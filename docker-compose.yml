@@ -13,6 +13,22 @@ services:
     volumes:
       - keycloak-data:/var/lib/postgresql/data
 
+  business-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: paktay
+      POSTGRES_USER: paktay
+      POSTGRES_PASSWORD: ${BUSINESS_DB_PASSWORD:-ChangeThisBusinessDatabasePassword123!}
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paktay -d paktay"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    volumes:
+      - business-data:/var/lib/postgresql/data
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     command: start-dev --import-realm
@@ -41,11 +57,12 @@ services:
 
   keycloak-init:
     image: quay.io/keycloak/keycloak:26.2
-    entrypoint: ["/bin/sh", "-c"]
-    command: >
-      until /opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080 --realm master --user "$$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$$KC_BOOTSTRAP_ADMIN_PASSWORD";
-      do sleep 3; done;
-      /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        until /opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080 --realm master --user "$$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$$KC_BOOTSTRAP_ADMIN_PASSWORD"; do sleep 3; done;
+        /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-ChangeThisAdminPassword123!}
@@ -72,11 +89,17 @@ services:
     environment:
       KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/paktay
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/paktay/protocol/openid-connect/certs
+      BUSINESS_DB_URL: jdbc:postgresql://business-db:5432/paktay
+      BUSINESS_DB_USERNAME: paktay
+      BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:-ChangeThisBusinessDatabasePassword123!}
     ports:
       - "8082:8082"
     depends_on:
       keycloak-init:
         condition: service_completed_successfully
+      business-db:
+        condition: service_healthy
 
 volumes:
   keycloak-data:
+  business-data:

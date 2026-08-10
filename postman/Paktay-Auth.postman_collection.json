@@ -75,7 +75,74 @@
       ]
     },
     {
-      "name": "04. Administración",
+      "name": "04. Tarjetas",
+      "item": [
+        {
+          "name": "Listar bancos disponibles",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/banks"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const banks = pm.response.json();", "const selected = banks.find(bank => bank.slug === 'guayaquil') || banks[0];", "if (selected) pm.environment.set('bankId', selected.id);"] } }]
+        },
+        {
+          "name": "Registrar tarjeta",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankId\": \"{{bankId}}\",\n  \"brand\": \"visa\",\n  \"kind\": \"credit\",\n  \"last4\": \"{{cardLast4}}\",\n  \"nickname\": \"{{cardNickname}}\"\n}"
+            },
+            "url": "{{businessUrl}}/api/v1/cards"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const body = pm.response.json();", "if (body.id) pm.environment.set('cardId', body.id);"] } }]
+        },
+        {
+          "name": "Listar mis tarjetas",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/cards"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Seguridad biométrica",
+      "item": [
+        {
+          "name": "Registrar dispositivo biométrico",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"platform\": \"ios\",\n  \"deviceName\": \"iPhone de prueba\",\n  \"biometricEnabled\": true\n}" },
+            "url": "{{businessUrl}}/api/v1/security/devices/me"
+          }
+        },
+        {
+          "name": "Listar mis dispositivos",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/security/devices"
+          }
+        },
+        {
+          "name": "Eliminar mi dispositivo",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": "{{businessUrl}}/api/v1/security/devices/{{deviceId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Administración",
       "item": [
         {
           "name": "Iniciar sesión como admin",
