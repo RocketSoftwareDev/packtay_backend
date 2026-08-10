@@ -1,0 +1,82 @@
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-ChangeThisDatabasePassword123!}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    volumes:
+      - keycloak-data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-ChangeThisAdminPassword123!}
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-ChangeThisDatabasePassword123!}
+      KC_HOSTNAME: http://localhost:8180
+      KC_HEALTH_ENABLED: "true"
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nhost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep '200 OK' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+
+  keycloak-init:
+    image: quay.io/keycloak/keycloak:26.2
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      until /opt/keycloak/bin/kcadm.sh config credentials --server http://keycloak:8080 --realm master --user "$$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$$KC_BOOTSTRAP_ADMIN_PASSWORD";
+      do sleep 3; done;
+      /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-ChangeThisAdminPassword123!}
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  auth-svc:
+    build: ./auth-svc
+    environment:
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
+      KEYCLOAK_PUBLIC_URL: http://localhost:8180
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/paktay
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/paktay/protocol/openid-connect/certs
+      KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:-ChangeThisServiceSecret123!}
+    ports:
+      - "8081:8081"
+    depends_on:
+      keycloak-init:
+        condition: service_completed_successfully
+
+  business-svc:
+    build: ./business-svc
+    environment:
+      KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/paktay
+      KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/paktay/protocol/openid-connect/certs
+    ports:
+      - "8082:8082"
+    depends_on:
+      keycloak-init:
+        condition: service_completed_successfully
+
+volumes:
+  keycloak-data:
