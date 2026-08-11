@@ -87,7 +87,9 @@ services:
         condition: service_completed_successfully
 
   business-svc:
-    build: ./business-svc
+    build:
+      context: .
+      dockerfile: business-svc/Dockerfile
     environment:
       KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/paktay
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/paktay/protocol/openid-connect/certs
