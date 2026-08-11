@@ -23,6 +23,7 @@ import org.springframework.web.client.RestClientResponseException;
 public class KeycloakIdentityService {
     private static final Logger log = LoggerFactory.getLogger(KeycloakIdentityService.class);
     private static final Pattern KEYCLOAK_ERROR = Pattern.compile("\\\"error\\\"\\s*:\\s*\\\"([A-Za-z0-9_-]{1,64})\\\"");
+    private static final Pattern KEYCLOAK_ERROR_DESCRIPTION = Pattern.compile("\\\"error_description\\\"\\s*:\\s*\\\"([^\\\"]{1,256})\\\"");
     private final RestClient client;
     private final KeycloakProperties properties;
 
@@ -68,7 +69,7 @@ public class KeycloakIdentityService {
                     .retrieve().body(TokenResponse.class);
         } catch (RestClientResponseException ex) {
             if (ex.getStatusCode().is4xxClientError()) {
-                log.warn("keycloak_login_rejected status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+                log.warn("keycloak_login_rejected status={} errorCode={} reason={}", ex.getStatusCode().value(), keycloakErrorCode(ex), keycloakErrorDescription(ex));
                 throw new IllegalArgumentException("Credenciales inválidas");
             }
             log.error("keycloak_login_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
@@ -134,6 +135,11 @@ public class KeycloakIdentityService {
 
     private String keycloakErrorCode(RestClientResponseException exception) {
         Matcher matcher = KEYCLOAK_ERROR.matcher(exception.getResponseBodyAsString());
+        return matcher.find() ? matcher.group(1) : "unknown";
+    }
+
+    private String keycloakErrorDescription(RestClientResponseException exception) {
+        Matcher matcher = KEYCLOAK_ERROR_DESCRIPTION.matcher(exception.getResponseBodyAsString());
         return matcher.find() ? matcher.group(1) : "unknown";
     }
 }
