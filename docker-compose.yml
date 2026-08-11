@@ -71,7 +71,9 @@ services:
         condition: service_healthy
 
   auth-svc:
-    build: ./auth-svc
+    build:
+      context: .
+      dockerfile: auth-svc/Dockerfile
     environment:
       KEYCLOAK_INTERNAL_URL: http://keycloak:8080
       KEYCLOAK_PUBLIC_URL: http://localhost:8180
