@@ -32,3 +32,7 @@ La cuenta administrativa local importada es `admin@paktay.local` / `AdminPaktay1
 ## Aplicación móvil
 
 React Native debe iniciar sesión directamente con Keycloak mediante **Authorization Code + PKCE** usando el cliente público `paktay-mobile` y el redirect `paktay://oauth/callback`. Luego envía `Authorization: Bearer <access_token>` a ambos servicios. `POST /api/v1/auth/login` está incluido únicamente para pruebas automatizadas y Postman; no debe usarse desde la app publicada.
+
+## Despliegue
+
+La guía para Render, Keycloak y Supabase está en [docs/render-deployment.md](docs/render-deployment.md).
