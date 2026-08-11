@@ -8,9 +8,7 @@ Esta guía despliega el backend desde el repositorio `RocketSoftwareDev/packtay_
 
 ## 0. Estado requerido antes del primer despliegue
 
-No despliegues todavía los Dockerfiles actuales. Están pensados para recibir un JAR ya compilado en `target/`, pero `target/` no se versiona en GitHub. Antes de seguir se debe publicar el ajuste de Dockerfiles para que Render compile cada servicio desde el repositorio.
-
-Cuando ese commit esté en `main`, continúa con los pasos siguientes.
+El Dockerfile de Keycloak ya está disponible. Los Dockerfiles de `auth-svc` y `business-svc` todavía necesitan un ajuste para que Render compile los JAR desde el repositorio, porque `target/` no se versiona en GitHub. En esta primera parte despliega solo Keycloak.
 
 ## 1. Crear las bases de datos
 
@@ -39,7 +37,7 @@ Nunca uses la base de Supabase para las tablas internas de Keycloak.
 1. En Render selecciona **New > Web Service**.
 2. Conecta el repositorio `RocketSoftwareDev/packtay_backend`, rama `main`.
 3. Nombre sugerido: `paktay-keycloak`.
-4. Usa el Dockerfile de `infra/keycloak/Dockerfile` cuando esté disponible en el commit de preparación para Render.
+4. Configura **Root Directory** como vacío (raíz del repositorio) y **Dockerfile Path** como `infra/keycloak/Dockerfile`.
 5. Crea secretos nuevos y exclusivos para producción:
 
 ```text
