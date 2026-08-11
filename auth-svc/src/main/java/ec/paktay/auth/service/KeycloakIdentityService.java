@@ -9,6 +9,8 @@ import ec.paktay.auth.dto.LoginRequest;
 import ec.paktay.auth.dto.RegisterRequest;
 import ec.paktay.auth.dto.TokenResponse;
 import ec.paktay.auth.dto.UserResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 @Service
 public class KeycloakIdentityService {
+    private static final Logger log = LoggerFactory.getLogger(KeycloakIdentityService.class);
     private final RestClient client;
     private final KeycloakProperties properties;
 
@@ -44,7 +47,11 @@ public class KeycloakIdentityService {
             assignUserRole(adminToken, id);
             return new UserResponse(id, request.email(), request.displayName(), true);
         } catch (RestClientResponseException ex) {
-            if (ex.getStatusCode().value() == 409) throw new IllegalArgumentException("Ya existe una cuenta con ese correo");
+            if (ex.getStatusCode().value() == 409) {
+                log.warn("keycloak_register_rejected status={}", ex.getStatusCode().value());
+                throw new IllegalArgumentException("Ya existe una cuenta con ese correo");
+            }
+            log.error("keycloak_register_failed status={}", ex.getStatusCode().value());
             throw new IllegalStateException("No fue posible registrar la cuenta: " + ex.getStatusText());
         }
     }
@@ -57,7 +64,11 @@ public class KeycloakIdentityService {
                             + "&username=" + encode(request.username()) + "&password=" + encode(request.password()))
                     .retrieve().body(TokenResponse.class);
         } catch (RestClientResponseException ex) {
-            if (ex.getStatusCode().is4xxClientError()) throw new IllegalArgumentException("Credenciales inválidas");
+            if (ex.getStatusCode().is4xxClientError()) {
+                log.warn("keycloak_login_rejected status={}", ex.getStatusCode().value());
+                throw new IllegalArgumentException("Credenciales inválidas");
+            }
+            log.error("keycloak_login_failed status={}", ex.getStatusCode().value());
             throw new IllegalStateException("No fue posible iniciar sesión en Keycloak");
         }
     }
@@ -90,6 +101,7 @@ public class KeycloakIdentityService {
             if (response == null || response.get("access_token") == null) throw new IllegalStateException("Keycloak no devolvió token de servicio");
             return String.valueOf(response.get("access_token"));
         } catch (RestClientResponseException ex) {
+            log.error("keycloak_service_token_failed status={}", ex.getStatusCode().value());
             throw new IllegalStateException("No fue posible autenticar el servicio con Keycloak");
         }
     }
