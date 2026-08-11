@@ -34,6 +34,11 @@ public class RequestLoggingFilter extends OncePerRequestFilter {
         }
     }
 
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/actuator/health");
+    }
+
     private String resolveRequestId(String incoming) {
         return incoming != null && incoming.matches("[A-Za-z0-9-]{1,64}") ? incoming : UUID.randomUUID().toString();
     }
