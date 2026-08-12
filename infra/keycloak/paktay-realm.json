@@ -1,0 +1,57 @@
+{
+  "realm": "paktay",
+  "enabled": true,
+  "displayName": "Paktay",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "passwordPolicy": "length(10) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)",
+  "roles": {
+    "realm": [
+      { "name": "USER", "description": "Usuario de Paktay" },
+      { "name": "ADMIN", "description": "Administrador de Paktay" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "paktay-mobile",
+      "name": "Paktay Mobile",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["paktay://oauth/callback"],
+      "webOrigins": ["+"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256"
+      }
+    },
+    {
+      "clientId": "paktay-auth-service",
+      "name": "Paktay Auth Service",
+      "enabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "secret": "ChangeThisServiceSecret123!"
+    }
+  ],
+  "users": [
+    {
+      "username": "admin@paktay.local",
+      "email": "admin@paktay.local",
+      "firstName": "Paktay",
+      "lastName": "Admin",
+      "enabled": true,
+      "emailVerified": true,
+      "realmRoles": ["ADMIN", "USER"],
+      "credentials": [
+        { "type": "password", "value": "AdminPaktay123!", "temporary": false }
+      ]
+    }
+  ]
+}

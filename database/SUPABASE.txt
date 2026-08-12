@@ -1,0 +1,714 @@
+1 · Extensiones, enums y helpers
+
+create extension if not exists pgcrypto;
+
+create type platform_kind                as enum ('ios','android');
+create type capture_permission_status     as enum ('not_requested','granted','denied','revoked');
+create type card_brand                    as enum ('visa','mastercard','amex','diners','other');
+create type card_kind                     as enum ('credit','debit');
+create type transaction_direction         as enum ('expense','refund');
+create type transaction_kind              as enum ('purchase','deferred_purchase');
+create type transaction_source            as enum ('notification','manual');
+create type review_status                 as enum ('auto_confirmed','needs_review','user_confirmed','ignored');
+create type categorization_source         as enum ('merchant_alias','merchant_default','parser_rule','user','unresolved');
+create type installment_plan_status       as enum ('active','completed','cancelled');
+create type installment_status            as enum ('paid','pending','overdue');
+create type alias_match_type              as enum ('exact','prefix','contains');
+create type alias_source                  as enum ('user','catalog','heuristic');
+create type appearance_mode               as enum ('light','dark','auto');
+create type notification_discard_reason   as enum ('not_a_purchase','duplicate','unsupported_bank');
+
+create or replace function public.tg_set_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+
+----------------------------------------------------------------------------------------------------
+2 · Usuario y preferencias
+
+create table public.profiles (
+  id            uuid primary key references auth.users(id) on delete cascade,
+  display_name  text not null,
+  initials      text generated always as (
+                  upper(left(split_part(display_name,' ',1),1)) ||
+                  coalesce(upper(left(nullif(split_part(display_name,' ',2),''),1)),'')
+                ) stored,
+  avatar_url    text,
+  timezone      text not null default 'America/Guayaquil',
+  locale        text not null default 'es-EC',
+  created_at    timestamptz not null default now(),
+  updated_at    timestamptz not null default now()
+);
+
+create table public.user_settings (
+  user_id                uuid primary key references public.profiles(id) on delete cascade,
+  currency               char(3) not null default 'USD',
+  -- "Inicio del mes · Día 1". 1..28 para no romperse en febrero.
+  month_start_day        smallint not null default 1 check (month_start_day between 1 and 28),
+  budget_alerts_enabled  boolean not null default true,
+  biometric_lock_enabled boolean not null default false,
+  appearance             appearance_mode not null default 'auto',
+  capture_enabled        boolean not null default false,
+  updated_at             timestamptz not null default now()
+);
+
+create table public.capture_permissions (
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  platform     platform_kind not null,
+  status       capture_permission_status not null default 'not_requested',
+  requested_at timestamptz,
+  granted_at   timestamptz,
+  primary key (user_id, platform)
+);
+
+create trigger set_updated_at before update on public.profiles
+  for each row execute function public.tg_set_updated_at();
+create trigger set_updated_at before update on public.user_settings
+  for each row execute function public.tg_set_updated_at();
+
+
+Función de periodo — todo month_key sale de aquí, no del mes calendario:
+
+create or replace function public.month_key(p_user uuid, p_at timestamptz)
+returns text
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_tz    text := 'America/Guayaquil';
+  v_start smallint := 1;
+  v_local date;
+begin
+  select coalesce(p.timezone,'America/Guayaquil'), coalesce(s.month_start_day,1)
+    into v_tz, v_start
+  from public.profiles p
+  left join public.user_settings s on s.user_id = p.id
+  where p.id = p_user;
+
+  v_local := (p_at at time zone v_tz)::date;
+  if extract(day from v_local) < v_start then
+    v_local := (v_local - interval '1 month')::date;
+  end if;
+  return to_char(v_local, 'YYYY-MM');
+end $$;
+
+
+----------------------------------------------------------------------------------------------------
+3 · Catálogo: bancos, apps y tarjetas
+banks, bank_apps y bank_notification_rules son globales (sin user_id): se escriben con service role y se leen desde el cliente.
+
+create table public.banks (
+  id                 uuid primary key default gen_random_uuid(),
+  slug               text not null unique,            -- 'guayaquil'
+  legal_name         text not null,                   -- 'Banco de Guayaquil'
+  short_name         text not null,                   -- 'Guayaquil'
+  monogram           text not null,                   -- 'BG'
+  brand_color        text not null check (brand_color ~ '^#[0-9A-Fa-f]{6}$'),
+  brand_ink_on_light boolean not null default false,  -- true solo para marcas claras (Pichincha)
+  country_code       char(2) not null default 'EC',
+  logo_url           text,
+  active             boolean not null default true
+);
+
+-- Catálogo de apps por banco: el "5" de "3 de 5".
+create table public.bank_apps (
+  id               uuid primary key default gen_random_uuid(),
+  bank_id          uuid not null references public.banks(id) on delete cascade,
+  ios_bundle_id    text,
+  android_package  text,
+  active           boolean not null default true,
+  check (ios_bundle_id is not null or android_package is not null)
+);
+
+-- Estado por usuario: el "3" de "3 de 5".
+create table public.user_monitored_apps (
+  user_id           uuid not null references public.profiles(id) on delete cascade,
+  bank_app_id       uuid not null references public.bank_apps(id) on delete cascade,
+  installed         boolean not null default false,
+  enabled           boolean not null default false,
+  last_captured_at  timestamptz,
+  primary key (user_id, bank_app_id)
+);
+
+-- Plantillas de parseo. Server-side para corregir formatos sin publicar la app.
+create table public.bank_notification_rules (
+  id              uuid primary key default gen_random_uuid(),
+  bank_id         uuid not null references public.banks(id) on delete cascade,
+  match_pattern   text not null,   -- descarta rápido lo que no es consumo
+  extract_pattern text not null,   -- grupos: amount, merchant, last4, installments, datetime
+  number_format   jsonb not null default '{"thousands":",","decimal":"."}',
+  priority        int  not null default 100,
+  version         text not null default 'v1',
+  active          boolean not null default true
+);
+
+create table public.bank_accounts (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references public.profiles(id) on delete cascade,
+  bank_id      uuid not null references public.banks(id) on delete restrict,
+  connected_at timestamptz not null default now(),
+  active       boolean not null default true,
+  unique (user_id, bank_id)
+);
+
+-- Nunca el número completo: la notificación solo expone 4 dígitos.
+create table public.cards (
+  id              uuid primary key default gen_random_uuid(),
+  bank_account_id uuid not null references public.bank_accounts(id) on delete cascade,
+  brand           card_brand not null default 'other',
+  kind            card_kind  not null,
+  last4           char(4) not null check (last4 ~ '^[0-9]{4}$'),
+  nickname        text,
+  auto_detected   boolean not null default true,
+  active          boolean not null default true,
+  created_at      timestamptz not null default now(),
+  unique (bank_account_id, kind, last4)
+);
+
+create index on public.bank_accounts (user_id);
+create index on public.cards (bank_account_id);
+
+
+----------------------------------------------------------------------------------------------------
+4 · Categorías, comercios y aprendizaje
+
+-- user_id null = categoría del sistema, compartida. "9 activas".
+create table public.categories (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid references public.profiles(id) on delete cascade,
+  key         text not null,          -- 'electronicos'
+  name        text not null,          -- 'Electrónicos'
+  icon        text not null,          -- 'laptop' (lucide)
+  color_token text not null,          -- 'cat-electro'
+  is_system   boolean not null default false,
+  active      boolean not null default true,
+  sort_order  int not null default 0
+);
+create unique index categories_system_key_uq on public.categories (key) where user_id is null;
+create unique index categories_user_key_uq   on public.categories (user_id, key) where user_id is not null;
+
+-- "47 comercios reconocidos"
+create table public.merchants (
+  id                  uuid primary key default gen_random_uuid(),
+  user_id             uuid not null references public.profiles(id) on delete cascade,
+  display_name        text not null,                  -- 'Netflix'
+  default_category_id uuid references public.categories(id) on delete set null,
+  logo_url            text,
+  transaction_count   int not null default 0,
+  last_seen_at        timestamptz not null default now(),
+  unique (user_id, display_name)
+);
+
+-- El motor del aprendizaje: 'PAYPAL *SPOTIFYAB' -> Netflix + Subscripciones.
+create table public.merchant_aliases (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references public.profiles(id) on delete cascade,
+  merchant_id uuid not null references public.merchants(id) on delete cascade,
+  raw_pattern text not null,                          -- normalizado: upper, sin espacios dobles
+  match_type  alias_match_type not null default 'contains',
+  source      alias_source not null default 'user',   -- 'user' gana ante 'catalog'
+  hit_count   int not null default 0,
+  created_at  timestamptz not null default now(),
+  unique (user_id, raw_pattern, match_type)
+);
+create index on public.merchant_aliases (user_id, match_type);
+
+Resolución de alias — se llama en el ingest antes de crear la transacción:
+
+create or replace function public.resolve_merchant(p_user uuid, p_raw text)
+returns table (merchant_id uuid, category_id uuid, alias_id uuid)
+language sql stable as $$
+  with needle as (select upper(regexp_replace(coalesce(p_raw,''), '\s+', ' ', 'g')) as v)
+  select m.id, coalesce(a.merchant_id is not null, false)::bool and m.default_category_id is not null
+           then m.default_category_id else m.default_category_id end, a.id
+  from public.merchant_aliases a
+  join public.merchants m on m.id = a.merchant_id
+  cross join needle n
+  where a.user_id = p_user
+    and (
+      (a.match_type = 'exact'    and n.v = upper(a.raw_pattern)) or
+      (a.match_type = 'prefix'   and n.v like upper(a.raw_pattern) || '%') or
+      (a.match_type = 'contains' and n.v like '%' || upper(a.raw_pattern) || '%')
+    )
+  order by (a.source = 'user') desc, a.hit_count desc, length(a.raw_pattern) desc
+  limit 1;
+$$;
+
+Ojo con esa función: el case que escribí ahí es redundante. La versión correcta del select es:
+
+  select m.id, m.default_category_id, a.id
+
+
+----------------------------------------------------------------------------------------------------
+5 · Captura de notificaciones
+
+-- Inmutable: es la fuente de verdad. Si mejoras el parser, reprocesas.
+create table public.captured_notifications (
+  id                     uuid primary key default gen_random_uuid(),
+  user_id                uuid not null references public.profiles(id) on delete cascade,
+  bank_app_id            uuid references public.bank_apps(id) on delete set null,
+  bank_id                uuid references public.banks(id) on delete set null,
+  source_label           text not null,        -- 'Banco Guayaquil'
+  title                  text,
+  body                   text not null,        -- cuerpo literal, sin normalizar
+  posted_at              timestamptz not null, -- momento en que el SO la publicó
+  captured_at            timestamptz not null default now(),
+
+  -- Resultado del parseo. jsonb guarda {value, rawText, confidence} por campo;
+  -- las columnas planas existen para poder filtrar e indexar.
+  parse_result           jsonb,
+  parser_version         text,
+  rule_id                uuid references public.bank_notification_rules(id) on delete set null,
+  parsed_amount_cents    bigint check (parsed_amount_cents is null or parsed_amount_cents > 0),
+  parsed_currency        char(3),
+  parsed_merchant_raw    text,
+  parsed_card_last4      char(4),
+  parsed_card_brand      card_brand,
+  parsed_installments    smallint check (parsed_installments is null or parsed_installments between 2 and 48),
+  parsed_occurred_at     timestamptz,
+  parse_confidence       numeric(4,3) check (parse_confidence between 0 and 1),
+  missing_fields         text[] not null default '{}',
+
+  discard_reason         notification_discard_reason
+);
+
+create index on public.captured_notifications (user_id, posted_at desc);
+-- Soporta el dedup de ingest: mismo banco + monto + last4 en ventana de 2 min.
+create index captured_dedup_idx on public.captured_notifications
+  (user_id, bank_id, parsed_amount_cents, parsed_card_last4, posted_at);
+
+
+----------------------------------------------------------------------------------------------------
+6 · Núcleo transaccional
+
+create table public.transactions (
+  id                        uuid primary key default gen_random_uuid(),
+  user_id                   uuid not null references public.profiles(id) on delete cascade,
+
+  -- Siempre positivo. El signo lo determina `direction`, nunca el monto.
+  amount_cents              bigint not null check (amount_cents > 0),
+  currency                  char(3) not null default 'USD',
+  direction                 transaction_direction not null default 'expense',
+
+  occurred_at               timestamptz not null,
+  month_key                 char(7) not null,        -- lo pone el trigger
+
+  bank_account_id           uuid not null references public.bank_accounts(id) on delete restrict,
+  card_id                   uuid references public.cards(id) on delete set null,
+
+  merchant_id               uuid references public.merchants(id) on delete set null,
+  merchant_raw              text not null,           -- 'PAYPAL *SPOTIFYAB'
+  display_label             text not null,           -- merchant.display_name ?? merchant_raw
+
+  category_id               uuid references public.categories(id) on delete set null,
+  categorization_source     categorization_source not null default 'unresolved',
+
+  kind                      transaction_kind not null default 'purchase',
+  -- Denormalizado para el chip "Financiado" de Movimientos; lo sincroniza un trigger.
+  financed                  boolean not null default false,
+
+  source                    transaction_source not null default 'notification',
+  captured_notification_id  uuid unique references public.captured_notifications(id) on delete set null,
+  review_status             review_status not null default 'needs_review',
+  note                      text,
+
+  created_at                timestamptz not null default now(),
+  updated_at                timestamptz not null default now(),
+
+  constraint kind_matches_financed check ((kind = 'deferred_purchase') = financed),
+  constraint reviewed_has_category check (
+    review_status in ('needs_review','ignored') or category_id is not null
+  )
+);
+
+create index on public.transactions (user_id, occurred_at desc);
+create index on public.transactions (user_id, month_key);
+create index on public.transactions (user_id, category_id, month_key);
+create index on public.transactions (bank_account_id, month_key);
+create index tx_review_idx on public.transactions (user_id, occurred_at desc)
+  where review_status = 'needs_review';
+
+create table public.installment_plans (
+  id                    uuid primary key default gen_random_uuid(),
+  transaction_id        uuid not null unique references public.transactions(id) on delete cascade,
+  principal_cents       bigint not null check (principal_cents > 0),
+  total_payable_cents   bigint not null check (total_payable_cents >= principal_cents),
+  term_months           smallint not null check (term_months between 2 and 48),
+  monthly_amount_cents  bigint not null check (monthly_amount_cents > 0),
+  monthly_interest_rate numeric(6,5),
+  first_due_date        date not null,
+  last_due_date         date not null check (last_due_date >= first_due_date),
+  paid_count            smallint not null default 0 check (paid_count >= 0),
+  status                installment_plan_status not null default 'active',
+  check (paid_count <= term_months)
+);
+
+-- Cada chip Ago…Ene de la pantalla de detalle.
+create table public.installments (
+  id                  uuid primary key default gen_random_uuid(),
+  installment_plan_id uuid not null references public.installment_plans(id) on delete cascade,
+  number              smallint not null check (number >= 1),
+  due_month_key       char(7) not null,
+  due_date            date not null,
+  amount_cents        bigint not null check (amount_cents > 0),
+  status              installment_status not null default 'pending',
+  paid_at             timestamptz,
+  unique (installment_plan_id, number),
+  check ((status = 'paid') = (paid_at is not null))
+);
+
+create index on public.installments (due_month_key, status);
+Triggers de consistencia:
+
+create or replace function public.tg_tx_month_key()
+returns trigger language plpgsql as $$
+begin
+  new.month_key := public.month_key(new.user_id, new.occurred_at);
+  return new;
+end $$;
+
+create trigger tx_month_key before insert or update of occurred_at, user_id
+  on public.transactions for each row execute function public.tg_tx_month_key();
+
+create trigger tx_updated_at before update on public.transactions
+  for each row execute function public.tg_set_updated_at();
+
+-- financed / kind siempre reflejan la existencia del plan.
+create or replace function public.tg_sync_financed()
+returns trigger language plpgsql as $$
+begin
+  if tg_op = 'DELETE' then
+    update public.transactions
+       set financed = false, kind = 'purchase'
+     where id = old.transaction_id;
+    return old;
+  end if;
+  update public.transactions
+     set financed = true, kind = 'deferred_purchase'
+   where id = new.transaction_id;
+  return new;
+end $$;
+
+create trigger sync_financed after insert or delete on public.installment_plans
+  for each row execute function public.tg_sync_financed();
+
+-- paid_count = count(installments where status = 'paid')
+create or replace function public.tg_sync_paid_count()
+returns trigger language plpgsql as $$
+declare v_plan uuid := coalesce(new.installment_plan_id, old.installment_plan_id);
+begin
+  update public.installment_plans p
+     set paid_count = (select count(*) from public.installments i
+                        where i.installment_plan_id = v_plan and i.status = 'paid'),
+         status = case when (select count(*) from public.installments i
+                              where i.installment_plan_id = v_plan and i.status <> 'paid') = 0
+                       then 'completed' else p.status end
+   where p.id = v_plan;
+  return null;
+end $$;
+
+create trigger sync_paid_count after insert or update or delete on public.installments
+  for each row execute function public.tg_sync_paid_count();
+
+----------------------------------------------------------------------------------------------------
+7 · Presupuestos
+
+-- month_key null = presupuesto vigente por defecto; con valor = override de un mes.
+create table public.budgets (
+  id               uuid primary key default gen_random_uuid(),
+  user_id          uuid not null references public.profiles(id) on delete cascade,
+  month_key        char(7),
+  total_limit_cents bigint not null check (total_limit_cents > 0),
+  currency         char(3) not null default 'USD',
+  alert_threshold  numeric(3,2) not null default 0.90 check (alert_threshold between 0.5 and 1),
+  created_at       timestamptz not null default now()
+);
+create unique index budgets_default_uq on public.budgets (user_id) where month_key is null;
+create unique index budgets_month_uq   on public.budgets (user_id, month_key) where month_key is not null;
+
+create table public.category_budgets (
+  id          uuid primary key default gen_random_uuid(),
+  budget_id   uuid not null references public.budgets(id) on delete cascade,
+  category_id uuid not null references public.categories(id) on delete cascade,
+  limit_cents bigint not null check (limit_cents > 0),
+  active      boolean not null default true,
+  unique (budget_id, category_id)
+);
+
+-- Presupuesto efectivo de un mes: override si existe, si no el default.
+create or replace function public.effective_budget(p_user uuid, p_month char(7))
+returns public.budgets
+language sql stable as $$
+  select * from public.budgets
+   where user_id = p_user and (month_key = p_month or month_key is null)
+   order by month_key nulls last
+   limit 1;
+$$;
+
+
+----------------------------------------------------------------------------------------------------
+8 · RLS
+Todo lo del usuario se filtra por auth.uid(); el catálogo global es solo lectura desde el cliente (el service role salta RLS).
+
+alter table public.profiles              enable row level security;
+alter table public.user_settings         enable row level security;
+alter table public.capture_permissions   enable row level security;
+alter table public.banks                 enable row level security;
+alter table public.bank_apps             enable row level security;
+alter table public.bank_notification_rules enable row level security;
+alter table public.user_monitored_apps   enable row level security;
+alter table public.bank_accounts         enable row level security;
+alter table public.cards                 enable row level security;
+alter table public.categories            enable row level security;
+alter table public.merchants             enable row level security;
+alter table public.merchant_aliases      enable row level security;
+alter table public.captured_notifications enable row level security;
+alter table public.transactions          enable row level security;
+alter table public.installment_plans     enable row level security;
+alter table public.installments          enable row level security;
+alter table public.budgets               enable row level security;
+alter table public.category_budgets      enable row level security;
+
+-- Catálogo global: lectura para autenticados, sin escritura.
+create policy read_catalog on public.banks                   for select to authenticated using (true);
+create policy read_catalog on public.bank_apps               for select to authenticated using (true);
+create policy read_catalog on public.bank_notification_rules for select to authenticated using (active);
+
+-- Dueño directo (tienen columna user_id o id = uid).
+create policy own on public.profiles              for all using (id = auth.uid())      with check (id = auth.uid());
+create policy own on public.user_settings         for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.capture_permissions   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.user_monitored_apps   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.bank_accounts         for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.merchants             for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.merchant_aliases      for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.captured_notifications for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.transactions          for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy own on public.budgets               for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- Categorías: las del sistema se leen, las propias se editan.
+create policy read_categories on public.categories for select to authenticated
+  using (user_id is null or user_id = auth.uid());
+create policy write_categories on public.categories for insert to authenticated
+  with check (user_id = auth.uid());
+create policy update_categories on public.categories for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+create policy delete_categories on public.categories for delete to authenticated
+  using (user_id = auth.uid() and not is_system);
+
+-- Dueño indirecto vía join.
+create policy own on public.cards for all
+  using (exists (select 1 from public.bank_accounts b
+                  where b.id = cards.bank_account_id and b.user_id = auth.uid()))
+  with check (exists (select 1 from public.bank_accounts b
+                  where b.id = cards.bank_account_id and b.user_id = auth.uid()));
+
+create policy own on public.installment_plans for all
+  using (exists (select 1 from public.transactions t
+                  where t.id = installment_plans.transaction_id and t.user_id = auth.uid()))
+  with check (exists (select 1 from public.transactions t
+                  where t.id = installment_plans.transaction_id and t.user_id = auth.uid()));
+
+create policy own on public.installments for all
+  using (exists (select 1 from public.installment_plans p
+                  join public.transactions t on t.id = p.transaction_id
+                 where p.id = installments.installment_plan_id and t.user_id = auth.uid()))
+  with check (exists (select 1 from public.installment_plans p
+                  join public.transactions t on t.id = p.transaction_id
+                 where p.id = installments.installment_plan_id and t.user_id = auth.uid()));
+
+create policy own on public.category_budgets for all
+  using (exists (select 1 from public.budgets b
+                  where b.id = category_budgets.budget_id and b.user_id = auth.uid()))
+  with check (exists (select 1 from public.budgets b
+                  where b.id = category_budgets.budget_id and b.user_id = auth.uid()));
+
+----------------------------------------------------------------------------------------------------
+9 · Vistas derivadas
+Nada de esto se persiste. security_invoker = on hace que las vistas respeten el RLS del usuario que consulta.
+
+-- Base común: excluye lo ignorado y lo que no cuenta como gasto.
+create view public.v_countable_transactions with (security_invoker = on) as
+  select * from public.transactions
+   where review_status <> 'ignored' and direction = 'expense';
+
+-- Gasto por categoría: Home + Presupuestos.
+create view public.v_category_monthly with (security_invoker = on) as
+select t.user_id, t.month_key, t.category_id, c.name, c.key, c.color_token, c.icon,
+       sum(t.amount_cents)                      as spent_cents,
+       count(*)                                 as transaction_count,
+       round(sum(t.amount_cents)::numeric
+             / nullif(sum(sum(t.amount_cents)) over (partition by t.user_id, t.month_key),0), 4) as share_of_total,
+       cb.limit_cents,
+       round(sum(t.amount_cents)::numeric / nullif(cb.limit_cents,0), 4) as usage,
+       case
+         when cb.limit_cents is null then null
+         when sum(t.amount_cents) > cb.limit_cents then 'exceeded'
+         when sum(t.amount_cents)::numeric / cb.limit_cents >= b.alert_threshold then 'near_limit'
+         else 'normal'
+       end as status
+  from public.v_countable_transactions t
+  join public.categories c on c.id = t.category_id
+  left join public.budgets b
+         on b.user_id = t.user_id and (b.month_key = t.month_key or b.month_key is null)
+  left join public.category_budgets cb
+         on cb.budget_id = b.id and cb.category_id = t.category_id and cb.active
+ group by t.user_id, t.month_key, t.category_id, c.name, c.key, c.color_token, c.icon,
+          cb.limit_cents, b.alert_threshold;
+
+-- Barra apilada y lista de Bancos.
+create view public.v_bank_monthly with (security_invoker = on) as
+select t.user_id, t.month_key, t.bank_account_id, bk.short_name, bk.monogram, bk.brand_color,
+       sum(t.amount_cents) as spent_cents,
+       count(*)            as transaction_count,
+       round(sum(t.amount_cents)::numeric
+             / nullif(sum(sum(t.amount_cents)) over (partition by t.user_id, t.month_key),0), 4) as share_of_total
+  from public.v_countable_transactions t
+  join public.bank_accounts ba on ba.id = t.bank_account_id
+  join public.banks bk on bk.id = ba.bank_id
+ group by t.user_id, t.month_key, t.bank_account_id, bk.short_name, bk.monogram, bk.brand_color;
+
+-- "$420.00 dif." por tarjeta: cuotas que caen en el mes.
+create view public.v_card_financed_monthly with (security_invoker = on) as
+select t.user_id, i.due_month_key as month_key, t.card_id,
+       sum(i.amount_cents) as financed_cents
+  from public.installments i
+  join public.installment_plans p on p.id = i.installment_plan_id
+  join public.transactions t on t.id = p.transaction_id
+ where t.review_status <> 'ignored'
+ group by t.user_id, i.due_month_key, t.card_id;
+
+-- Tarjeta de saldo del Home.
+create view public.v_monthly_summary with (security_invoker = on) as
+with spend as (
+  select user_id, month_key, sum(amount_cents) as total_spent_cents, count(*) as transaction_count
+    from public.v_countable_transactions group by user_id, month_key
+), fin as (
+  select t.user_id, i.due_month_key as month_key, sum(i.amount_cents) as financed_cents
+    from public.installments i
+    join public.installment_plans p on p.id = i.installment_plan_id
+    join public.transactions t on t.id = p.transaction_id
+   where t.review_status <> 'ignored'
+   group by t.user_id, i.due_month_key
+), pend as (
+  select user_id, month_key, count(*) as pending_review_count
+    from public.transactions where review_status = 'needs_review'
+   group by user_id, month_key
+)
+select s.user_id, s.month_key,
+       s.total_spent_cents,
+       s.transaction_count,
+       coalesce(f.financed_cents, 0) as financed_this_month_cents,
+       coalesce(pe.pending_review_count, 0) as pending_review_count,
+       b.total_limit_cents,
+       -- OJO: "Disponible" del Home. Esto asume tope de presupuesto como techo.
+       -- Si en realidad es ingreso mensual, hace falta una tabla que el diseño no tiene.
+       b.total_limit_cents - s.total_spent_cents as available_cents,
+       round(s.total_spent_cents::numeric
+             / nullif(lag(s.total_spent_cents) over (partition by s.user_id order by s.month_key),0) - 1, 4)
+         as trend_vs_previous_month
+  from spend s
+  left join fin  f  on f.user_id  = s.user_id and f.month_key  = s.month_key
+  left join pend pe on pe.user_id = s.user_id and pe.month_key = s.month_key
+  left join public.budgets b
+         on b.user_id = s.user_id and (b.month_key = s.month_key or b.month_key is null);
+
+-- Cola de "Por revisar".
+create view public.v_review_queue with (security_invoker = on) as
+select t.id as transaction_id, t.user_id, t.display_label, t.merchant_raw,
+       t.amount_cents, t.occurred_at, t.card_id, t.bank_account_id,
+       n.id as notification_id, n.body, n.source_label, n.parse_confidence, n.missing_fields,
+       case
+         when t.category_id is null and t.merchant_id is null then 'unknown_merchant'
+         when t.category_id is null                            then 'unknown_category'
+         when coalesce(n.parse_confidence,0) < 0.7             then 'low_confidence'
+         else 'missing_amount'
+       end as reason
+  from public.transactions t
+  left join public.captured_notifications n on n.id = t.captured_notification_id
+ where t.review_status = 'needs_review';
+
+-- Stats del Perfil: 1,847 · 47 · 6.
+create view public.v_user_stats with (security_invoker = on) as
+select p.id as user_id,
+       (select count(*) from public.transactions t where t.user_id = p.id and t.review_status <> 'ignored') as transaction_count,
+       (select count(distinct m.id) from public.merchants m
+         join public.merchant_aliases a on a.merchant_id = m.id and a.source = 'user'
+        where m.user_id = p.id) as recognized_merchant_count,
+       (select count(distinct month_key) from public.transactions t where t.user_id = p.id) as active_months
+  from public.profiles p;
+Ritmo de gasto — necesita el día actual, así que va como función y no como vista:
+
+create or replace function public.budget_pace(p_user uuid, p_month char(7))
+returns table (day_of_period int, expected_spent_cents bigint,
+               actual_spent_cents bigint, pace_deviation numeric, over_pace boolean)
+language plpgsql stable as $$
+declare
+  v_start smallint; v_tz text; v_first date; v_next date; v_today date;
+  v_limit bigint; v_spent bigint; v_days int; v_elapsed int;
+begin
+  select coalesce(s.month_start_day,1), coalesce(p.timezone,'America/Guayaquil')
+    into v_start, v_tz
+    from public.profiles p left join public.user_settings s on s.user_id = p.id
+   where p.id = p_user;
+
+  v_first  := to_date(p_month,'YYYY-MM') + (v_start - 1);
+  v_next   := (v_first + interval '1 month')::date;
+  v_today  := (now() at time zone v_tz)::date;
+  v_days   := v_next - v_first;
+  v_elapsed:= greatest(1, least(v_days, v_today - v_first + 1));
+
+  select total_limit_cents into v_limit from public.effective_budget(p_user, p_month);
+  select coalesce(sum(amount_cents),0) into v_spent
+    from public.v_countable_transactions where user_id = p_user and month_key = p_month;
+
+  expected_spent_cents := (v_limit::numeric * v_elapsed / v_days)::bigint;
+  actual_spent_cents   := v_spent;
+  day_of_period        := v_elapsed;
+  pace_deviation       := round(v_spent::numeric / nullif(expected_spent_cents,0) - 1, 4);
+  over_pace            := pace_deviation > 0;
+  return next;
+end $$;
+
+
+----------------------------------------------------------------------------------------------------
+10 · Seeds y bootstrap
+
+insert into public.banks (slug, legal_name, short_name, monogram, brand_color, brand_ink_on_light) values
+  ('pichincha','Banco Pichincha','Pichincha','PICH','#FFD100', true),
+  ('guayaquil','Banco de Guayaquil','Guayaquil','BG','#E5007D', false),
+  ('produbanco','Produbanco','Produbanco','PROD','#009B3A', false),
+  ('pacifico','Banco del Pacífico','Pacífico','BP','#0B3B8C', false),
+  ('internacional','Banco Internacional','Internacional','BI','#004A8F', false)
+on conflict (slug) do nothing;
+
+insert into public.categories (user_id, key, name, icon, color_token, is_system, sort_order) values
+  (null,'comida','Comida','utensils','cat-comida', true, 1),
+  (null,'ropa','Ropa','shirt','cat-ropa', true, 2),
+  (null,'electronicos','Electrónicos','laptop','cat-electro', true, 3),
+  (null,'casa','Casa','house','cat-casa', true, 4),
+  (null,'subscripciones','Subscripciones','tv','cat-subs', true, 5),
+  (null,'transporte','Transporte','car','cat-electro', true, 6),
+  (null,'salud','Salud','heart-pulse','cat-ropa', true, 7),
+  (null,'entretenimiento','Entretenimiento','music','cat-subs', true, 8),
+  (null,'otros','Otros','circle-dashed','cat-casa', true, 9)
+on conflict do nothing;
+
+-- Perfil + settings + presupuesto por defecto al registrarse.
+create or replace function public.tg_on_auth_user_created()
+returns trigger language plpgsql security definer set search_path = public as $$
+begin
+  insert into public.profiles (id, display_name)
+    values (new.id, coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email,'@',1)));
+  insert into public.user_settings (user_id) values (new.id);
+  insert into public.capture_permissions (user_id, platform) values (new.id,'ios'),(new.id,'android');
+  return new;
+end $$;
+
+create trigger on_auth_user_created after insert on auth.users
+  for each row execute function public.tg_on_auth_user_created();

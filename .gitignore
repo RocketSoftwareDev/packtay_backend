@@ -1,0 +1,6 @@
+target/
+.maven/
+.env
+.idea/
+*.iml
+.DS_Store

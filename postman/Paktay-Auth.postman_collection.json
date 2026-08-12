@@ -1,0 +1,185 @@
+{
+  "info": {
+    "name": "Paktay - Auth",
+    "description": "Registro, inicio de sesión, OAuth, seguridad de ingreso y administración de usuarios.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01. Configuración OAuth",
+      "item": [
+        {
+          "name": "Obtener configuración móvil",
+          "request": {
+            "method": "GET",
+            "url": "{{authUrl}}/api/v1/auth/oauth-config"
+          }
+        }
+      ]
+    },
+    {
+      "name": "02. Registro e inicio de sesión",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"displayName\": \"Usuario Paktay\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{authUrl}}/api/v1/auth/register"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const body = pm.response.json();", "if (body.id) pm.environment.set('userId', body.id);"] } }]
+        },
+        {
+          "name": "Iniciar sesión como usuario",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": "{{authUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const body = pm.response.json();", "pm.environment.set('accessToken', body.access_token);"] } }]
+        }
+      ]
+    },
+    {
+      "name": "03. Seguridad de ingreso",
+      "item": [
+        {
+          "name": "Ingresar a la aplicación",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/app/entry"
+          }
+        },
+        {
+          "name": "Cambiar contraseña propia",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{userPassword}}\",\n  \"newPassword\": \"UsuarioPaktay456!\"\n}"
+            },
+            "url": "{{authUrl}}/api/v1/auth/password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "04. Tarjetas",
+      "item": [
+        {
+          "name": "Listar bancos disponibles",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/banks"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const banks = pm.response.json();", "const selected = banks.find(bank => bank.slug === 'guayaquil') || banks[0];", "if (selected) pm.environment.set('bankId', selected.id);"] } }]
+        },
+        {
+          "name": "Registrar tarjeta",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bankId\": \"{{bankId}}\",\n  \"brand\": \"visa\",\n  \"kind\": \"credit\",\n  \"last4\": \"{{cardLast4}}\",\n  \"nickname\": \"{{cardNickname}}\"\n}"
+            },
+            "url": "{{businessUrl}}/api/v1/cards"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const body = pm.response.json();", "if (body.id) pm.environment.set('cardId', body.id);"] } }]
+        },
+        {
+          "name": "Listar mis tarjetas",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/cards"
+          }
+        }
+      ]
+    },
+    {
+      "name": "05. Seguridad biométrica",
+      "item": [
+        {
+          "name": "Registrar dispositivo biométrico",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"platform\": \"ios\",\n  \"deviceName\": \"iPhone de prueba\",\n  \"biometricEnabled\": true\n}" },
+            "url": "{{businessUrl}}/api/v1/security/devices/me"
+          }
+        },
+        {
+          "name": "Listar mis dispositivos",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{businessUrl}}/api/v1/security/devices"
+          }
+        },
+        {
+          "name": "Eliminar mi dispositivo",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": "{{businessUrl}}/api/v1/security/devices/{{deviceId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "06. Administración",
+      "item": [
+        {
+          "name": "Iniciar sesión como admin",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{authUrl}}/api/v1/auth/login"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["const body = pm.response.json();", "pm.environment.set('adminToken', body.access_token);"] } }]
+        },
+        {
+          "name": "Reemplazar contraseña de usuario",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newPassword\": \"UsuarioPaktay789!\",\n  \"temporary\": false\n}"
+            },
+            "url": "{{authUrl}}/api/v1/admin/users/{{userId}}/password"
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "DELETE",
+            "url": "{{authUrl}}/api/v1/admin/users/{{userId}}"
+          }
+        }
+      ]
+    }
+  ]
+}
+
