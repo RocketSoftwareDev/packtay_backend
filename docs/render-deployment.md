@@ -21,7 +21,11 @@ El Dockerfile de Keycloak ya está disponible. Los Dockerfiles de `auth-svc` y `
 
 Supabase se usa solo como PostgreSQL de negocio. No se usa Supabase Auth: la identidad es administrada por Keycloak.
 
-No ejecutes manualmente `database/SUPABASE.txt`: contiene referencias a `auth.users` y políticas RLS de Supabase Auth que no aplican a Keycloak. Las migraciones que debe ejecutar el backend son las de `business-svc/src/main/resources/db/migration`.
+No ejecutes manualmente `database/SUPABASE.txt`: contiene referencias a `auth.users` y políticas RLS de Supabase Auth que no aplican a Keycloak.
+
+Ejecuta una sola vez, desde **SQL Editor**, el archivo `database/paktay_mvp_v0_1_postgres.sql`. Este es el esquema de negocio vigente: usa el `sub` de Keycloak como usuario local, no guarda JWT y contiene los catálogos, tarjetas, categorías, presupuestos, gastos y cuotas.
+
+La base debe estar vacía. Las migraciones `V1` a `V5` de `business-svc/src/main/resources/db/migration` pertenecen al modelo local anterior y no son compatibles con este esquema.
 
 ### 1.2 Base exclusiva para Keycloak en Render
 
@@ -143,9 +147,10 @@ KEYCLOAK_JWK_SET_URI=https://<keycloak-url>/realms/paktay/protocol/openid-connec
 BUSINESS_DB_URL=jdbc:postgresql://<supabase-host>:<puerto>/<base>?sslmode=require
 BUSINESS_DB_USERNAME=<usuario-de-supabase>
 BUSINESS_DB_PASSWORD=<contraseña-de-supabase>
+FLYWAY_ENABLED=false
 ```
 
-7. Despliega. Flyway ejecutará automáticamente las migraciones `V1` a `V5` contra la base de Supabase.
+7. Despliega. `FLYWAY_ENABLED=false` evita ejecutar las migraciones antiguas sobre Supabase.
 8. Verifica:
 
 ```text
