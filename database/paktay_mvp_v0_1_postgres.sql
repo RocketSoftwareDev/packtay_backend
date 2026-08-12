@@ -28,6 +28,23 @@ create table app_users (
         or (status = 'INACTIVE' and deactivated_at is not null))
 );
 
+-- Dispositivos autorizados para preferencias locales como el desbloqueo biométrico.
+-- Los datos biométricos nunca se guardan; solo se conserva la preferencia del usuario.
+create table user_devices (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null references app_users(id) on delete cascade,
+    device_id uuid not null,
+    platform varchar(16) not null check (platform in ('ios', 'android')),
+    device_name varchar(120) not null,
+    biometric_enabled boolean not null default false,
+    last_authenticated_at timestamptz not null default now(),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (user_id, device_id)
+);
+
+create index user_devices_user_id_idx on user_devices(user_id);
+
 -- Catálogo ISO 4217. USD es la moneda base de Paktay porque Ecuador está dolarizado.
 -- La tasa se almacena en cada gasto externo para que un reporte histórico no cambie si la
 -- cotización posterior cambia. La integración automática de cotizaciones no es parte del MVP.
@@ -736,6 +753,7 @@ on conflict (normalized_name) do update set name = excluded.name, active = true;
 
 -- Diccionario del esquema: visible en Supabase Studio y herramientas PostgreSQL.
 comment on table app_users is 'Usuario local de Paktay identificado por el claim sub de Keycloak; no almacena credenciales ni JWT.';
+comment on table user_devices is 'Dispositivos registrados por usuario; almacena preferencias, nunca datos biométricos.';
 comment on column app_users.id is 'UUID sub emitido por Keycloak.';
 comment on column app_users.status is 'Estado de acceso administrado por el backend: ACTIVE o INACTIVE.';
 comment on column app_users.deactivated_at is 'Fecha y hora de desactivación de la cuenta.';

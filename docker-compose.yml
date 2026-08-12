@@ -28,6 +28,7 @@ services:
       retries: 15
     volumes:
       - business-data:/var/lib/postgresql/data
+      - ./database/paktay_mvp_v0_1_postgres.sql:/docker-entrypoint-initdb.d/001-paktay-schema.sql:ro
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
@@ -93,9 +94,11 @@ services:
     environment:
       KEYCLOAK_ISSUER_URI: http://localhost:8180/realms/paktay
       KEYCLOAK_JWK_SET_URI: http://keycloak:8080/realms/paktay/protocol/openid-connect/certs
+      KEYCLOAK_HEALTH_URL: http://keycloak:8080/realms/paktay
       BUSINESS_DB_URL: jdbc:postgresql://business-db:5432/paktay
       BUSINESS_DB_USERNAME: paktay
       BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:-ChangeThisBusinessDatabasePassword123!}
+      FLYWAY_ENABLED: "false"
     ports:
       - "8082:8082"
     depends_on:

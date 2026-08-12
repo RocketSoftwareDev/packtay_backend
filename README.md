@@ -19,6 +19,19 @@ Primera entrega del backend: OAuth 2.0/OIDC, registro, inicio de sesión, cambio
 
 El contenedor `keycloak-init` asigna al cliente técnico solo los permisos de Keycloak necesarios para administrar usuarios. No utiliza la contraseña del administrador de Keycloak desde los servicios Java.
 
+En el primer arranque, PostgreSQL ejecuta automáticamente `database/paktay_mvp_v0_1_postgres.sql` y carga el esquema junto con los catálogos iniciales de monedas, categorías y bancos. Para repetir la inicialización desde cero usa `docker compose down -v` antes de volver a levantar el entorno.
+
+## Healthchecks y activación en Render
+
+Las rutas públicas que debe consultar el frontend son:
+
+- `GET https://<auth-url>/actuator/health`
+- `GET https://<business-url>/actuator/health`
+
+Una llamada a cada URL activa los dos servicios web cuando Render los ha suspendido. Ambos healthchecks consultan también el documento OIDC de Keycloak, por lo que despiertan y validan ese servicio. El healthcheck de `business-svc` valida además su conexión PostgreSQL.
+
+Durante el arranque puede responder temporalmente `503 Service Unavailable`; el frontend debe reintentar con espera progresiva hasta recibir `200 OK`. No se deben usar las rutas de `liveness` para este flujo porque solo comprueban el proceso Java y no sus dependencias.
+
 ## Orden para probar en Postman
 
 1. **Registrar usuario** guarda `userId`.
