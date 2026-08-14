@@ -21,6 +21,12 @@ create type audit_action as enum ('CREATE', 'UPDATE', 'DEACTIVATE', 'CONFIRM', '
 
 create table app_users (
     id uuid primary key, -- claim sub de Keycloak
+    email varchar(320),
+    display_name varchar(120),
+    avatar_url varchar(1000),
+    avatar_object_path varchar(500),
+    avatar_updated_at timestamptz,
+    is_automatic boolean not null default false,
     status varchar(16) not null default 'ACTIVE' check (status in ('ACTIVE', 'INACTIVE')),
     deactivated_at timestamptz,
     created_at timestamptz not null default now(),
@@ -63,6 +69,7 @@ create table banks (
     id uuid primary key default gen_random_uuid(),
     name varchar(120) not null,
     normalized_name varchar(120) not null,
+    logo_url varchar(1000),
     active boolean not null default true,
     created_at timestamptz not null default now(),
     unique (normalized_name)
@@ -71,14 +78,23 @@ create table banks (
 -- Catálogo global controlado por Paktay. No pertenece a ningún usuario.
 create table system_categories (
     id uuid primary key default gen_random_uuid(),
+    code varchar(50) not null,
     name varchar(80) not null,
+    alias varchar(80) not null,
     normalized_name varchar(80) not null,
+    parent_code varchar(50),
+    parent_name varchar(80),
+    icon varchar(60) not null,
+    color_dark char(7) not null check (color_dark ~ '^#[0-9A-Fa-f]{6}$'),
+    color_light char(7) not null check (color_light ~ '^#[0-9A-Fa-f]{6}$'),
     active boolean not null default true,
     display_order smallint not null check (display_order > 0),
     created_at timestamptz not null default now(),
     unique (normalized_name),
+    unique (code),
     unique (display_order),
-    check (btrim(name) <> '')
+    check (btrim(name) <> ''),
+    check (btrim(alias) <> '')
 );
 
 -- Categorías operativas del usuario. Al registrarse se clona una por cada categoría del
@@ -89,12 +105,18 @@ create table user_categories (
     user_id uuid not null references app_users(id),
     system_category_id uuid references system_categories(id),
     origin category_origin not null,
+    code varchar(50) not null,
     name varchar(80) not null,
     normalized_name varchar(80) not null,
+    icon varchar(60) not null,
+    color_dark char(7) not null check (color_dark ~ '^#[0-9A-Fa-f]{6}$'),
+    color_light char(7) not null check (color_light ~ '^#[0-9A-Fa-f]{6}$'),
+    sort_order smallint not null check (sort_order > 0),
     active boolean not null default true,
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
     unique (user_id, normalized_name),
+    unique (user_id, code),
     check ((origin = 'SYSTEM' and system_category_id is not null)
         or (origin = 'CUSTOM' and system_category_id is null)),
     check (btrim(name) <> '')
@@ -106,8 +128,12 @@ create table cards (
     id uuid primary key default gen_random_uuid(),
     user_id uuid not null references app_users(id),
     bank_id uuid not null references banks(id),
-    alias varchar(80) not null,
+    card_type varchar(20) not null default 'DEBIT' check (card_type in ('CREDIT', 'DEBIT')),
+    credit_brand varchar(20),
+    name varchar(80) not null,
     last4 char(4) not null check (last4 ~ '^[0-9]{4}$'),
+    color_dark char(7) not null check (color_dark ~ '^#[0-9A-Fa-f]{6}$'),
+    color_light char(7) not null check (color_light ~ '^#[0-9A-Fa-f]{6}$'),
     default_currency_code char(3) not null default 'USD' references currencies(code),
     status card_status not null default 'ACTIVE',
     deactivated_at timestamptz,
@@ -115,7 +141,9 @@ create table cards (
     updated_at timestamptz not null default now(),
     check ((status = 'ACTIVE' and deactivated_at is null)
         or (status = 'INACTIVE' and deactivated_at is not null)),
-    check (btrim(alias) <> '')
+    check ((card_type = 'DEBIT' and credit_brand is null) or
+        (card_type = 'CREDIT' and credit_brand in ('VISA','MASTERCARD','DINERS','DISCOVER','AMEX','OTHER'))),
+    check (btrim(name) <> '')
 );
 
 -- Una tarjeta desactivada nunca se reactiva. El usuario puede registrar un plástico nuevo
@@ -180,6 +208,30 @@ create table financial_periods (
     unique (user_id, period_month)
 );
 
+create table user_budget_settings (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null references app_users(id),
+    period_id uuid not null references financial_periods(id),
+    global_amount numeric(12,2) check (global_amount > 0),
+    currency_code char(3) not null default 'USD' references currencies(code),
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (user_id, period_id)
+);
+
+create table user_category_budgets (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null references app_users(id),
+    period_id uuid not null references financial_periods(id),
+    category_id uuid not null references user_categories(id),
+    individual_amount numeric(12,2) check (individual_amount > 0),
+    active boolean not null default true,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    unique (user_id, period_id, category_id)
+);
+create index user_category_budgets_active_idx on user_category_budgets (user_id, period_id, active);
+
 -- Ingreso declarado: global o asociado a una tarjeta. No es obligatorio para registrar gastos.
 create table monthly_incomes (
     id uuid primary key default gen_random_uuid(),
@@ -228,6 +280,7 @@ create unique index budget_card_category_uq on budget_allocations (period_id, ca
 create table expenses (
     id uuid primary key default gen_random_uuid(),
     user_id uuid not null references app_users(id),
+    idempotency_key uuid,
     card_id uuid not null references cards(id),
     category_id uuid not null references user_categories(id),
     pending_movement_id uuid unique references pending_movements(id),
@@ -250,6 +303,8 @@ create table expenses (
 create index expenses_user_date_idx on expenses (user_id, occurred_at);
 create index expenses_category_date_idx on expenses (user_id, category_id, occurred_at);
 create index expenses_card_date_idx on expenses (user_id, card_id, occurred_at);
+create unique index expenses_user_idempotency_uq on expenses (user_id, idempotency_key)
+    where idempotency_key is not null;
 
 -- V0.1 no calcula interés financiero: la tasa se conserva explícitamente en 0.0000.
 -- La cantidad de cuotas es libre; el backend distribuye importe/numero y deja el residuo
@@ -488,11 +543,7 @@ create constraint trigger installments_validate_math
 create or replace function create_user_system_categories(p_user_id uuid)
 returns void language plpgsql as $$
 begin
-    insert into user_categories (user_id, system_category_id, origin, name, normalized_name)
-    select p_user_id, sc.id, 'SYSTEM', sc.name, sc.normalized_name
-      from system_categories sc
-     where sc.active
-    on conflict do nothing;
+    return;
 end;
 $$;
 
@@ -703,53 +754,67 @@ on conflict (code) do update set
     decimal_places = excluded.decimal_places,
     active = true;
 
-insert into system_categories (name, normalized_name, display_order) values
-    ('Comida', 'COMIDA', 1),
-    ('Ropa', 'ROPA', 2),
-    ('Electrónicos', 'ELECTRONICOS', 3),
-    ('Casa', 'CASA', 4),
-    ('Suscripciones', 'SUSCRIPCIONES', 5),
-    ('Transporte', 'TRANSPORTE', 6),
-    ('Salud', 'SALUD', 7),
-    ('Entretenimiento', 'ENTRETENIMIENTO', 8),
-    ('Otros', 'OTROS', 9)
+insert into system_categories (code, name, normalized_name, icon, color_dark, color_light, display_order) values
+    ('arriendo', 'Arriendo o hipoteca', 'ARRIENDO O HIPOTECA', 'key', '#2DD4BF', '#0D9488', 1),
+    ('servicios', 'Luz, agua y gas', 'LUZ AGUA Y GAS', 'lightbulb', '#FACC15', '#CA8A04', 2),
+    ('supermercado', 'Supermercado y despensa', 'SUPERMERCADO Y DESPENSA', 'shopping-cart', '#A3E635', '#65A30D', 3),
+    ('comida', 'Comida y restaurantes', 'COMIDA Y RESTAURANTES', 'utensils', '#F59E0B', '#D97706', 4),
+    ('casa', 'Casa y hogar', 'CASA Y HOGAR', 'house', '#34D399', '#059669', 5),
+    ('transporte', 'Transporte y taxis', 'TRANSPORTE Y TAXIS', 'car', '#38BDF8', '#0284C7', 6),
+    ('gasolina', 'Gasolina y peajes', 'GASOLINA Y PEAJES', 'fuel', '#FB923C', '#EA580C', 7),
+    ('telefono', 'Teléfono e internet', 'TELEFONO E INTERNET', 'wifi', '#818CF8', '#4F46E5', 8),
+    ('salud', 'Salud y consultas', 'SALUD Y CONSULTAS', 'heart-pulse', '#FB7185', '#E11D48', 9),
+    ('farmacia', 'Farmacia y medicinas', 'FARMACIA Y MEDICINAS', 'pill', '#F0ABFC', '#C026D3', 10),
+    ('educacion', 'Educación y cursos', 'EDUCACION Y CURSOS', 'graduation-cap', '#3B82F6', '#1D4ED8', 11),
+    ('subscripciones', 'Suscripciones y apps', 'SUSCRIPCIONES Y APPS', 'tv', '#A78BFA', '#7C5CE0', 12),
+    ('entretenimiento', 'Entretenimiento y ocio', 'ENTRETENIMIENTO Y OCIO', 'gamepad-2', '#C084FC', '#9333EA', 13),
+    ('ropa', 'Ropa', 'ROPA', 'shirt', '#F472B6', '#DB2777', 14),
+    ('cuidado', 'Cuidado personal', 'CUIDADO PERSONAL', 'scissors', '#E0B085', '#B45309', 15),
+    ('electronicos', 'Electrónicos', 'ELECTRONICOS', 'laptop', '#60A5FA', '#2563EB', 16),
+    ('gimnasio', 'Gimnasio y deporte', 'GIMNASIO Y DEPORTE', 'dumbbell', '#22D3EE', '#0E7490', 17),
+    ('mascotas', 'Mascotas', 'MASCOTAS', 'paw-print', '#FDBA74', '#C2410C', 18),
+    ('viajes', 'Viajes', 'VIAJES', 'plane', '#5EEAD4', '#0F766E', 19),
+    ('regalos', 'Regalos', 'REGALOS', 'gift', '#F9A8D4', '#BE185D', 20),
+    ('deudas', 'Deudas y préstamos', 'DEUDAS Y PRESTAMOS', 'landmark', '#C4B5FD', '#6D28D9', 21),
+    ('otros', 'Otros', 'OTROS', 'circle-ellipsis', '#8B93A3', '#5B6575', 22)
 on conflict (normalized_name) do update set
+    code = excluded.code,
     name = excluded.name,
+    icon = excluded.icon,
+    color_dark = excluded.color_dark,
+    color_light = excluded.color_light,
     display_order = excluded.display_order,
     active = true;
 
 -- Catálogo inicial de bancos supervisados en Ecuador. Se deriva del Catastro Público de la
 -- Superintendencia de Bancos; debe revisarse periódicamente antes de un despliegue productivo.
-insert into banks (name, normalized_name) values
-    ('Banco Amazonas S.A.', 'BANCO AMAZONAS'),
-    ('Banco de la Producción S.A. (Produbanco)', 'PRODUBANCO'),
-    ('Banco del Austro S.A.', 'BANCO DEL AUSTRO'),
-    ('Banco Solidario S.A.', 'BANCO SOLIDARIO'),
-    ('Banco Guayaquil S.A.', 'BANCO GUAYAQUIL'),
-    ('Banco Sudamericano S.A.', 'BANCO SUDAMERICANO'),
-    ('Banco Bolivariano C.A.', 'BANCO BOLIVARIANO'),
-    ('Banco Coopnacional S.A.', 'BANCO COOPNACIONAL'),
-    ('Banco Comercial Manabí S.A.', 'BANCO COMERCIAL MANABI'),
-    ('Banco ProCredit S.A.', 'BANCO PROCREDIT'),
-    ('Banco del Litoral S.A.', 'BANCO DEL LITORAL'),
-    ('Banco Capital S.A.', 'BANCO CAPITAL'),
-    ('Banco General Rumiñahui S.A.', 'BANCO GENERAL RUMINAHUI'),
-    ('Banco Delbank S.A.', 'BANCO DELBANK'),
-    ('Banco Internacional S.A.', 'BANCO INTERNACIONAL'),
-    ('Banco Atlántida S.A.', 'BANCO ATLANTIDA'),
-    ('Banco de Loja S.A.', 'BANCO DE LOJA'),
-    ('Banco Desarrollo de los Pueblos S.A. Codesarrollo', 'CODESARROLLO'),
-    ('Banco de Machala S.A.', 'BANCO DE MACHALA'),
-    ('Banco VisionFund Ecuador S.A.', 'BANCO VISIONFUND ECUADOR'),
-    ('Banco del Pacífico S.A.', 'BANCO DEL PACIFICO'),
-    ('Banco Diners Club del Ecuador S.A.', 'BANCO DINERS CLUB'),
-    ('Banco Pichincha C.A.', 'BANCO PICHINCHA'),
-    ('Citibank N.A. Sucursal Ecuador', 'CITIBANK'),
-    ('Banco de Desarrollo del Ecuador B.P.', 'BANCO DE DESARROLLO DEL ECUADOR'),
-    ('Corporación Financiera Nacional B.P.', 'CORPORACION FINANCIERA NACIONAL'),
-    ('Banco del Instituto Ecuatoriano de Seguridad Social - BIESS', 'BIESS'),
-    ('BanEcuador B.P.', 'BANECUADOR')
-on conflict (normalized_name) do update set name = excluded.name, active = true;
+insert into banks (name, normalized_name, logo_url) values
+    ('Banco Amazonas S.A.', 'BANCO AMAZONAS', 'https://www.google.com/s2/favicons?domain=bancoamazonas.com&sz=128'),
+    ('Banco de la Producción S.A. (Produbanco)', 'PRODUBANCO', 'https://www.google.com/s2/favicons?domain=produbanco.com.ec&sz=128'),
+    ('Banco del Austro S.A.', 'BANCO DEL AUSTRO', 'https://www.google.com/s2/favicons?domain=bancodelaustro.com&sz=128'),
+    ('Banco Solidario S.A.', 'BANCO SOLIDARIO', 'https://www.google.com/s2/favicons?domain=banco-solidario.com&sz=128'),
+    ('Banco Guayaquil S.A.', 'BANCO GUAYAQUIL', 'https://www.google.com/s2/favicons?domain=bancoguayaquil.com&sz=128'),
+    ('Banco Sudamericano S.A.', 'BANCO SUDAMERICANO', 'https://www.google.com/s2/favicons?domain=bancosudamericano.com.ec&sz=128'),
+    ('Banco Bolivariano C.A.', 'BANCO BOLIVARIANO', 'https://www.google.com/s2/favicons?domain=bolivariano.com&sz=128'),
+    ('Banco Coopnacional S.A.', 'BANCO COOPNACIONAL', 'https://www.google.com/s2/favicons?domain=coopnacional.com&sz=128'),
+    ('Banco Comercial Manabí S.A.', 'BANCO COMERCIAL MANABI', 'https://www.google.com/s2/favicons?domain=bancodelmanabi.com&sz=128'),
+    ('Banco ProCredit S.A.', 'BANCO PROCREDIT', 'https://www.google.com/s2/favicons?domain=bancoprocredit.com.ec&sz=128'),
+    ('Banco del Litoral S.A.', 'BANCO DEL LITORAL', 'https://www.google.com/s2/favicons?domain=bancodellitoral.com&sz=128'),
+    ('Banco Capital S.A.', 'BANCO CAPITAL', 'https://www.google.com/s2/favicons?domain=bancocapital.com.ec&sz=128'),
+    ('Banco General Rumiñahui S.A.', 'BANCO GENERAL RUMINAHUI', 'https://www.google.com/s2/favicons?domain=bgr.com.ec&sz=128'),
+    ('Banco Delbank S.A.', 'BANCO DELBANK', 'https://www.google.com/s2/favicons?domain=delbank.fin.ec&sz=128'),
+    ('Banco Internacional S.A.', 'BANCO INTERNACIONAL', 'https://www.google.com/s2/favicons?domain=bancointernacional.com.ec&sz=128'),
+    ('Banco Atlántida S.A.', 'BANCO ATLANTIDA', 'https://www.google.com/s2/favicons?domain=bancoatlantida.com.ec&sz=128'),
+    ('Banco de Loja S.A.', 'BANCO DE LOJA', 'https://www.google.com/s2/favicons?domain=bancodeloja.fin.ec&sz=128'),
+    ('Banco Desarrollo de los Pueblos S.A. Codesarrollo', 'CODESARROLLO', 'https://www.google.com/s2/favicons?domain=bancodesarrollo.fin.ec&sz=128'),
+    ('Banco de Machala S.A.', 'BANCO DE MACHALA', 'https://www.google.com/s2/favicons?domain=bmachala.com&sz=128'),
+    ('Banco VisionFund Ecuador S.A.', 'BANCO VISIONFUND ECUADOR', 'https://www.google.com/s2/favicons?domain=visionfund.ec&sz=128'),
+    ('Banco del Pacífico S.A.', 'BANCO DEL PACIFICO', 'https://www.google.com/s2/favicons?domain=bancodelpacifico.com&sz=128'),
+    ('Banco Diners Club del Ecuador S.A.', 'BANCO DINERS CLUB', 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128'),
+    ('Banco Pichincha C.A.', 'BANCO PICHINCHA', 'https://www.google.com/s2/favicons?domain=pichincha.com&sz=128'),
+    ('Citibank N.A. Sucursal Ecuador', 'CITIBANK', 'https://www.google.com/s2/favicons?domain=citibank.com&sz=128'),
+    ('BanEcuador B.P.', 'BANECUADOR', 'https://www.google.com/s2/favicons?domain=banecuador.fin.ec&sz=128')
+on conflict (normalized_name) do update set name = excluded.name, logo_url = excluded.logo_url, active = true;
 
 -- Diccionario del esquema: visible en Supabase Studio y herramientas PostgreSQL.
 comment on table app_users is 'Usuario local de Paktay identificado por el claim sub de Keycloak; no almacena credenciales ni JWT.';
@@ -757,6 +822,7 @@ comment on table user_devices is 'Dispositivos registrados por usuario; almacena
 comment on column app_users.id is 'UUID sub emitido por Keycloak.';
 comment on column app_users.status is 'Estado de acceso administrado por el backend: ACTIVE o INACTIVE.';
 comment on column app_users.deactivated_at is 'Fecha y hora de desactivación de la cuenta.';
+comment on column app_users.is_automatic is 'Preferencia que habilita o deshabilita el procesamiento automático para el usuario.';
 comment on column app_users.created_at is 'Fecha y hora de creación del registro local.';
 
 comment on table currencies is 'Catálogo de monedas ISO 4217 disponibles para registrar importes.';
@@ -772,6 +838,7 @@ comment on table banks is 'Catálogo de bancos autorizados y disponibles para as
 comment on column banks.id is 'Identificador interno del banco.';
 comment on column banks.name is 'Nombre legal o comercial mostrado al usuario.';
 comment on column banks.normalized_name is 'Nombre normalizado único para integración y búsquedas.';
+comment on column banks.logo_url is 'URL HTTPS de una imagen PNG con el logo del banco para mostrar en el frontend.';
 comment on column banks.active is 'Indica si el banco está disponible para nuevas tarjetas.';
 comment on column banks.created_at is 'Fecha y hora de alta del banco en el catálogo.';
 
@@ -798,7 +865,10 @@ comment on table cards is 'Tarjetas registradas por el usuario; solo se conserva
 comment on column cards.id is 'Identificador interno de la tarjeta.';
 comment on column cards.user_id is 'Usuario propietario de la tarjeta.';
 comment on column cards.bank_id is 'Banco emisor seleccionado del catálogo.';
-comment on column cards.alias is 'Nombre amigable de la tarjeta para el usuario.';
+comment on column cards.credit_brand is 'Franquicia seleccionada para crédito; siempre nula en débito.';
+comment on column cards.name is 'Nombre libre de la tarjeta definido por el usuario.';
+comment on column cards.color_dark is 'Color hexadecimal de la tarjeta para tema oscuro.';
+comment on column cards.color_light is 'Color hexadecimal de la tarjeta para tema claro.';
 comment on column cards.last4 is 'Últimos cuatro dígitos; nunca se almacena el número completo.';
 comment on column cards.default_currency_code is 'Moneda predeterminada propuesta al registrar gastos de la tarjeta.';
 comment on column cards.status is 'Estado ACTIVE o INACTIVE; una tarjeta inactiva no recibe gastos nuevos.';

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import ec.paktay.business.dto.CardResponse;
 import ec.paktay.business.dto.CreateCardRequest;
+import ec.paktay.business.dto.UpdateCardRequest;
 import ec.paktay.business.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,6 +17,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -32,7 +35,7 @@ public class CardController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar una tarjeta", description = "Crea una tarjeta del usuario y, opcionalmente, su presupuesto de tarjeta para el mes actual.")
+    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. Valida el tipo contra la oferta del banco. CREDIT exige creditBrand permitido; DEBIT prohíbe marca. Conserva nombre, últimos cuatro y colores.")
     @ApiResponse(responseCode = "201", description = "Tarjeta creada")
     @ApiResponse(responseCode = "400", description = "Banco, moneda o tarjeta inválidos")
     public CardResponse register(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateCardRequest request) {
@@ -41,7 +44,18 @@ public class CardController {
 
     @GetMapping
     @Operation(summary = "Listar mis tarjetas", description = "Devuelve únicamente las tarjetas del usuario autenticado y su presupuesto del mes actual.")
+    @ApiResponse(responseCode = "200", description = "Tarjetas con tipo, marca de crédito, últimos cuatro y colores persistidos")
+    @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public List<CardResponse> list(@AuthenticationPrincipal Jwt jwt) {
         return cards.list(UUID.fromString(jwt.getSubject()));
+    }
+
+    @PutMapping("/{cardId}")
+    @Operation(summary = "Editar apodo y color de una tarjeta", description = "Ruta autenticada. Actualiza exclusivamente el apodo y los colores. Banco, tipo, franquicia y últimos cuatro permanecen inmutables.")
+    @ApiResponse(responseCode = "200", description = "Tarjeta actualizada")
+    @ApiResponse(responseCode = "400", description = "Alias o colores inválidos")
+    public CardResponse update(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId,
+                               @Valid @RequestBody UpdateCardRequest request) {
+        return cards.update(UUID.fromString(jwt.getSubject()), cardId, request);
     }
 }

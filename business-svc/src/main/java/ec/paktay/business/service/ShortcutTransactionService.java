@@ -2,10 +2,12 @@ package ec.paktay.business.service;
 
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.List;
 import java.util.UUID;
 
 import ec.paktay.business.dto.ShortcutTransactionRequest;
 import ec.paktay.business.dto.ShortcutTransactionResponse;
+import ec.paktay.business.dto.PendingMovementResponse;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +64,35 @@ public class ShortcutTransactionService {
                 .param("suggestedCard", suggestedCard).param("suggestedCategory", suggestedCategory)
                 .query(UUID.class).single();
         return new ShortcutTransactionResponse(pendingId, suggestedCard, suggestedCategory, false);
+    }
+
+    @Transactional
+    public List<PendingMovementResponse> listPending(UUID userId) {
+        users.ensureActiveUser(userId);
+        return jdbc.sql("""
+                select id, idempotency_key, source, parsed_amount, parsed_currency_code, merchant_raw,
+                       bank_id, last4, occurred_at, suggested_card_id, suggested_category_id,
+                       status::text, created_at
+                  from pending_movements
+                 where user_id = :userId and status = 'PENDING'
+                 order by created_at desc
+                """).param("userId", userId).query((rs, rowNum) -> new PendingMovementResponse(
+                        rs.getObject("id", UUID.class), rs.getObject("idempotency_key", UUID.class),
+                        rs.getString("source"), rs.getBigDecimal("parsed_amount"), rs.getString("parsed_currency_code"),
+                        rs.getString("merchant_raw"), rs.getObject("bank_id", UUID.class), rs.getString("last4"),
+                        rs.getObject("occurred_at", java.time.OffsetDateTime.class),
+                        rs.getObject("suggested_card_id", UUID.class), rs.getObject("suggested_category_id", UUID.class),
+                        rs.getString("status"), rs.getObject("created_at", java.time.OffsetDateTime.class))).list();
+    }
+
+    @Transactional
+    public void discard(UUID userId, UUID movementId) {
+        users.ensureActiveUser(userId);
+        int updated = jdbc.sql("""
+                update pending_movements set status = 'DISCARDED', resolved_at = now()
+                 where id = :id and user_id = :userId and status = 'PENDING'
+                """).param("id", movementId).param("userId", userId).update();
+        if (updated == 0) throw new IllegalArgumentException("El movimiento no existe o ya fue resuelto");
     }
 
     private String normalize(String value) {

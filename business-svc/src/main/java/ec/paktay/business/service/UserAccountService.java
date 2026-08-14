@@ -19,6 +19,5 @@ public class UserAccountService {
         String status = jdbc.sql("select status from app_users where id = :id")
                 .param("id", userId).query(String.class).single();
         if (!"ACTIVE".equals(status)) throw new IllegalArgumentException("La cuenta se encuentra desactivada");
-        jdbc.sql("select create_user_system_categories(:id)").param("id", userId).query(Object.class).single();
     }
 }

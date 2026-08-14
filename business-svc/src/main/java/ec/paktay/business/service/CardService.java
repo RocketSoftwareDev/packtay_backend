@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import ec.paktay.business.dto.CardResponse;
 import ec.paktay.business.dto.CreateCardRequest;
+import ec.paktay.business.dto.UpdateCardRequest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -25,22 +26,21 @@ public class CardService {
     public CardResponse register(UUID userId, CreateCardRequest request) {
         users.ensureActiveUser(userId);
         String currency = request.currencyCode() == null ? "USD" : request.currencyCode();
-        String bankName = jdbc.sql("select name from banks where id = :bankId and active")
-                .param("bankId", request.bankId()).query(String.class).optional()
-                .orElseThrow(() -> new IllegalArgumentException("El banco seleccionado no existe o está inactivo"));
+        validateOffering(request);
         boolean currencyExists = jdbc.sql("select exists(select 1 from currencies where code = :code and active)")
                 .param("code", currency).query(Boolean.class).single();
         if (!currencyExists) throw new IllegalArgumentException("La moneda seleccionada no existe o está inactiva");
 
-        String alias = request.alias() == null || request.alias().isBlank()
-                ? bankName + " • " + request.last4() : request.alias().trim();
         UUID cardId;
         try {
             cardId = jdbc.sql("""
-                    insert into cards (user_id, bank_id, alias, last4, default_currency_code)
-                    values (:userId, :bankId, :alias, :last4, :currency)
+                    insert into cards (user_id, bank_id, card_type, credit_brand, name, last4, color_dark, color_light, default_currency_code)
+                    values (:userId, :bankId, :cardType, :brand, :name, :last4, :colorDark, :colorLight, :currency)
                     returning id
-                    """).param("userId", userId).param("bankId", request.bankId()).param("alias", alias)
+                    """).param("userId", userId).param("bankId", request.bankId())
+                    .param("cardType", request.cardType()).param("name", request.name().trim())
+                    .param("brand", "CREDIT".equals(request.cardType()) ? request.creditBrand() : null)
+                    .param("colorDark", request.colorDark().toUpperCase()).param("colorLight", request.colorLight().toUpperCase())
                     .param("last4", request.last4()).param("currency", currency).query(UUID.class).single();
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException("Ya existe una tarjeta activa con ese banco y últimos cuatro dígitos");
@@ -61,7 +61,8 @@ public class CardService {
     public List<CardResponse> list(UUID userId) {
         users.ensureActiveUser(userId);
         return jdbc.sql("""
-                select c.id, b.id as bank_id, b.name as bank_name, c.alias, c.last4, c.default_currency_code,
+                select c.id, b.id as bank_id, b.name as bank_name, b.logo_url as bank_logo_url,
+                       c.card_type, c.credit_brand, c.name, c.last4, c.color_dark, c.color_light, c.default_currency_code,
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c
                   join banks b on b.id = c.bank_id
@@ -73,9 +74,25 @@ public class CardService {
                 """).param("userId", userId).query(this::mapCard).list();
     }
 
+    @Transactional
+    public CardResponse update(UUID userId, UUID cardId, UpdateCardRequest request) {
+        users.ensureActiveUser(userId);
+        jdbc.sql("select id from cards where id=:cardId and user_id=:userId")
+                .param("cardId", cardId).param("userId", userId).query(UUID.class)
+                .optional().orElseThrow(() -> new IllegalArgumentException("La tarjeta no existe"));
+        jdbc.sql("""
+                update cards set name=:name, color_dark=:colorDark, color_light=:colorLight, updated_at=now()
+                 where id=:cardId and user_id=:userId
+                """).param("name", request.name().trim()).param("colorDark", request.colorDark().toUpperCase())
+                .param("colorLight", request.colorLight().toUpperCase()).param("cardId", cardId)
+                .param("userId", userId).update();
+        return findOne(userId, cardId, currentPeriod(userId));
+    }
+
     private CardResponse findOne(UUID userId, UUID cardId, UUID periodId) {
         return jdbc.sql("""
-                select c.id, b.id as bank_id, b.name as bank_name, c.alias, c.last4, c.default_currency_code,
+                select c.id, b.id as bank_id, b.name as bank_name, b.logo_url as bank_logo_url,
+                       c.card_type, c.credit_brand, c.name, c.last4, c.color_dark, c.color_light, c.default_currency_code,
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c join banks b on b.id = c.bank_id
                   left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD'
@@ -95,7 +112,30 @@ public class CardService {
 
     private CardResponse mapCard(ResultSet rs, int rowNum) throws SQLException {
         return new CardResponse(rs.getObject("id", UUID.class), rs.getObject("bank_id", UUID.class), rs.getString("bank_name"),
-                rs.getString("alias"), rs.getString("last4"), rs.getString("default_currency_code"), rs.getString("status"),
+                rs.getString("bank_logo_url"), rs.getString("card_type"), rs.getString("credit_brand"), rs.getString("name"), rs.getString("last4"),
+                rs.getString("color_dark"), rs.getString("color_light"),
+                rs.getString("default_currency_code"), rs.getString("status"),
                 rs.getObject("current_period_budget", BigDecimal.class), rs.getObject("created_at", OffsetDateTime.class));
     }
+
+    private void validateOffering(CreateCardRequest request) {
+        validateOffering(request.bankId(), request.cardType(), request.creditBrand());
+    }
+
+    private void validateOffering(UUID bankId, String cardType, String creditBrand) {
+        if ("DEBIT".equals(cardType) && creditBrand != null) {
+            throw new IllegalArgumentException("Las tarjetas de débito no registran franquicia o marca");
+        }
+        if ("CREDIT".equals(cardType) && creditBrand == null) {
+            throw new IllegalArgumentException("La franquicia o marca es obligatoria para una tarjeta de crédito");
+        }
+        boolean allowed = jdbc.sql("""
+                select exists(select 1 from bank_card_offerings o join banks b on b.id=o.bank_id
+                 where o.bank_id=:bankId and o.card_type=:cardType and o.active and b.active
+                   and ((:cardType='DEBIT' and o.brand is null) or o.brand=:brand))
+                """).param("bankId", bankId).param("cardType", cardType)
+                .param("brand", creditBrand, java.sql.Types.VARCHAR).query(Boolean.class).single();
+        if (!allowed) throw new IllegalArgumentException("El banco no ofrece el tipo o marca de tarjeta seleccionados");
+    }
+
 }
