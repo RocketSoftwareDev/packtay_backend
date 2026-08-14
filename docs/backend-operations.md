@@ -110,6 +110,11 @@ Swagger público:
 
 ## ¿Qué ocurre si la Mac se apaga o duerme?
 
+La compilación Release de iOS puede abrir sin cable y sin Metro porque contiene
+su bundle JavaScript. Sin embargo, eso es independiente del servidor: mientras
+este stack Docker sea el origen del túnel, la app necesita que la Mac permanezca
+despierta para autenticarse y consultar o guardar información.
+
 - Mac apagada o reiniciándose: backend, Keycloak y túnel quedan fuera de línea.
 - Pantalla bloqueada: continúa funcionando mientras el sistema permanezca despierto.
 - Pantalla apagada con la Mac despierta: continúa funcionando.
@@ -121,6 +126,10 @@ Para una prueba temporal puedes mantener la Mac despierta con:
 ```bash
 caffeinate -dimsu
 ```
+
+Para mantenerla despierta hasta cancelar manualmente, ejecuta el comando en una
+terminal dedicada y termina con `Ctrl+C`. Bloquear la sesión es seguro; poner el
+sistema en reposo no lo es.
 
 El comando funciona mientras esa terminal permanezca abierta. Para uso continuo activa
 “Evitar reposo automático con el adaptador de corriente” en Configuración del Sistema y configura

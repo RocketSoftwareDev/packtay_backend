@@ -48,3 +48,21 @@ curl https://login.example.com/realms/paktay/.well-known/openid-configuration
 Swagger queda disponible en `/swagger-ui/index.html` en los hostnames `auth` y `api`.
 Para un entorno público real conviene limitar Swagger con una política de Cloudflare Access
 basada en ruta, sin aplicar esa política a los endpoints consumidos por la aplicación móvil.
+
+## Disponibilidad de la Mac
+
+Cloudflare Tunnel no convierte la Mac en un servidor independiente de su energía.
+`cloudflared` crea una conexión saliente desde Docker; si macOS entra en reposo,
+se apaga, pierde Internet o Docker Desktop se detiene, los hostnames públicos dejan
+de alcanzar Auth, Business y Keycloak. Bloquear la pantalla no causa el problema
+si el sistema permanece despierto.
+
+Para demostraciones temporales:
+
+```bash
+caffeinate -dimsu
+```
+
+Una app iOS Release instalada con el bundle incorporado seguirá abriendo sin cable
+ni Metro, pero mostrará un error de conexión mientras este origen esté dormido. Para
+disponibilidad permanente se debe mover el stack a infraestructura encendida 24/7.
