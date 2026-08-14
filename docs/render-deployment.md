@@ -144,6 +144,7 @@ https://<auth-url>/swagger-ui/index.html
 ```text
 KEYCLOAK_ISSUER_URI=https://<keycloak-url>/realms/paktay
 KEYCLOAK_JWK_SET_URI=https://<keycloak-url>/realms/paktay/protocol/openid-connect/certs
+KEYCLOAK_HEALTH_URL=https://<keycloak-url>/realms/paktay
 BUSINESS_DB_URL=jdbc:postgresql://<supabase-host>:<puerto>/<base>?sslmode=require
 BUSINESS_DB_USERNAME=<usuario-de-supabase>
 BUSINESS_DB_PASSWORD=<contraseña-de-supabase>
@@ -157,6 +158,19 @@ FLYWAY_ENABLED=false
 https://<business-url>/actuator/health
 https://<business-url>/swagger-ui/index.html
 ```
+
+## Activación desde el frontend
+
+Antes de iniciar el flujo de autenticación, el frontend puede llamar en paralelo a:
+
+```text
+GET https://<auth-url>/actuator/health
+GET https://<business-url>/actuator/health
+```
+
+Estas llamadas despiertan los servicios de Auth y Business. Los dos healthchecks consultan a su vez la configuración OIDC de Keycloak, de modo que también lo despiertan y esperan a que esté disponible. Business valida adicionalmente PostgreSQL/Supabase.
+
+Mientras Render inicia los contenedores es normal recibir errores de red, `502` o `503`. El frontend debe reintentar con espera progresiva y considerar el backend listo únicamente cuando ambas rutas respondan `200`. El endpoint no requiere token y no expone secretos ni detalles internos de las dependencias.
 
 ## 6. Prueba final
 
