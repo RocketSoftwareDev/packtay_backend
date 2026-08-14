@@ -4,9 +4,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.UUID;
+import java.util.Arrays;
 
 import ec.paktay.business.dto.BankResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -29,15 +31,28 @@ public class BankController {
     public BankController(JdbcClient jdbc) { this.jdbc = jdbc; }
 
     @GetMapping
-    @Operation(summary = "Listar bancos disponibles", description = "Catálogo público autenticado de bancos activos para registrar tarjetas.")
+    @Operation(summary = "Listar bancos disponibles", description = "Ruta autenticada. Devuelve únicamente entidades con oferta configurada e incluye supportedCardTypes y creditBrands para construir el formulario dinámico.")
+    @ApiResponse(responseCode = "200", description = "Entidades, tipos admitidos y marcas de crédito disponibles")
+    @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public List<BankResponse> list(@AuthenticationPrincipal Jwt ignored) {
         log.debug("catalog_banks_query_started sql=select_id_name_from_banks_where_active");
-        List<BankResponse> banks = jdbc.sql("select id, name from banks where active order by name").query(this::map).list();
+        List<BankResponse> banks = jdbc.sql("""
+                select b.id, b.name, b.logo_url,
+                       array(select distinct o.card_type from bank_card_offerings o
+                              where o.bank_id=b.id and o.active order by o.card_type) supported_types,
+                       array(select distinct o.brand from bank_card_offerings o
+                              where o.bank_id=b.id and o.active and o.card_type='CREDIT' order by o.brand) credit_brands
+                  from banks b where b.active
+                   and exists(select 1 from bank_card_offerings o where o.bank_id=b.id and o.active)
+                 order by b.name
+                """).query(this::map).list();
         log.info("catalog_banks_query_completed count={}", banks.size());
         return banks;
     }
 
     private BankResponse map(ResultSet rs, int rowNum) throws SQLException {
-        return new BankResponse(rs.getObject("id", UUID.class), rs.getString("name"));
+        return new BankResponse(rs.getObject("id", UUID.class), rs.getString("name"), rs.getString("logo_url"),
+                Arrays.asList((String[]) rs.getArray("supported_types").getArray()),
+                Arrays.asList((String[]) rs.getArray("credit_brands").getArray()));
     }
 }

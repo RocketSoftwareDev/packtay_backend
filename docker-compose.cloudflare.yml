@@ -1,0 +1,15 @@
+services:
+  keycloak:
+    environment:
+      KC_HOSTNAME: https://paktaykeycloak.rocketsoftwarecore.com
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+
+  auth-svc:
+    environment:
+      KEYCLOAK_PUBLIC_URL: https://paktaykeycloak.rocketsoftwarecore.com
+      KEYCLOAK_ISSUER_URI: https://paktaykeycloak.rocketsoftwarecore.com/realms/paktay
+
+  business-svc:
+    environment:
+      KEYCLOAK_ISSUER_URI: https://paktaykeycloak.rocketsoftwarecore.com/realms/paktay

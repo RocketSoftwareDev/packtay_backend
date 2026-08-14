@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Paktay - Business Service",
+    "description": "Colección completa de business-svc. Ejecuta primero el login de la colección Auth para llenar accessToken o adminToken.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{accessToken}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "Estado y documentación",
+      "item": [
+        { "name": "Healthcheck", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{businessUrl}}/actuator/health" } },
+        { "name": "OpenAPI JSON", "request": { "auth": { "type": "noauth" }, "method": "GET", "url": "{{businessUrl}}/v3/api-docs" } }
+      ]
+    },
+    {
+      "name": "Entrada",
+      "item": [
+        { "name": "Ingresar a la aplicación", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/app/entry" } }
+      ]
+    },
+    {
+      "name": "Perfil de usuario",
+      "item": [
+        { "name": "Consultar mi perfil", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/profile" } },
+        {
+          "name": "Subir o reemplazar avatar",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": { "mode": "formdata", "formdata": [{ "key": "file", "type": "file", "src": [] }] },
+            "url": "{{businessUrl}}/api/v1/user/profile/avatar"
+          }
+        },
+        { "name": "Eliminar avatar", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/profile/avatar" } }
+      ]
+    },
+    {
+      "name": "Catálogos",
+      "item": [
+        {
+          "name": "Listar bancos",
+          "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/catalog/banks" },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) {", "  const banks = pm.response.json();", "  if (banks.length) pm.environment.set('bankId', banks[0].id);", "}"] } }]
+        },
+        {
+          "name": "Listar categorías disponibles",
+          "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/categories" },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) {", "  const categories = pm.response.json();", "  if (categories.length) pm.environment.set('categoryId', categories[0].id);", "}"] } }]
+        },
+        {
+          "name": "Crear categoría personal",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"{{userCategoryName}}\"\n}" },
+            "url": "{{businessUrl}}/api/v1/user/categories"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('categoryId', pm.response.json().id);"] } }]
+        },
+        {
+          "name": "Crear categoría global (ADMIN)",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{adminToken}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"{{systemCategoryName}}\",\n  \"displayOrder\": 100\n}" },
+            "url": "{{businessUrl}}/api/v1/admin/catalog/categories"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tarjetas",
+      "item": [
+        {
+          "name": "Registrar tarjeta",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"bankId\": \"{{bankId}}\",\n  \"cardType\": \"DEBIT\",\n  \"name\": \"{{cardName}}\",\n  \"last4\": \"{{cardLast4}}\",\n  \"colorDark\": \"#2563EB\",\n  \"colorLight\": \"#60A5FA\",\n  \"initialBudget\": 500.00,\n  \"currencyCode\": \"USD\"\n}" },
+            "url": "{{businessUrl}}/api/v1/user/cards"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('cardId', pm.response.json().id);"] } }]
+        },
+        { "name": "Listar mis tarjetas", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/cards" } }
+      ]
+    },
+    {
+      "name": "Gastos y movimientos",
+      "item": [
+        {
+          "name": "Registrar gasto manual",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"cardId\": \"{{cardId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"exchangeRateToUsd\": 1,\n  \"merchant\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"recurring\": false\n}" },
+            "url": "{{businessUrl}}/api/v1/user/expenses"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('expenseId', pm.response.json().id);"] } }]
+        },
+        {
+          "name": "Listar mis gastos",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{businessUrl}}/api/v1/user/expenses?from={{expenseFrom}}&to={{expenseTo}}", "host": ["{{businessUrl}}"], "path": ["api", "v1", "user", "expenses"], "query": [{ "key": "from", "value": "{{expenseFrom}}", "disabled": true }, { "key": "to", "value": "{{expenseTo}}", "disabled": true }, { "key": "cardId", "value": "{{cardId}}", "disabled": true }, { "key": "categoryId", "value": "{{categoryId}}", "disabled": true }] }
+          }
+        },
+        {
+          "name": "Ingresar consumo desde Shortcut",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"bankId\": \"{{bankId}}\",\n  \"cardLast4\": \"{{cardLast4}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"merchantRaw\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"rawPayload\": \"Payload de prueba desde Postman\",\n  \"rawText\": \"Consumo USD 12.50\"\n}" },
+            "url": "{{businessUrl}}/api/v1/user/movements/shortcut"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('pendingMovementId', pm.response.json().pendingMovementId);"] } }]
+        },
+        {
+          "name": "Listar consumos pendientes",
+          "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/movements/pending" }
+        },
+        {
+          "name": "Confirmar consumo pendiente",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"cardId\": \"{{cardId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"exchangeRateToUsd\": 1,\n  \"rememberCategory\": true,\n  \"recurring\": false\n}" },
+            "url": "{{businessUrl}}/api/v1/user/movements/{{pendingMovementId}}/confirm"
+          }
+        },
+        {
+          "name": "Descartar consumo pendiente",
+          "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/movements/{{pendingMovementId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Dispositivos",
+      "item": [
+        {
+          "name": "Registrar o actualizar dispositivo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"deviceId\": \"{{deviceId}}\",\n  \"platform\": \"ios\",\n  \"deviceName\": \"iPhone de prueba\",\n  \"biometricEnabled\": true\n}" },
+            "url": "{{businessUrl}}/api/v1/security/devices/me"
+          }
+        },
+        { "name": "Listar mis dispositivos", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/security/devices" } },
+        { "name": "Eliminar dispositivo", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/security/devices/{{deviceId}}" } }
+      ]
+    }
+  ]
+}

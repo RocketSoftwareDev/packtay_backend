@@ -26,10 +26,10 @@ public class AdminCategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear categoría predeterminada")
+    @Operation(summary = "Crear subcategoría predeterminada", description = "Asocia parentCode y parentName para búsqueda visual. Los usuarios guardan el UUID de la subcategoría, no el grupo principal.")
     @ApiResponse(responseCode = "201", description = "Categoría predeterminada creada")
     @ApiResponse(responseCode = "403", description = "Se requiere el rol ADMIN")
     public SystemCategoryResponse create(@Valid @RequestBody CreateSystemCategoryRequest request) {
-        return categories.createSystemCategory(request.name(), request.displayOrder());
+        return categories.createSystemCategory(request);
     }
 }

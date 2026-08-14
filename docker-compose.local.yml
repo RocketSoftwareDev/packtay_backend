@@ -1,0 +1,43 @@
+# Entorno aislado de desarrollo. Se usa junto con docker-compose.yml y un nombre
+# de proyecto distinto para obtener redes, contenedores y volúmenes independientes.
+# No incluye el perfil `tunnel`, por lo que nunca inicia cloudflared.
+services:
+  keycloak-db:
+    mem_limit: 384m
+    mem_reservation: 128m
+
+  business-db:
+    mem_limit: 512m
+    mem_reservation: 128m
+    ports: !override
+      - "127.0.0.1:25433:5432"
+
+  keycloak:
+    mem_limit: 1g
+    mem_reservation: 256m
+    environment:
+      KC_HOSTNAME: http://${PAKTAY_LOCAL_HOST:-localhost}:28180
+      JAVA_OPTS_KC_HEAP: -Xms128m -Xmx640m
+    ports: !override
+      - "0.0.0.0:28180:8080"
+
+  keycloak-init:
+    mem_limit: 384m
+    mem_reservation: 96m
+
+  auth-svc:
+    mem_limit: 768m
+    mem_reservation: 192m
+    environment:
+      KEYCLOAK_PUBLIC_URL: http://${PAKTAY_LOCAL_HOST:-localhost}:28180
+      KEYCLOAK_ISSUER_URI: http://${PAKTAY_LOCAL_HOST:-localhost}:28180/realms/paktay
+    ports: !override
+      - "0.0.0.0:28081:8081"
+
+  business-svc:
+    mem_limit: 1g
+    mem_reservation: 256m
+    environment:
+      KEYCLOAK_ISSUER_URI: http://${PAKTAY_LOCAL_HOST:-localhost}:28180/realms/paktay
+    ports: !override
+      - "0.0.0.0:28082:8082"

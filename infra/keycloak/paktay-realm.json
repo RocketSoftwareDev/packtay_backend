@@ -6,6 +6,9 @@
   "resetPasswordAllowed": false,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 28800,
+  "ssoSessionIdleTimeout": 2592000,
+  "ssoSessionMaxLifespan": 2592000,
   "passwordPolicy": "length(10) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)",
   "roles": {
     "realm": [
@@ -37,7 +40,7 @@
       "serviceAccountsEnabled": true,
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": false,
-      "secret": "ChangeThisServiceSecret123!"
+      "secret": "bootstrap-secret-replaced-by-keycloak-init"
     }
   ],
   "users": [
@@ -48,10 +51,7 @@
       "lastName": "Admin",
       "enabled": true,
       "emailVerified": true,
-      "realmRoles": ["ADMIN", "USER"],
-      "credentials": [
-        { "type": "password", "value": "AdminPaktay123!", "temporary": false }
-      ]
+      "realmRoles": ["ADMIN", "USER"]
     }
   ]
 }

@@ -11,7 +11,7 @@ Primera entrega del backend: OAuth 2.0/OIDC, registro, inicio de sesión, cambio
 
 ## Desarrollo local
 
-1. Instala Docker Desktop y Java 17. Docker no está disponible en el equipo actual, por lo que falta ejecutar esta prueba de integración.
+1. Instala Docker Desktop y Java 17.
 2. Copia `.env.example` a `.env` y cambia sus secretos antes de levantar los servicios.
 3. Compila los JAR: `./mvnw.cmd clean package`.
 4. Arranca el entorno: `docker compose up --build`.
@@ -40,7 +40,7 @@ Durante el arranque puede responder temporalmente `503 Service Unavailable`; el 
 4. **Cambiar contraseña propia** requiere el token del usuario.
 5. **Iniciar sesión como admin**, **Reemplazar contraseña** y **Eliminar usuario** requieren el rol `ADMIN`.
 
-La cuenta administrativa local importada es `admin@paktay.local` / `AdminPaktay123!`. Debe sustituirse o eliminarse antes de un despliegue público.
+Las credenciales administrativas se definen exclusivamente en `.env` y no deben confirmarse en Git.
 
 ## Aplicación móvil
 
@@ -49,3 +49,6 @@ React Native debe iniciar sesión directamente con Keycloak mediante **Authoriza
 ## Despliegue
 
 La guía para Render, Keycloak y Supabase está en [docs/render-deployment.md](docs/render-deployment.md).
+
+La operación completa del backend local, Cloudflare Tunnel, PostgreSQL y DBeaver está en
+[docs/backend-operations.md](docs/backend-operations.md).
