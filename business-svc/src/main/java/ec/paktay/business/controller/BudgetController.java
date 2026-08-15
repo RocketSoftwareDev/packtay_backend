@@ -30,7 +30,7 @@ public class BudgetController {
     }
 
     @PutMapping
-    @Operation(summary = "Guardar presupuesto global y selección", description = "Ruta autenticada. Reemplaza atómicamente la selección del mes. Las categorías con individualAmount nulo heredan globalAmount y las que envían un monto conservan su presupuesto personalizado. No crea presupuestos para categorías deseleccionadas.")
+    @Operation(summary = "Guardar plantilla global y presupuestos por categoría", description = "Ruta autenticada. globalAmount es una plantilla aplicada individualmente, nunca una bolsa ni una sumatoria. individualAmount nulo hereda la plantilla (o equivale a cero si está sin definir); un monto conserva el valor manual. recurrence acepta THIS_MONTH o MONTHLY.")
     @ApiResponse(responseCode = "200", description = "Presupuesto y selección guardados")
     @ApiResponse(responseCode = "400", description = "Categoría, moneda o monto inválido")
     public BudgetResponse save(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody SaveBudgetRequest request) {

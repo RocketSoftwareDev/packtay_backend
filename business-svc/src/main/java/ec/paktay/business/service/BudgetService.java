@@ -36,10 +36,6 @@ public class BudgetService {
     public BudgetResponse save(UUID userId, SaveBudgetRequest request) {
         users.ensureActiveUser(userId);
         List<CategoryBudgetInput> categories = request.categories() == null ? List.of() : request.categories();
-        if (request.globalAmount() == null
-                && categories.stream().anyMatch(item -> item.individualAmount() == null)) {
-            throw new IllegalArgumentException("Las categorías con presupuesto global requieren un globalAmount");
-        }
         HashSet<UUID> unique = new HashSet<>();
         for (CategoryBudgetInput item : categories) {
             if (!unique.add(item.categoryId())) throw new IllegalArgumentException("No se puede repetir una categoría");
@@ -48,12 +44,13 @@ public class BudgetService {
         ensureCurrency(request.currencyCode());
         UUID periodId = currentPeriod(userId);
         jdbc.sql("""
-                insert into user_budget_settings (user_id, period_id, global_amount, currency_code)
-                values (:userId, :periodId, :amount, :currency)
+                insert into user_budget_settings (user_id, period_id, global_amount, currency_code, recurrence)
+                values (:userId, :periodId, :amount, :currency, :recurrence)
                 on conflict (user_id, period_id) do update set global_amount = excluded.global_amount,
-                    currency_code = excluded.currency_code, updated_at = now()
+                    currency_code = excluded.currency_code, recurrence = excluded.recurrence, updated_at = now()
                 """).param("userId", userId).param("periodId", periodId)
-                .param("amount", request.globalAmount()).param("currency", request.currencyCode()).update();
+                .param("amount", request.globalAmount()).param("currency", request.currencyCode())
+                .param("recurrence", request.recurrence()).update();
         jdbc.sql("update user_category_budgets set active = false, updated_at = now() where user_id = :userId and period_id = :periodId")
                 .param("userId", userId).param("periodId", periodId).update();
         for (CategoryBudgetInput item : categories) {
@@ -83,12 +80,13 @@ public class BudgetService {
 
     private BudgetResponse response(UUID userId, UUID periodId) {
         Settings settings = jdbc.sql("""
-                select fp.period_month, s.global_amount, coalesce(s.currency_code, 'USD') currency_code
+                select fp.period_month, s.global_amount, coalesce(s.currency_code, 'USD') currency_code,
+                       coalesce(s.recurrence, 'THIS_MONTH') recurrence
                   from financial_periods fp left join user_budget_settings s on s.period_id = fp.id and s.user_id = fp.user_id
                  where fp.id = :periodId and fp.user_id = :userId
                 """).param("periodId", periodId).param("userId", userId).query((rs, rowNum) ->
                         new Settings(rs.getObject("period_month", LocalDate.class), rs.getBigDecimal("global_amount"),
-                                rs.getString("currency_code"))).single();
+                                rs.getString("currency_code"), rs.getString("recurrence"))).single();
         List<CategoryBudgetResponse> categories = jdbc.sql("""
                 select uc.id, uc.alias, uc.icon, uc.color_dark, uc.color_light, b.individual_amount, b.active
                   from user_category_budgets b join user_categories uc on uc.id = b.category_id
@@ -98,16 +96,35 @@ public class BudgetService {
                         new CategoryBudgetResponse(rs.getObject("id", UUID.class), rs.getString("alias"),
                                 rs.getString("icon"), rs.getString("color_dark"), rs.getString("color_light"),
                                 rs.getBigDecimal("individual_amount"), rs.getBoolean("active"))).list();
-        return new BudgetResponse(settings.month(), settings.globalAmount(), settings.currency(), categories);
+        return new BudgetResponse(settings.month(), settings.globalAmount(), settings.currency(), settings.recurrence(), categories);
     }
 
     private UUID currentPeriod(UUID userId) {
-        return jdbc.sql("""
+        UUID periodId = jdbc.sql("""
                 insert into financial_periods (user_id, period_month)
                 values (:userId, date_trunc('month', current_date)::date)
                 on conflict (user_id, period_month) do update set period_month = excluded.period_month
                 returning id
                 """).param("userId", userId).query(UUID.class).single();
+        jdbc.sql("""
+                with previous as (
+                    select s.global_amount, s.currency_code, s.recurrence, s.period_id
+                      from user_budget_settings s join financial_periods fp on fp.id = s.period_id
+                     where s.user_id = :userId and fp.period_month < date_trunc('month', current_date)::date
+                       and s.recurrence = 'MONTHLY'
+                     order by fp.period_month desc limit 1
+                ), copied as (
+                    insert into user_budget_settings (user_id, period_id, global_amount, currency_code, recurrence)
+                    select :userId, :periodId, global_amount, currency_code, recurrence from previous
+                    on conflict (user_id, period_id) do nothing returning 1
+                )
+                insert into user_category_budgets (user_id, period_id, category_id, individual_amount, active)
+                select :userId, :periodId, b.category_id, b.individual_amount, b.active
+                  from previous p join user_category_budgets b on b.period_id = p.period_id and b.user_id = :userId
+                 where exists(select 1 from copied)
+                on conflict (user_id, period_id, category_id) do nothing
+                """).param("userId", userId).param("periodId", periodId).update();
+        return periodId;
     }
 
     private void ensureCategory(UUID userId, UUID categoryId) {
@@ -122,5 +139,5 @@ public class BudgetService {
         if (!exists) throw new IllegalArgumentException("La moneda no existe o está inactiva");
     }
 
-    private record Settings(LocalDate month, BigDecimal globalAmount, String currency) { }
+    private record Settings(LocalDate month, BigDecimal globalAmount, String currency, String recurrence) { }
 }

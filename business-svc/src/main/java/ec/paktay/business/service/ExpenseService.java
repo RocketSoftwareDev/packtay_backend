@@ -45,6 +45,7 @@ public class ExpenseService {
                 .param("merchant", request.merchant().trim()).param("normalized", normalize(request.merchant()))
                 .param("occurredAt", request.occurredAt()).param("recurring", request.recurring())
                 .param("recurrenceDay", request.recurrenceDay()).query(UUID.class).single();
+        remember(userId, request.merchant().trim(), normalize(request.merchant()), request.categoryId());
         return findOne(userId, expenseId);
     }
 
@@ -95,6 +96,10 @@ public class ExpenseService {
     }
 
     private void remember(UUID userId, Incoming movement, UUID categoryId) {
+        remember(userId, movement.merchant(), movement.normalized(), categoryId);
+    }
+
+    private void remember(UUID userId, String merchant, String normalized, UUID categoryId) {
         jdbc.sql("""
                 insert into user_consumption_selections (user_id, consumption_name, merchant_normalized,
                     normalization_version, category_id)
@@ -103,8 +108,8 @@ public class ExpenseService {
                     consumption_name = excluded.consumption_name, category_id = excluded.category_id,
                     active = true, selection_count = user_consumption_selections.selection_count + 1,
                     last_selected_at = now(), updated_at = now()
-                """).param("userId", userId).param("name", movement.merchant())
-                .param("normalized", movement.normalized()).param("categoryId", categoryId).update();
+                """).param("userId", userId).param("name", merchant)
+                .param("normalized", normalized).param("categoryId", categoryId).update();
     }
 
     private ExpenseResponse findByIdempotency(UUID userId, UUID key) {

@@ -107,6 +107,22 @@ public class CategoryService {
     @Transactional
     public void deactivateUserCategory(UUID userId, UUID categoryId) {
         users.ensureActiveUser(userId);
+        boolean hasExpenses = jdbc.sql("select exists(select 1 from expenses where user_id = :userId and category_id = :id)")
+                .param("id", categoryId).param("userId", userId).query(Boolean.class).single();
+        if (!hasExpenses) {
+            jdbc.sql("delete from user_category_budgets where user_id = :userId and category_id = :id")
+                    .param("id", categoryId).param("userId", userId).update();
+            jdbc.sql("delete from budget_allocations where user_id = :userId and category_id = :id")
+                    .param("id", categoryId).param("userId", userId).update();
+            jdbc.sql("delete from user_consumption_selections where user_id = :userId and category_id = :id")
+                    .param("id", categoryId).param("userId", userId).update();
+            jdbc.sql("update pending_movements set suggested_category_id = null where user_id = :userId and suggested_category_id = :id")
+                    .param("id", categoryId).param("userId", userId).update();
+            int deleted = jdbc.sql("delete from user_categories where id = :id and user_id = :userId and active")
+                    .param("id", categoryId).param("userId", userId).update();
+            if (deleted == 0) throw new IllegalArgumentException("La categoría no existe, no pertenece al usuario o ya está inactiva");
+            return;
+        }
         int updated = jdbc.sql("update user_categories set active = false where id = :id and user_id = :userId and active")
                 .param("id", categoryId).param("userId", userId).update();
         if (updated == 0) throw new IllegalArgumentException("La categoría no existe, no pertenece al usuario o ya está inactiva");
@@ -155,16 +171,6 @@ public class CategoryService {
                     .param("icon", request.icon()).param("colorDark", request.colorDark())
                     .param("colorLight", request.colorLight()).param("sortOrder", request.sortOrder())
                     .query(this::mapSystem).single();
-            jdbc.sql("""
-                    insert into user_categories
-                        (user_id, system_category_id, origin, code, name, alias, normalized_name,
-                         icon, color_dark, color_light, sort_order)
-                    select u.id, sc.id, 'SYSTEM', sc.code, sc.name, sc.name, sc.normalized_name,
-                           sc.icon, sc.color_dark, sc.color_light, sc.display_order
-                      from app_users u cross join system_categories sc
-                     where sc.id = :systemCategoryId and u.status = 'ACTIVE'
-                    on conflict do nothing
-                    """).param("systemCategoryId", created.id()).update();
             return created;
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException("Ya existe una categoría predeterminada con ese nombre u orden");
