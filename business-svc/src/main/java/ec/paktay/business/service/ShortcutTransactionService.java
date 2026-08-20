@@ -39,11 +39,7 @@ public class ShortcutTransactionService {
         if (!validCurrency) throw new IllegalArgumentException("La moneda seleccionada no existe o está inactiva");
 
         String normalized = normalize(request.merchantRaw());
-        UUID suggestedCard = jdbc.sql("""
-                select id from cards
-                 where user_id = :userId and bank_id = :bankId and last4 = :last4 and status = 'ACTIVE'
-                """).param("userId", userId).param("bankId", request.bankId()).param("last4", request.cardLast4())
-                .query(UUID.class).optional().orElse(null);
+        UUID suggestedCard = suggestCard(userId, request);
         UUID suggestedCategory = jdbc.sql("""
                 select category_id from user_consumption_selections
                  where user_id = :userId and merchant_normalized = :merchant and normalization_version = 1 and active
@@ -52,18 +48,48 @@ public class ShortcutTransactionService {
         UUID pendingId = jdbc.sql("""
                 insert into pending_movements (
                     user_id, idempotency_key, source, raw_payload, raw_text, parsed_amount, parsed_currency_code,
-                    merchant_raw, merchant_normalized, normalization_version, bank_id, last4, occurred_at,
+                    merchant_raw, merchant_normalized, normalization_version, bank_id, last4, card_name_raw, occurred_at,
                     suggested_card_id, suggested_category_id)
                 values (:userId, :key, 'IOS_SHORTCUT', cast(:rawPayload as jsonb), :rawText, :amount, :currency,
-                    :merchantRaw, :merchantNormalized, 1, :bankId, :last4, :occurredAt, :suggestedCard, :suggestedCategory)
+                    :merchantRaw, :merchantNormalized, 1, :bankId, :last4, :cardName, :occurredAt, :suggestedCard, :suggestedCategory)
                 returning id
                 """).param("userId", userId).param("key", request.idempotencyKey()).param("rawPayload", request.rawPayload())
                 .param("rawText", request.rawText()).param("amount", request.amount()).param("currency", request.currencyCode())
                 .param("merchantRaw", request.merchantRaw().trim()).param("merchantNormalized", normalized)
-                .param("bankId", request.bankId()).param("last4", request.cardLast4()).param("occurredAt", request.occurredAt())
+                .param("bankId", request.bankId()).param("last4", request.cardLast4())
+                .param("cardName", cleanCardName(request.cardName())).param("occurredAt", request.occurredAt())
                 .param("suggestedCard", suggestedCard).param("suggestedCategory", suggestedCategory)
                 .query(UUID.class).single();
         return new ShortcutTransactionResponse(pendingId, suggestedCard, suggestedCategory, false);
+    }
+
+    // Prioriza los últimos cuatro dígitos por ser exactos; sin ellos asocia por el nombre real
+    // de la tarjeta y sólo cuando existe una única candidata activa en ese banco.
+    private UUID suggestCard(UUID userId, ShortcutTransactionRequest request) {
+        if (request.cardLast4() != null) {
+            UUID byLast4 = jdbc.sql("""
+                    select id from cards
+                     where user_id = :userId and bank_id = :bankId and last4 = :last4 and status = 'ACTIVE'
+                    """).param("userId", userId).param("bankId", request.bankId()).param("last4", request.cardLast4())
+                    .query(UUID.class).optional().orElse(null);
+            if (byLast4 != null) return byLast4;
+        }
+        String cardName = cleanCardName(request.cardName());
+        if (cardName == null) return null;
+        String normalizedName = normalize(cardName);
+        if (normalizedName.isEmpty()) return null;
+        List<UUID> byName = jdbc.sql("""
+                select id from cards
+                 where user_id = :userId and bank_id = :bankId and name_normalized = :name and status = 'ACTIVE'
+                """).param("userId", userId).param("bankId", request.bankId()).param("name", normalizedName)
+                .query(UUID.class).list();
+        return byName.size() == 1 ? byName.get(0) : null;
+    }
+
+    private String cleanCardName(String cardName) {
+        if (cardName == null) return null;
+        String trimmed = cardName.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     @Transactional
@@ -71,7 +97,7 @@ public class ShortcutTransactionService {
         users.ensureActiveUser(userId);
         return jdbc.sql("""
                 select id, idempotency_key, source, parsed_amount, parsed_currency_code, merchant_raw,
-                       bank_id, last4, occurred_at, suggested_card_id, suggested_category_id,
+                       bank_id, last4, card_name_raw, occurred_at, suggested_card_id, suggested_category_id,
                        status::text, created_at
                   from pending_movements
                  where user_id = :userId and status = 'PENDING'
@@ -80,7 +106,7 @@ public class ShortcutTransactionService {
                         rs.getObject("id", UUID.class), rs.getObject("idempotency_key", UUID.class),
                         rs.getString("source"), rs.getBigDecimal("parsed_amount"), rs.getString("parsed_currency_code"),
                         rs.getString("merchant_raw"), rs.getObject("bank_id", UUID.class), rs.getString("last4"),
-                        rs.getObject("occurred_at", java.time.OffsetDateTime.class),
+                        rs.getString("card_name_raw"), rs.getObject("occurred_at", java.time.OffsetDateTime.class),
                         rs.getObject("suggested_card_id", UUID.class), rs.getObject("suggested_category_id", UUID.class),
                         rs.getString("status"), rs.getObject("created_at", java.time.OffsetDateTime.class))).list();
     }

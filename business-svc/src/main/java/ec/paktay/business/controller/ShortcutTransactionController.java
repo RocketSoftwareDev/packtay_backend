@@ -42,7 +42,7 @@ public class ShortcutTransactionController {
 
     @PostMapping("/shortcut")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Recibir un consumo de Apple Shortcut", description = "Guarda un movimiento pendiente e idempotente. Nunca crea un gasto ni tarjeta hasta que el usuario lo confirme.")
+    @Operation(summary = "Recibir un consumo de Apple Shortcut", description = "Guarda un movimiento pendiente e idempotente. cardLast4 es opcional (cuatro dígitos si se envía) y cardName es el nombre de la tarjeta detectado en la notificación; la tarjeta sugerida se resuelve primero por últimos cuatro y, si no hay coincidencia, por nombre real normalizado cuando existe una única tarjeta activa con ese nombre en el banco. Nunca crea un gasto ni tarjeta hasta que el usuario lo confirme.")
     @ApiResponse(responseCode = "201", description = "Movimiento pendiente creado")
     @ApiResponse(responseCode = "400", description = "Datos de consumo inválidos")
     public ShortcutTransactionResponse ingest(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody ShortcutTransactionRequest request) {

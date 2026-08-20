@@ -81,7 +81,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"bankId\": \"{{bankId}}\",\n  \"cardType\": \"DEBIT\",\n  \"name\": \"{{cardName}}\",\n  \"last4\": \"{{cardLast4}}\",\n  \"colorDark\": \"#2563EB\",\n  \"colorLight\": \"#60A5FA\",\n  \"initialBudget\": 500.00,\n  \"currencyCode\": \"USD\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"bankId\": \"{{bankId}}\",\n  \"cardType\": \"DEBIT\",\n  \"name\": \"{{cardName}}\",\n  \"alias\": \"{{cardAlias}}\",\n  \"last4\": \"{{cardLast4}}\",\n  \"colorDark\": \"#2563EB\",\n  \"colorLight\": \"#60A5FA\",\n  \"initialBudget\": 500.00,\n  \"currencyCode\": \"USD\"\n}" },
             "url": "{{businessUrl}}/api/v1/user/cards"
           },
           "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('cardId', pm.response.json().id);"] } }]
@@ -114,7 +114,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"bankId\": \"{{bankId}}\",\n  \"cardLast4\": \"{{cardLast4}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"merchantRaw\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"rawPayload\": \"Payload de prueba desde Postman\",\n  \"rawText\": \"Consumo USD 12.50\"\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"bankId\": \"{{bankId}}\",\n  \"cardName\": \"{{cardName}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"merchantRaw\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"rawPayload\": \"Payload de prueba desde Postman\",\n  \"rawText\": \"Consumo USD 12.50\"\n}" },
             "url": "{{businessUrl}}/api/v1/user/movements/shortcut"
           },
           "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('pendingMovementId', pm.response.json().pendingMovementId);"] } }]

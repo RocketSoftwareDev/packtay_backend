@@ -34,11 +34,12 @@ public class CardService {
         UUID cardId;
         try {
             cardId = jdbc.sql("""
-                    insert into cards (user_id, bank_id, card_type, credit_brand, name, last4, color_dark, color_light, default_currency_code)
-                    values (:userId, :bankId, :cardType, :brand, :name, :last4, :colorDark, :colorLight, :currency)
+                    insert into cards (user_id, bank_id, card_type, credit_brand, name, name_normalized, alias, last4, color_dark, color_light, default_currency_code)
+                    values (:userId, :bankId, :cardType, :brand, :name, :nameNormalized, :alias, :last4, :colorDark, :colorLight, :currency)
                     returning id
                     """).param("userId", userId).param("bankId", request.bankId())
                     .param("cardType", request.cardType()).param("name", request.name().trim())
+                    .param("nameNormalized", normalize(request.name())).param("alias", cleanAlias(request.alias()))
                     .param("brand", "CREDIT".equals(request.cardType()) ? request.creditBrand() : null)
                     .param("colorDark", request.colorDark().toUpperCase()).param("colorLight", request.colorLight().toUpperCase())
                     .param("last4", request.last4()).param("currency", currency).query(UUID.class).single();
@@ -62,7 +63,7 @@ public class CardService {
         users.ensureActiveUser(userId);
         return jdbc.sql("""
                 select c.id, b.id as bank_id, b.name as bank_name, b.logo_url as bank_logo_url,
-                       c.card_type, c.credit_brand, c.name, c.last4, c.color_dark, c.color_light, c.default_currency_code,
+                       c.card_type, c.credit_brand, c.name, c.alias, c.last4, c.color_dark, c.color_light, c.default_currency_code,
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c
                   join banks b on b.id = c.bank_id
@@ -81,9 +82,11 @@ public class CardService {
                 .param("cardId", cardId).param("userId", userId).query(UUID.class)
                 .optional().orElseThrow(() -> new IllegalArgumentException("La tarjeta no existe"));
         jdbc.sql("""
-                update cards set name=:name, color_dark=:colorDark, color_light=:colorLight, updated_at=now()
+                update cards set name=:name, name_normalized=:nameNormalized, alias=:alias,
+                       color_dark=:colorDark, color_light=:colorLight, updated_at=now()
                  where id=:cardId and user_id=:userId
-                """).param("name", request.name().trim()).param("colorDark", request.colorDark().toUpperCase())
+                """).param("name", request.name().trim()).param("nameNormalized", normalize(request.name()))
+                .param("alias", cleanAlias(request.alias())).param("colorDark", request.colorDark().toUpperCase())
                 .param("colorLight", request.colorLight().toUpperCase()).param("cardId", cardId)
                 .param("userId", userId).update();
         return findOne(userId, cardId, currentPeriod(userId));
@@ -92,7 +95,7 @@ public class CardService {
     private CardResponse findOne(UUID userId, UUID cardId, UUID periodId) {
         return jdbc.sql("""
                 select c.id, b.id as bank_id, b.name as bank_name, b.logo_url as bank_logo_url,
-                       c.card_type, c.credit_brand, c.name, c.last4, c.color_dark, c.color_light, c.default_currency_code,
+                       c.card_type, c.credit_brand, c.name, c.alias, c.last4, c.color_dark, c.color_light, c.default_currency_code,
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c join banks b on b.id = c.bank_id
                   left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD'
@@ -112,10 +115,22 @@ public class CardService {
 
     private CardResponse mapCard(ResultSet rs, int rowNum) throws SQLException {
         return new CardResponse(rs.getObject("id", UUID.class), rs.getObject("bank_id", UUID.class), rs.getString("bank_name"),
-                rs.getString("bank_logo_url"), rs.getString("card_type"), rs.getString("credit_brand"), rs.getString("name"), rs.getString("last4"),
+                rs.getString("bank_logo_url"), rs.getString("card_type"), rs.getString("credit_brand"), rs.getString("name"),
+                rs.getString("alias"), rs.getString("last4"),
                 rs.getString("color_dark"), rs.getString("color_light"),
                 rs.getString("default_currency_code"), rs.getString("status"),
                 rs.getObject("current_period_budget", BigDecimal.class), rs.getObject("created_at", OffsetDateTime.class));
+    }
+
+    private String cleanAlias(String alias) {
+        if (alias == null) return null;
+        String trimmed = alias.trim();
+        return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalize(String value) {
+        return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD).replaceAll("\\p{M}", "")
+                .replaceAll("[^A-Za-z0-9 ]", " ").replaceAll("\\s+", " ").trim().toUpperCase(java.util.Locale.ROOT);
     }
 
     private void validateOffering(CreateCardRequest request) {

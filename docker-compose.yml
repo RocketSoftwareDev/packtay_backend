@@ -38,6 +38,7 @@ services:
       - ./database/paktay_mvp_v0_11_bank_card_offerings.sql:/docker-entrypoint-initdb.d/011-bank-card-offerings.sql:ro
       - ./database/paktay_mvp_v0_12_system_category_hierarchy.sql:/docker-entrypoint-initdb.d/012-system-category-hierarchy.sql:ro
       - ./database/paktay_mvp_v0_13_explicit_user_categories.sql:/docker-entrypoint-initdb.d/013-explicit-user-categories.sql:ro
+      - ./database/paktay_mvp_v0_14_card_alias_optional_last4.sql:/docker-entrypoint-initdb.d/014-card-alias-optional-last4.sql:ro
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2

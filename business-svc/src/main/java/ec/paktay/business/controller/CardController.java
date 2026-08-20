@@ -35,7 +35,7 @@ public class CardController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. Valida el tipo contra la oferta del banco. CREDIT exige creditBrand permitido; DEBIT prohíbe marca. Conserva nombre, últimos cuatro y colores.")
+    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. Valida el tipo contra la oferta del banco. CREDIT exige creditBrand permitido; DEBIT prohíbe marca. name es el nombre real de la tarjeta tal como llega en las notificaciones (ej. TITANIUM Visa) y se usa para asociar consumos entrantes; alias es un apodo opcional para mostrar. last4 es opcional: si se envía debe tener exactamente cuatro dígitos y ser único por banco entre tarjetas activas.")
     @ApiResponse(responseCode = "201", description = "Tarjeta creada")
     @ApiResponse(responseCode = "400", description = "Banco, moneda o tarjeta inválidos")
     public CardResponse register(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateCardRequest request) {
@@ -44,16 +44,16 @@ public class CardController {
 
     @GetMapping
     @Operation(summary = "Listar mis tarjetas", description = "Devuelve únicamente las tarjetas del usuario autenticado y su presupuesto del mes actual.")
-    @ApiResponse(responseCode = "200", description = "Tarjetas con tipo, marca de crédito, últimos cuatro y colores persistidos")
+    @ApiResponse(responseCode = "200", description = "Tarjetas con tipo, marca de crédito, nombre real, alias, últimos cuatro (puede ser nulo) y colores persistidos")
     @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public List<CardResponse> list(@AuthenticationPrincipal Jwt jwt) {
         return cards.list(UUID.fromString(jwt.getSubject()));
     }
 
     @PutMapping("/{cardId}")
-    @Operation(summary = "Editar apodo y color de una tarjeta", description = "Ruta autenticada. Actualiza exclusivamente el apodo y los colores. Banco, tipo, franquicia y últimos cuatro permanecen inmutables.")
+    @Operation(summary = "Editar nombre, alias y colores de una tarjeta", description = "Ruta autenticada. Actualiza el nombre real (clave de asociación de consumos), el alias opcional y los colores. Enviar alias nulo o vacío lo elimina. Banco, tipo, franquicia y últimos cuatro permanecen inmutables.")
     @ApiResponse(responseCode = "200", description = "Tarjeta actualizada")
-    @ApiResponse(responseCode = "400", description = "Alias o colores inválidos")
+    @ApiResponse(responseCode = "400", description = "Nombre, alias o colores inválidos")
     public CardResponse update(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId,
                                @Valid @RequestBody UpdateCardRequest request) {
         return cards.update(UUID.fromString(jwt.getSubject()), cardId, request);
