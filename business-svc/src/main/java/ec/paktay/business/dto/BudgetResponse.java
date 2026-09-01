@@ -5,4 +5,4 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record BudgetResponse(LocalDate periodMonth, BigDecimal globalAmount, String currencyCode, String recurrence,
-                             List<CategoryBudgetResponse> categories) { }
+                             BigDecimal spentAmount, List<CategoryBudgetResponse> categories) { }

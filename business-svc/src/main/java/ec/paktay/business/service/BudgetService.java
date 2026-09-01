@@ -81,22 +81,32 @@ public class BudgetService {
     private BudgetResponse response(UUID userId, UUID periodId) {
         Settings settings = jdbc.sql("""
                 select fp.period_month, s.global_amount, coalesce(s.currency_code, 'USD') currency_code,
+                       coalesce((select sum(e.amount_usd) from expenses e
+                                  where e.user_id = :userId and e.occurred_at >= fp.period_month
+                                    and e.occurred_at < fp.period_month + interval '1 month'), 0) spent_amount,
                        coalesce(s.recurrence, 'THIS_MONTH') recurrence
                   from financial_periods fp left join user_budget_settings s on s.period_id = fp.id and s.user_id = fp.user_id
                  where fp.id = :periodId and fp.user_id = :userId
                 """).param("periodId", periodId).param("userId", userId).query((rs, rowNum) ->
                         new Settings(rs.getObject("period_month", LocalDate.class), rs.getBigDecimal("global_amount"),
-                                rs.getString("currency_code"), rs.getString("recurrence"))).single();
+                                rs.getString("currency_code"), rs.getString("recurrence"), rs.getBigDecimal("spent_amount"))).single();
         List<CategoryBudgetResponse> categories = jdbc.sql("""
-                select uc.id, uc.alias, uc.icon, uc.color_dark, uc.color_light, b.individual_amount, b.active
+                select uc.id, uc.alias, uc.icon, uc.color_dark, uc.color_light, b.individual_amount, b.active,
+                       coalesce((select sum(e.amount_usd) from expenses e
+                                  where e.user_id = :userId and e.category_id = uc.id
+                                    and e.occurred_at >= :periodMonth
+                                    and e.occurred_at < :periodMonth + interval '1 month'), 0) spent_amount
                   from user_category_budgets b join user_categories uc on uc.id = b.category_id
                  where b.user_id = :userId and b.period_id = :periodId and b.active
                  order by uc.sort_order, uc.alias
-                """).param("userId", userId).param("periodId", periodId).query((rs, rowNum) ->
+                """).param("userId", userId).param("periodId", periodId)
+                .param("periodMonth", settings.month()).query((rs, rowNum) ->
                         new CategoryBudgetResponse(rs.getObject("id", UUID.class), rs.getString("alias"),
                                 rs.getString("icon"), rs.getString("color_dark"), rs.getString("color_light"),
-                                rs.getBigDecimal("individual_amount"), rs.getBoolean("active"))).list();
-        return new BudgetResponse(settings.month(), settings.globalAmount(), settings.currency(), settings.recurrence(), categories);
+                                rs.getBigDecimal("individual_amount"), rs.getBoolean("active"),
+                                rs.getBigDecimal("spent_amount"))).list();
+        return new BudgetResponse(settings.month(), settings.globalAmount(), settings.currency(), settings.recurrence(),
+                settings.spentAmount(), categories);
     }
 
     private UUID currentPeriod(UUID userId) {
@@ -139,5 +149,6 @@ public class BudgetService {
         if (!exists) throw new IllegalArgumentException("La moneda no existe o está inactiva");
     }
 
-    private record Settings(LocalDate month, BigDecimal globalAmount, String currency, String recurrence) { }
+    private record Settings(LocalDate month, BigDecimal globalAmount, String currency, String recurrence,
+                             BigDecimal spentAmount) { }
 }
