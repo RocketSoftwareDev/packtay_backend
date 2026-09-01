@@ -16,7 +16,10 @@ public class OpenApiConfig {
                 .description("Lógica de negocio financiera. Las rutas autenticadas usan JWT de Keycloak; las rutas bajo /api/v1/public indican explícitamente que no requieren autenticación."))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
-                        .description("Token de acceso emitido por Keycloak. En Authorize pega únicamente el JWT, sin escribir el prefijo Bearer.")))
+                        .description("Token de acceso emitido por Keycloak. En Authorize pega únicamente el JWT, sin escribir el prefijo Bearer."))
+                        .addSecuritySchemes("shortcutBearer", new SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("PAKTAY Shortcut token")
+                                .description("Código personal generado por /api/v1/user/shortcut-credential. No es un JWT.")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
     }
 }

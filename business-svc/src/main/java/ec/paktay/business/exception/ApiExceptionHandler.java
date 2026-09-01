@@ -16,6 +16,11 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class ApiExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+    @ExceptionHandler(ShortcutAuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    Map<String, String> shortcutAuthentication(ShortcutAuthenticationException ex) {
+        return Map.of("message", ex.getMessage(), "requestId", String.valueOf(MDC.get("requestId")));
+    }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     Map<String, String> invalid(MethodArgumentNotValidException ex) {

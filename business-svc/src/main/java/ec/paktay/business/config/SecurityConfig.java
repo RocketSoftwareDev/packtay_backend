@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,18 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
     @Bean
+    @Order(1)
+    SecurityFilterChain shortcutSecurity(HttpSecurity http) throws Exception {
+        return http.securityMatcher("/api/v1/shortcut/**")
+                .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                .build();
+    }
+
+    @Bean
+    @Order(2)
     SecurityFilterChain security(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())

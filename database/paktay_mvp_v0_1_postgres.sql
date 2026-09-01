@@ -214,6 +214,24 @@ create table unregistered_payments (
 );
 create index unregistered_payments_created_idx on unregistered_payments (created_at desc);
 
+-- Credencial personal que usa el Shortcut cuando iOS ejecuta la automatización
+-- sin tener disponible el JWT efímero de la sesión móvil.
+create table shortcut_credentials (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null references app_users(id) on delete cascade,
+    token_hash char(64) not null unique,
+    token_hint varchar(12) not null,
+    active boolean not null default true,
+    created_at timestamptz not null default now(),
+    last_used_at timestamptz,
+    revoked_at timestamptz,
+    check ((active and revoked_at is null) or (not active and revoked_at is not null))
+);
+create unique index shortcut_credentials_active_user_uq
+    on shortcut_credentials (user_id) where active;
+create index shortcut_credentials_user_idx
+    on shortcut_credentials (user_id, created_at desc);
+
 create table financial_periods (
     id uuid primary key default gen_random_uuid(),
     user_id uuid not null references app_users(id),
