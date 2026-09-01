@@ -9,6 +9,26 @@ alter table cards drop constraint if exists cards_alias_check;
 alter table cards add constraint cards_alias_check check (alias is null or btrim(alias) <> '');
 
 drop index if exists cards_active_identity_uq;
+
+-- Los datos anteriores usaban name como alias y podían repetirlo. Conserva el
+-- primer nombre y distingue sólo los duplicados históricos antes de imponer la
+-- nueva identidad estable por nombre.
+with duplicated_names as (
+    select id,
+           row_number() over (
+               partition by user_id, lower(btrim(name))
+               order by created_at, id
+           ) as occurrence
+      from cards
+     where status = 'ACTIVE'
+)
+update cards c
+   set name = left(btrim(c.name), 69) || ' #' || left(c.id::text, 8),
+       updated_at = now()
+  from duplicated_names d
+ where c.id = d.id
+   and d.occurrence > 1;
+
 create unique index cards_active_identity_uq
     on cards (user_id, lower(btrim(name))) where status = 'ACTIVE';
 
