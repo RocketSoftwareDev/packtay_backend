@@ -13,7 +13,8 @@ import jakarta.validation.constraints.Size;
 public record ShortcutTransactionRequest(
         @NotNull UUID idempotencyKey,
         @NotNull UUID bankId,
-        @NotBlank @Pattern(regexp = "^[0-9]{4}$") String cardLast4,
+        @NotBlank @Size(max = 80) String cardName,
+        @Pattern(regexp = "^[0-9]{4}$") String cardLast4,
         @NotNull @Positive BigDecimal amount,
         @NotBlank @Pattern(regexp = "^[A-Z]{3}$") String currencyCode,
         @NotBlank @Size(max = 180) String merchantRaw,

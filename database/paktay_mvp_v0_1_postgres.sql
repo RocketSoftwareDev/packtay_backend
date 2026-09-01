@@ -131,7 +131,8 @@ create table cards (
     card_type varchar(20) not null default 'DEBIT' check (card_type in ('CREDIT', 'DEBIT')),
     credit_brand varchar(20),
     name varchar(80) not null,
-    last4 char(4) not null check (last4 ~ '^[0-9]{4}$'),
+    alias varchar(80),
+    last4 char(4) check (last4 is null or last4 ~ '^[0-9]{4}$'),
     color_dark char(7) not null check (color_dark ~ '^#[0-9A-Fa-f]{6}$'),
     color_light char(7) not null check (color_light ~ '^#[0-9A-Fa-f]{6}$'),
     default_currency_code char(3) not null default 'USD' references currencies(code),
@@ -143,13 +144,14 @@ create table cards (
         or (status = 'INACTIVE' and deactivated_at is not null)),
     check ((card_type = 'DEBIT' and credit_brand is null) or
         (card_type = 'CREDIT' and credit_brand in ('VISA','MASTERCARD','DINERS','DISCOVER','AMEX','OTHER'))),
-    check (btrim(name) <> '')
+    check (btrim(name) <> ''),
+    check (alias is null or btrim(alias) <> '')
 );
 
 -- Una tarjeta desactivada nunca se reactiva. El usuario puede registrar un plástico nuevo
 -- con la misma combinación banco/últimos cuatro; sólo la combinación ACTIVA es única.
 create unique index cards_active_identity_uq
-    on cards (user_id, bank_id, last4) where status = 'ACTIVE';
+    on cards (user_id, lower(btrim(name))) where status = 'ACTIVE';
 create index cards_user_status_idx on cards (user_id, status);
 
 -- Selección persistida del usuario: asocia un nombre de consumo llegado por Shortcut/Android
@@ -185,6 +187,7 @@ create table pending_movements (
     merchant_normalized varchar(180),
     normalization_version smallint,
     bank_id uuid references banks(id),
+    card_name varchar(80),
     last4 char(4) check (last4 is null or last4 ~ '^[0-9]{4}$'),
     occurred_at timestamptz,
     suggested_card_id uuid references cards(id),
@@ -198,6 +201,18 @@ create table pending_movements (
         or (status in ('CONFIRMED', 'DISCARDED') and resolved_at is not null))
 );
 create index pending_movements_queue_idx on pending_movements (user_id, status, created_at);
+
+-- Bandeja pública temporal. No se vincula con usuarios ni tarjetas registradas.
+create table unregistered_payments (
+    id bigserial primary key,
+    amount numeric(12,2) not null check (amount > 0),
+    merchant varchar(180) not null check (btrim(merchant) <> ''),
+    card_name varchar(120) not null check (btrim(card_name) <> ''),
+    device_id varchar(255),
+    created_at timestamptz not null default now(),
+    check (device_id is null or btrim(device_id) <> '')
+);
+create index unregistered_payments_created_idx on unregistered_payments (created_at desc);
 
 create table financial_periods (
     id uuid primary key default gen_random_uuid(),
@@ -861,7 +876,7 @@ comment on column user_categories.active is 'Indica si puede asignarse a nuevos 
 comment on column user_categories.created_at is 'Fecha y hora de creación de la categoría del usuario.';
 comment on column user_categories.updated_at is 'Fecha y hora de última modificación.';
 
-comment on table cards is 'Tarjetas registradas por el usuario; solo se conserva banco, alias y últimos cuatro dígitos.';
+comment on table cards is 'Tarjetas registradas por el usuario; conserva el nombre identificador, alias opcional y últimos cuatro dígitos opcionales.';
 comment on column cards.id is 'Identificador interno de la tarjeta.';
 comment on column cards.user_id is 'Usuario propietario de la tarjeta.';
 comment on column cards.bank_id is 'Banco emisor seleccionado del catálogo.';
@@ -869,7 +884,7 @@ comment on column cards.credit_brand is 'Franquicia seleccionada para crédito; 
 comment on column cards.name is 'Nombre libre de la tarjeta definido por el usuario.';
 comment on column cards.color_dark is 'Color hexadecimal de la tarjeta para tema oscuro.';
 comment on column cards.color_light is 'Color hexadecimal de la tarjeta para tema claro.';
-comment on column cards.last4 is 'Últimos cuatro dígitos; nunca se almacena el número completo.';
+comment on column cards.last4 is 'Últimos cuatro dígitos opcionales; nunca se almacena el número completo.';
 comment on column cards.default_currency_code is 'Moneda predeterminada propuesta al registrar gastos de la tarjeta.';
 comment on column cards.status is 'Estado ACTIVE o INACTIVE; una tarjeta inactiva no recibe gastos nuevos.';
 comment on column cards.deactivated_at is 'Fecha y hora de desactivación; no permite reactivación.';

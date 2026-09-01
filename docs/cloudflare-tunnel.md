@@ -10,7 +10,7 @@ Configura tres aplicaciones públicas en el túnel administrado de Cloudflare:
 
 | Hostname de ejemplo | Servicio interno |
 | --- | --- |
-| `paktaykeycloak.rocketsoftwarecore.com` | `http://keycloak:8080` |
+| `keycloak.rocketsoftwarecore.com` | Keycloak Services central (`host.docker.internal:8180`) |
 | `auth.example.com` | `http://auth-svc:8081` |
 | `api.example.com` | `http://business-svc:8082` |
 

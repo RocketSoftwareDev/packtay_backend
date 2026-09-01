@@ -41,8 +41,10 @@ public class ShortcutTransactionService {
         String normalized = normalize(request.merchantRaw());
         UUID suggestedCard = jdbc.sql("""
                 select id from cards
-                 where user_id = :userId and bank_id = :bankId and last4 = :last4 and status = 'ACTIVE'
-                """).param("userId", userId).param("bankId", request.bankId()).param("last4", request.cardLast4())
+                 where user_id = :userId and lower(btrim(name)) = lower(btrim(:cardName)) and status = 'ACTIVE'
+                   and (:last4 is null or last4 = :last4)
+                """).param("userId", userId).param("cardName", request.cardName())
+                .param("last4", request.cardLast4(), java.sql.Types.CHAR)
                 .query(UUID.class).optional().orElse(null);
         UUID suggestedCategory = jdbc.sql("""
                 select category_id from user_consumption_selections
@@ -52,15 +54,16 @@ public class ShortcutTransactionService {
         UUID pendingId = jdbc.sql("""
                 insert into pending_movements (
                     user_id, idempotency_key, source, raw_payload, raw_text, parsed_amount, parsed_currency_code,
-                    merchant_raw, merchant_normalized, normalization_version, bank_id, last4, occurred_at,
+                    merchant_raw, merchant_normalized, normalization_version, bank_id, card_name, last4, occurred_at,
                     suggested_card_id, suggested_category_id)
                 values (:userId, :key, 'IOS_SHORTCUT', cast(:rawPayload as jsonb), :rawText, :amount, :currency,
-                    :merchantRaw, :merchantNormalized, 1, :bankId, :last4, :occurredAt, :suggestedCard, :suggestedCategory)
+                    :merchantRaw, :merchantNormalized, 1, :bankId, :cardName, :last4, :occurredAt, :suggestedCard, :suggestedCategory)
                 returning id
                 """).param("userId", userId).param("key", request.idempotencyKey()).param("rawPayload", request.rawPayload())
                 .param("rawText", request.rawText()).param("amount", request.amount()).param("currency", request.currencyCode())
                 .param("merchantRaw", request.merchantRaw().trim()).param("merchantNormalized", normalized)
-                .param("bankId", request.bankId()).param("last4", request.cardLast4()).param("occurredAt", request.occurredAt())
+                .param("bankId", request.bankId()).param("cardName", request.cardName().trim())
+                .param("last4", request.cardLast4(), java.sql.Types.CHAR).param("occurredAt", request.occurredAt())
                 .param("suggestedCard", suggestedCard).param("suggestedCategory", suggestedCategory)
                 .query(UUID.class).single();
         return new ShortcutTransactionResponse(pendingId, suggestedCard, suggestedCategory, false);
@@ -71,7 +74,7 @@ public class ShortcutTransactionService {
         users.ensureActiveUser(userId);
         return jdbc.sql("""
                 select id, idempotency_key, source, parsed_amount, parsed_currency_code, merchant_raw,
-                       bank_id, last4, occurred_at, suggested_card_id, suggested_category_id,
+                       bank_id, card_name, last4, occurred_at, suggested_card_id, suggested_category_id,
                        status::text, created_at
                   from pending_movements
                  where user_id = :userId and status = 'PENDING'
@@ -79,7 +82,7 @@ public class ShortcutTransactionService {
                 """).param("userId", userId).query((rs, rowNum) -> new PendingMovementResponse(
                         rs.getObject("id", UUID.class), rs.getObject("idempotency_key", UUID.class),
                         rs.getString("source"), rs.getBigDecimal("parsed_amount"), rs.getString("parsed_currency_code"),
-                        rs.getString("merchant_raw"), rs.getObject("bank_id", UUID.class), rs.getString("last4"),
+                        rs.getString("merchant_raw"), rs.getObject("bank_id", UUID.class), rs.getString("card_name"), rs.getString("last4"),
                         rs.getObject("occurred_at", java.time.OffsetDateTime.class),
                         rs.getObject("suggested_card_id", UUID.class), rs.getObject("suggested_category_id", UUID.class),
                         rs.getString("status"), rs.getObject("created_at", java.time.OffsetDateTime.class))).list();

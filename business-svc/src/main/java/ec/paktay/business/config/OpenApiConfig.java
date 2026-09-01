@@ -13,7 +13,7 @@ public class OpenApiConfig {
     @Bean
     OpenAPI businessOpenApi() {
         return new OpenAPI().info(new Info().title("Paktay Business API").version("v1")
-                .description("Lógica de negocio financiera. Todas las operaciones de datos requieren un JWT de Keycloak."))
+                .description("Lógica de negocio financiera. Las rutas autenticadas usan JWT de Keycloak; las rutas bajo /api/v1/public indican explícitamente que no requieren autenticación."))
                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                         .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
                         .description("Token de acceso emitido por Keycloak. En Authorize pega únicamente el JWT, sin escribir el prefijo Bearer.")))

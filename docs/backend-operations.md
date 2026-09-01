@@ -9,7 +9,7 @@ PostgreSQL/DBeaver, disponibilidad de la Mac y diagnóstico básico.
 | --- | ---: | --- | --- |
 | `auth-svc` | `8081` | `https://paktayauth.rocketsoftwarecore.com` | Registro, login de pruebas, contraseña y administración de identidad |
 | `business-svc` | `8082` | `https://paktay.rocketsoftwarecore.com` | Perfil, avatar, bancos, tarjetas, categorías, gastos y dispositivos |
-| Keycloak | `8180` | `https://paktaykeycloak.rocketsoftwarecore.com` | OAuth/OIDC, usuarios, roles, access token y refresh token |
+| Keycloak central | `8180` | `https://keycloak.rocketsoftwarecore.com` | OAuth/OIDC compartido; Paktay se diferencia mediante el realm `paktay` |
 | PostgreSQL Business | `5433` | No se publica | Base de negocio `paktay` |
 | PostgreSQL Keycloak | Sin puerto host | No se publica | Persistencia interna de Keycloak |
 | `cloudflared` | Sin puerto host | Salida HTTPS hacia Cloudflare | Publica los tres servicios sin abrir puertos del router |
@@ -38,7 +38,7 @@ La app móvil solo necesita estas URLs públicas:
 ```dotenv
 PAKTAY_AUTH_BASE_URL=https://paktayauth.rocketsoftwarecore.com
 PAKTAY_BUSINESS_BASE_URL=https://paktay.rocketsoftwarecore.com
-PAKTAY_KEYCLOAK_BASE_URL=https://paktaykeycloak.rocketsoftwarecore.com
+PAKTAY_KEYCLOAK_BASE_URL=https://keycloak.rocketsoftwarecore.com
 ```
 
 ## Arranque
@@ -83,13 +83,13 @@ El túnel administrado tiene estas rutas:
 | --- | --- |
 | `paktayauth.rocketsoftwarecore.com` | `http://auth-svc:8081` |
 | `paktay.rocketsoftwarecore.com` | `http://business-svc:8082` |
-| `paktaykeycloak.rocketsoftwarecore.com` | `http://keycloak:8080` |
+| `keycloak.rocketsoftwarecore.com` | Keycloak Services central (`host.docker.internal:8180`) |
 | Regla final | `http_status:404` |
 
 La configuración pública de Keycloak debe coincidir exactamente con el emisor del JWT:
 
 ```text
-https://paktaykeycloak.rocketsoftwarecore.com/realms/paktay
+https://keycloak.rocketsoftwarecore.com/realms/paktay
 ```
 
 El token `CLOUDFLARE_TUNNEL_TOKEN` solo vive en `.env`. Si se comparte o aparece en un log,
@@ -100,7 +100,7 @@ Comprobaciones públicas:
 ```bash
 curl https://paktayauth.rocketsoftwarecore.com/actuator/health
 curl https://paktay.rocketsoftwarecore.com/actuator/health
-curl https://paktaykeycloak.rocketsoftwarecore.com/realms/paktay/.well-known/openid-configuration
+curl https://keycloak.rocketsoftwarecore.com/realms/paktay/.well-known/openid-configuration
 ```
 
 Swagger público:
