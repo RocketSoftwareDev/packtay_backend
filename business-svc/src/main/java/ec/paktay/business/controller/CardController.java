@@ -35,7 +35,7 @@ public class CardController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. Valida el tipo contra la oferta del banco. CREDIT exige creditBrand permitido; DEBIT prohíbe marca. Conserva nombre, últimos cuatro y colores.")
+    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. Conserva el nombre identificador, alias visual opcional, últimos cuatro opcionales y colores. CREDIT exige creditBrand permitido; DEBIT prohíbe marca.")
     @ApiResponse(responseCode = "201", description = "Tarjeta creada")
     @ApiResponse(responseCode = "400", description = "Banco, moneda o tarjeta inválidos")
     public CardResponse register(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateCardRequest request) {
@@ -51,7 +51,7 @@ public class CardController {
     }
 
     @PutMapping("/{cardId}")
-    @Operation(summary = "Editar apodo y color de una tarjeta", description = "Ruta autenticada. Actualiza exclusivamente el apodo y los colores. Banco, tipo, franquicia y últimos cuatro permanecen inmutables.")
+    @Operation(summary = "Editar alias y colores de una tarjeta", description = "Ruta autenticada. Actualiza el alias visual opcional y los colores. El nombre identificador, banco, tipo, franquicia y últimos cuatro permanecen inmutables.")
     @ApiResponse(responseCode = "200", description = "Tarjeta actualizada")
     @ApiResponse(responseCode = "400", description = "Alias o colores inválidos")
     public CardResponse update(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId,

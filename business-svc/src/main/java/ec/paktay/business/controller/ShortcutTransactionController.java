@@ -42,7 +42,7 @@ public class ShortcutTransactionController {
 
     @PostMapping("/shortcut")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Recibir un consumo de Apple Shortcut", description = "Guarda un movimiento pendiente e idempotente. Nunca crea un gasto ni tarjeta hasta que el usuario lo confirme.")
+    @Operation(summary = "Recibir un consumo de Apple Shortcut", description = "Ruta autenticada. Guarda un movimiento pendiente e idempotente e identifica la tarjeta por cardName; cardLast4 es opcional. Nunca crea un gasto ni tarjeta hasta que el usuario lo confirme.")
     @ApiResponse(responseCode = "201", description = "Movimiento pendiente creado")
     @ApiResponse(responseCode = "400", description = "Datos de consumo inválidos")
     public ShortcutTransactionResponse ingest(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody ShortcutTransactionRequest request) {
@@ -57,7 +57,7 @@ public class ShortcutTransactionController {
     }
 
     @PostMapping("/{movementId}/confirm")
-    @Operation(summary = "Confirmar un consumo como gasto", description = "Ruta autenticada. Crea el gasto y resuelve el movimiento en una única transacción. Repetir la confirmación devuelve el mismo gasto sin duplicarlo.")
+    @Operation(summary = "Confirmar un consumo como gasto", description = "Ruta autenticada. Requiere seleccionar una tarjeta activa existente del usuario, crea el gasto y resuelve el movimiento en una única transacción. Repetir la confirmación devuelve el mismo gasto sin duplicarlo.")
     @ApiResponse(responseCode = "200", description = "Gasto confirmado y persistido")
     @ApiResponse(responseCode = "400", description = "Movimiento, tarjeta, categoría o recurrencia inválidos")
     public ExpenseResponse confirm(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID movementId,

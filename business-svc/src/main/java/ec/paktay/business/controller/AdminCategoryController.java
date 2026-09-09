@@ -26,7 +26,7 @@ public class AdminCategoryController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Crear subcategoría predeterminada", description = "Asocia parentCode y parentName para búsqueda visual. Los usuarios guardan el UUID de la subcategoría, no el grupo principal.")
+    @Operation(summary = "Crear subcategoría predeterminada", description = "Asocia parentCode y parentName para filtrar el catálogo. La nueva opción queda disponible para todos, pero sólo se materializa en user_categories cuando cada usuario la agrega; el grupo principal nunca se guarda como categoría del usuario.")
     @ApiResponse(responseCode = "201", description = "Categoría predeterminada creada")
     @ApiResponse(responseCode = "403", description = "Se requiere el rol ADMIN")
     public SystemCategoryResponse create(@Valid @RequestBody CreateSystemCategoryRequest request) {

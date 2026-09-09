@@ -10,4 +10,5 @@ import jakarta.validation.constraints.Positive;
 public record SaveBudgetRequest(
         @Positive BigDecimal globalAmount,
         @NotBlank @Pattern(regexp = "^[A-Z]{3}$") String currencyCode,
+        @NotBlank @Pattern(regexp = "^(THIS_MONTH|MONTHLY)$") String recurrence,
         @Valid List<CategoryBudgetInput> categories) { }

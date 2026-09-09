@@ -1,15 +1,25 @@
 services:
-  keycloak:
+  business-db:
+    ports: !override []
+
+  keycloak-init:
     environment:
-      KC_HOSTNAME: https://paktaykeycloak.rocketsoftwarecore.com
-      KC_PROXY_HEADERS: xforwarded
-      KC_HTTP_ENABLED: "true"
+      KEYCLOAK_INTERNAL_URL: http://host.docker.internal:8180
 
   auth-svc:
     environment:
-      KEYCLOAK_PUBLIC_URL: https://paktaykeycloak.rocketsoftwarecore.com
-      KEYCLOAK_ISSUER_URI: https://paktaykeycloak.rocketsoftwarecore.com/realms/paktay
+      KEYCLOAK_INTERNAL_URL: http://host.docker.internal:8180
+      KEYCLOAK_JWK_SET_URI: http://host.docker.internal:8180/realms/paktay/protocol/openid-connect/certs
+      KEYCLOAK_PUBLIC_URL: https://keycloak.rocketsoftwarecore.com
+      KEYCLOAK_ISSUER_URI: https://keycloak.rocketsoftwarecore.com/realms/paktay
 
   business-svc:
     environment:
-      KEYCLOAK_ISSUER_URI: https://paktaykeycloak.rocketsoftwarecore.com/realms/paktay
+      KEYCLOAK_JWK_SET_URI: http://host.docker.internal:8180/realms/paktay/protocol/openid-connect/certs
+      KEYCLOAK_HEALTH_URL: http://host.docker.internal:8180/realms/paktay
+      KEYCLOAK_ISSUER_URI: https://keycloak.rocketsoftwarecore.com/realms/paktay
+
+volumes:
+  business-data:
+    external: true
+    name: packtay_backend_business-data

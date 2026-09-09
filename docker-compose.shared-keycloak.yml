@@ -1,0 +1,34 @@
+# Ejecuta únicamente los servicios de Paktay y consume Keycloak Services.
+services:
+  keycloak-init:
+    entrypoint:
+      - /bin/sh
+      - -c
+      - >-
+        until /opt/keycloak/bin/kcadm.sh config credentials --server "$$KEYCLOAK_INTERNAL_URL" --realm master --user "$$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$$KC_BOOTSTRAP_ADMIN_PASSWORD"; do sleep 3; done;
+        CLIENT_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-auth-service --fields id --format csv --noquotes);
+        test -n "$$CLIENT_UUID";
+        /opt/keycloak/bin/kcadm.sh update realms/paktay -s "accessTokenLifespan=$$KEYCLOAK_ACCESS_TOKEN_LIFESPAN" -s "ssoSessionIdleTimeout=$$KEYCLOAK_SSO_SESSION_IDLE_TIMEOUT" -s "ssoSessionMaxLifespan=$$KEYCLOAK_SSO_SESSION_MAX_LIFESPAN";
+        /opt/keycloak/bin/kcadm.sh update "clients/$$CLIENT_UUID" -r paktay -s "secret=$$KEYCLOAK_SERVICE_CLIENT_SECRET";
+        /opt/keycloak/bin/kcadm.sh set-password -r paktay --username "$$PAKTAY_ADMIN_EMAIL" --new-password "$$PAKTAY_ADMIN_PASSWORD";
+        /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm
+    environment:
+      KEYCLOAK_INTERNAL_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
+    depends_on: !override []
+
+  auth-svc:
+    environment:
+      KEYCLOAK_INTERNAL_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
+      KEYCLOAK_JWK_SET_URI: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay/protocol/openid-connect/certs
+
+  business-svc:
+    environment:
+      KEYCLOAK_JWK_SET_URI: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay/protocol/openid-connect/certs
+      KEYCLOAK_HEALTH_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay
+
+  cloudflared:
+    depends_on: !override
+      auth-svc:
+        condition: service_started
+      business-svc:
+        condition: service_started

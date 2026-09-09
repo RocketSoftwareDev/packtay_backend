@@ -83,8 +83,8 @@ public class UserCategoryController {
     @DeleteMapping("/{categoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Eliminar una categoría de mi catálogo",
-            description = "Realiza una eliminación lógica para conservar gastos históricos asociados.")
-    @ApiResponse(responseCode = "204", description = "Categoría desactivada")
+            description = "La elimina físicamente cuando no tiene gastos; si tiene historial, sólo la desactiva para conservar sus relaciones.")
+    @ApiResponse(responseCode = "204", description = "Categoría eliminada o desactivada según su historial")
     @ApiResponse(responseCode = "400", description = "Categoría inexistente, ajena o ya inactiva")
     public void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID categoryId) {
         categories.deactivateUserCategory(UUID.fromString(jwt.getSubject()), categoryId);
