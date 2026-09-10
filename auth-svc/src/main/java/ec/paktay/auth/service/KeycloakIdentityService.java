@@ -89,6 +89,25 @@ public class KeycloakIdentityService {
                 .retrieve().toBodilessEntity();
     }
 
+    public Map<?, ?> findByEmail(String email) {
+        List<?> users = client.get().uri(builder -> builder.path(adminPath("users"))
+                .queryParam("email", email).queryParam("exact", true).build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
+        if (users == null || users.size() != 1) return null;
+        Map<?, ?> user = (Map<?, ?>) users.get(0);
+        return email.equalsIgnoreCase(String.valueOf(user.get("email"))) ? user : null;
+    }
+
+    public Map<?, ?> findById(String userId) {
+        try {
+            return client.get().uri(adminPath("users/" + userId))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(Map.class);
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().value() == 404) return null;
+            throw ex;
+        }
+    }
+
     public void deleteUser(String userId) {
         client.delete().uri(adminPath("users/" + userId))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
