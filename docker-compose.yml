@@ -26,6 +26,8 @@ services:
       - ./database/paktay_mvp_v0_16_card_name_identity.sql:/docker-entrypoint-initdb.d/016-card-name-identity.sql:ro
       - ./database/paktay_mvp_v0_17_unregistered_payments.sql:/docker-entrypoint-initdb.d/017-unregistered-payments.sql:ro
       - ./database/paktay_mvp_v0_18_shortcut_credentials.sql:/docker-entrypoint-initdb.d/018-shortcut-credentials.sql:ro
+      - ./database/paktay_mvp_v0_19_card_lifecycle.sql:/docker-entrypoint-initdb.d/019-card-lifecycle.sql:ro
+      - ./database/paktay_mvp_v0_20_wallet_name_association.sql:/docker-entrypoint-initdb.d/020-wallet-name-association.sql:ro
 
   keycloak-init:
     image: quay.io/keycloak/keycloak:26.2
