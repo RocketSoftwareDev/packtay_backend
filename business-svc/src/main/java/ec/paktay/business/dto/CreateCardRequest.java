@@ -13,7 +13,13 @@ public record CreateCardRequest(
         @NotNull UUID bankId,
         @NotBlank @Pattern(regexp = "^(CREDIT|DEBIT)$") String cardType,
         @Pattern(regexp = "^(VISA|MASTERCARD|DINERS|DISCOVER|AMEX)$") String creditBrand,
-        @NotBlank @Size(max = 80) String name,
+        /**
+         * Nombre de Wallet. Opcional desde v0.20: el móvil ya no lo pide al dar
+         * de alta la tarjeta porque el usuario no sabe qué texto manda Wallet
+         * hasta que llega el primer consumo. Se asocia después con
+         * PATCH /api/v1/user/cards/{id}/wallet-name.
+         */
+        @Size(max = 80) String name,
         @Size(max = 80) String alias,
         @Pattern(regexp = "^[0-9]{4}$", message = "debe contener exactamente cuatro dígitos") String last4,
         @NotBlank @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "debe ser un color hexadecimal #RRGGBB") String colorDark,

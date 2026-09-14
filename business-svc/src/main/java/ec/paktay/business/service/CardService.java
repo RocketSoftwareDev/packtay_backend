@@ -17,6 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CardService {
+    /** Meses sin consumos que exige la desactivación de una tarjeta. */
+    public static final int QUIET_MONTHS_BEFORE_DEACTIVATION = 3;
+    static final String DUPLICATE_NAME_MESSAGE =
+            "Ese nombre de Wallet ya está asociado a otra de tus tarjetas activas";
+
     private final JdbcClient jdbc;
     private final UserAccountService users;
 
@@ -30,6 +35,10 @@ public class CardService {
         boolean currencyExists = jdbc.sql("select exists(select 1 from currencies where code = :code and active)")
                 .param("code", currency).query(Boolean.class).single();
         if (!currencyExists) throw new IllegalArgumentException("La moneda seleccionada no existe o está inactiva");
+        // El nombre es opcional desde v0.20. Cuando llega —Postman, o un alta que
+        // ya sabe qué manda Wallet— se valida igual que al asociarlo después.
+        String walletName = trimToNull(request.name());
+        if (walletName != null) ensureWalletNameFree(userId, walletName, null);
 
         UUID cardId;
         try {
@@ -38,13 +47,13 @@ public class CardService {
                     values (:userId, :bankId, :cardType, :brand, :name, :alias, :last4, :colorDark, :colorLight, :currency)
                     returning id
                     """).param("userId", userId).param("bankId", request.bankId())
-                    .param("cardType", request.cardType()).param("name", request.name().trim())
+                    .param("cardType", request.cardType()).param("name", walletName, java.sql.Types.VARCHAR)
                     .param("alias", trimToNull(request.alias()), java.sql.Types.VARCHAR)
                     .param("brand", "CREDIT".equals(request.cardType()) ? request.creditBrand() : null)
                     .param("colorDark", request.colorDark().toUpperCase()).param("colorLight", request.colorLight().toUpperCase())
                     .param("last4", request.last4()).param("currency", currency).query(UUID.class).single();
         } catch (DataIntegrityViolationException ex) {
-            throw new IllegalArgumentException("Ya existe una tarjeta activa con ese nombre");
+            throw new IllegalArgumentException(DUPLICATE_NAME_MESSAGE);
         }
 
         UUID periodId = currentPeriod(userId);
@@ -71,8 +80,158 @@ public class CardService {
                        and fp.period_month = date_trunc('month', current_date)::date
                   left join budget_allocations ba on ba.period_id = fp.id and ba.card_id = c.id and ba.scope = 'CARD'
                  where c.user_id = :userId
-                 order by c.created_at desc
+                 order by (c.status = 'ACTIVE') desc, c.created_at desc
                 """).param("userId", userId).query(this::mapCard).list();
+    }
+
+    /**
+     * Desactiva una tarjeta. Sólo se permite si no registró consumos en los últimos
+     * {@link #QUIET_MONTHS_BEFORE_DEACTIVATION} meses: una tarjeta que sigue en uso no
+     * debe desaparecer de los selectores. La tarjeta desactivada conserva su historial,
+     * deja de aceptar gastos (trigger validate_expense_ownership) y libera su nombre.
+     */
+    @Transactional
+    public CardResponse deactivate(UUID userId, UUID cardId) {
+        users.ensureActiveUser(userId);
+        String status = statusOf(userId, cardId);
+        if ("INACTIVE".equals(status)) throw new IllegalArgumentException("La tarjeta ya está desactivada");
+        int recent = jdbc.sql("""
+                select count(*) from expenses
+                 where user_id = :userId and card_id = :cardId
+                   and occurred_at >= now() - make_interval(months => :months)
+                """).param("userId", userId).param("cardId", cardId)
+                .param("months", QUIET_MONTHS_BEFORE_DEACTIVATION).query(Integer.class).single();
+        if (recent > 0) {
+            throw new IllegalArgumentException("La tarjeta tiene " + recent + (recent == 1 ? " consumo" : " consumos")
+                    + " en los últimos " + QUIET_MONTHS_BEFORE_DEACTIVATION + " meses y no se puede desactivar");
+        }
+        jdbc.sql("""
+                update cards set status = 'INACTIVE', deactivated_at = now(), updated_at = now()
+                 where id = :cardId and user_id = :userId
+                """).param("cardId", cardId).param("userId", userId).update();
+        return findOne(userId, cardId, currentPeriod(userId));
+    }
+
+    /**
+     * Reactiva una tarjeta desactivada. El índice cards_active_identity_uq vuelve a
+     * exigir que no exista otra tarjeta ACTIVA con el mismo nombre en el mismo banco.
+     */
+    @Transactional
+    public CardResponse activate(UUID userId, UUID cardId) {
+        users.ensureActiveUser(userId);
+        String status = statusOf(userId, cardId);
+        if ("ACTIVE".equals(status)) throw new IllegalArgumentException("La tarjeta ya está activa");
+        try {
+            jdbc.sql("""
+                    update cards set status = 'ACTIVE', deactivated_at = null, updated_at = now()
+                     where id = :cardId and user_id = :userId
+                    """).param("cardId", cardId).param("userId", userId).update();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException("Otra tarjeta activa tiene asociado el mismo nombre de Wallet. Quítaselo o desactívala antes de activar esta.");
+        }
+        return findOne(userId, cardId, currentPeriod(userId));
+    }
+
+    /**
+     * Asocia a una tarjeta el nombre con el que Wallet la identifica en el atajo.
+     *
+     * Es la única forma de escribir {@code cards.name}: el alta ya no lo pide y
+     * {@code PUT /cards/{id}} no lo toca. El usuario no escribe este texto, sólo
+     * dice a qué tarjeta suya pertenece el que acaba de llegar.
+     *
+     * Reasignar está permitido —el móvil enseña antes el aviso de riesgo— pero
+     * quitárselo a otra tarjeta no: si el nombre ya es de otra activa, contesta
+     * 400 y el usuario tiene que quitárselo a esa primero. Hacerlo en silencio
+     * dejaría dos tarjetas cambiadas de un solo toque.
+     */
+    @Transactional
+    public CardResponse associateWalletName(UUID userId, UUID cardId, String walletName) {
+        users.ensureActiveUser(userId);
+        String status = statusOf(userId, cardId);
+        if (!"ACTIVE".equals(status)) {
+            throw new IllegalArgumentException("Una tarjeta desactivada no puede recibir consumos, así que no se le asocia un nombre");
+        }
+        String name = trimToNull(walletName);
+        if (name == null) throw new IllegalArgumentException("El nombre de Wallet no puede estar vacío");
+        ensureWalletNameFree(userId, name, cardId);
+        try {
+            jdbc.sql("update cards set name = :name, updated_at = now() where id = :cardId and user_id = :userId")
+                    .param("name", name).param("cardId", cardId).param("userId", userId).update();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException(DUPLICATE_NAME_MESSAGE);
+        }
+        return findOne(userId, cardId, currentPeriod(userId));
+    }
+
+    /**
+     * Deja la tarjeta sin nombre de Wallet.
+     *
+     * Hace falta para reasignar: quien se equivocó de tarjeta se lo quita a esa y
+     * se lo pone a la correcta. A partir de aquí, los consumos que lleguen con ese
+     * nombre vuelven a la cola sin asignar, que es exactamente lo que el aviso de
+     * la app promete.
+     */
+    @Transactional
+    public CardResponse clearWalletName(UUID userId, UUID cardId) {
+        users.ensureActiveUser(userId);
+        statusOf(userId, cardId);
+        jdbc.sql("update cards set name = null, updated_at = now() where id = :cardId and user_id = :userId")
+                .param("cardId", cardId).param("userId", userId).update();
+        return findOne(userId, cardId, currentPeriod(userId));
+    }
+
+    /**
+     * Elimina una tarjeta de forma definitiva. Sólo si no tiene ningún consumo en todo
+     * el historial (expenses no admite borrado, así que una tarjeta con gastos sólo se
+     * desactiva). Los presupuestos e ingresos ligados a la tarjeta se borran con ella
+     * y los movimientos pendientes que la sugerían quedan sin sugerencia.
+     */
+    @Transactional
+    public void delete(UUID userId, UUID cardId) {
+        users.ensureActiveUser(userId);
+        statusOf(userId, cardId);
+        int total = jdbc.sql("select count(*) from expenses where user_id = :userId and card_id = :cardId")
+                .param("userId", userId).param("cardId", cardId).query(Integer.class).single();
+        if (total > 0) {
+            throw new IllegalArgumentException("La tarjeta tiene " + total + (total == 1 ? " consumo" : " consumos")
+                    + " registrados y no se puede eliminar. Desactívala en su lugar.");
+        }
+        jdbc.sql("delete from budget_allocations where user_id = :userId and card_id = :cardId")
+                .param("userId", userId).param("cardId", cardId).update();
+        jdbc.sql("delete from monthly_incomes where user_id = :userId and card_id = :cardId")
+                .param("userId", userId).param("cardId", cardId).update();
+        jdbc.sql("update pending_movements set suggested_card_id = null where user_id = :userId and suggested_card_id = :cardId")
+                .param("userId", userId).param("cardId", cardId).update();
+        try {
+            jdbc.sql("delete from cards where id = :cardId and user_id = :userId")
+                    .param("cardId", cardId).param("userId", userId).update();
+        } catch (DataIntegrityViolationException ex) {
+            throw new IllegalArgumentException("La tarjeta tiene información asociada y no se puede eliminar. Desactívala en su lugar.");
+        }
+    }
+
+    private String statusOf(UUID userId, UUID cardId) {
+        return jdbc.sql("select status::text from cards where id = :cardId and user_id = :userId")
+                .param("cardId", cardId).param("userId", userId).query(String.class)
+                .optional().orElseThrow(() -> new IllegalArgumentException("La tarjeta no existe"));
+    }
+
+    /**
+     * Misma regla que el índice cards_active_wallet_name_uq (v0.20), comprobada antes
+     * de escribir para devolver un mensaje claro en vez de depender del error de la
+     * base. Es **por usuario y no por banco**: el atajo busca por nombre sin saber de
+     * qué banco viene el consumo.
+     */
+    private void ensureWalletNameFree(UUID userId, String walletName, UUID exceptCardId) {
+        boolean taken = jdbc.sql("""
+                select exists(select 1 from cards
+                 where user_id = :userId and status = 'ACTIVE' and name is not null
+                   and lower(btrim(name)) = lower(btrim(:name))
+                   and (:exceptId::uuid is null or id <> :exceptId::uuid))
+                """).param("userId", userId).param("name", walletName)
+                .param("exceptId", exceptCardId, java.sql.Types.OTHER)
+                .query(Boolean.class).single();
+        if (taken) throw new IllegalArgumentException(DUPLICATE_NAME_MESSAGE);
     }
 
     @Transactional
