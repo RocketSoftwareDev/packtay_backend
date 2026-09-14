@@ -86,7 +86,10 @@
           },
           "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('cardId', pm.response.json().id);"] } }]
         },
-        { "name": "Listar mis tarjetas", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/cards" } }
+        { "name": "Listar mis tarjetas", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/cards" } },
+        { "name": "Desactivar tarjeta (sin consumos en 3 meses)", "request": { "method": "PATCH", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/deactivate" } },
+        { "name": "Reactivar tarjeta", "request": { "method": "PATCH", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/activate" } },
+        { "name": "Eliminar tarjeta (sin consumos)", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}" } }
       ]
     },
     {
