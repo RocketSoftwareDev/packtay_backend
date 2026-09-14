@@ -6,6 +6,7 @@ import java.util.UUID;
 import ec.paktay.business.dto.CardResponse;
 import ec.paktay.business.dto.CreateCardRequest;
 import ec.paktay.business.dto.UpdateCardRequest;
+import ec.paktay.business.dto.WalletNameRequest;
 import ec.paktay.business.service.CardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -37,9 +38,9 @@ public class CardController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. Conserva el nombre identificador, alias visual opcional, últimos cuatro opcionales y colores. CREDIT exige creditBrand permitido; DEBIT prohíbe marca. El nombre no puede repetirse entre las tarjetas ACTIVAS del mismo banco del usuario (sí puede repetirse en bancos distintos).")
+    @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. El alias es el apodo del usuario y puede repetirse. El nombre de Wallet es OPCIONAL desde v0.20: la app ya no lo pide porque el usuario no sabe qué texto manda Wallet hasta que llega el primer consumo; se asocia después con PATCH /{cardId}/wallet-name. Si se envía, no puede estar asociado a otra tarjeta activa del usuario. CREDIT exige creditBrand permitido; DEBIT prohíbe marca.")
     @ApiResponse(responseCode = "201", description = "Tarjeta creada")
-    @ApiResponse(responseCode = "400", description = "Banco, moneda o tarjeta inválidos, o nombre ya usado en ese banco")
+    @ApiResponse(responseCode = "400", description = "Banco, moneda o tarjeta inválidos, o nombre de Wallet ya asociado a otra tarjeta activa")
     public CardResponse register(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateCardRequest request) {
         return cards.register(UUID.fromString(jwt.getSubject()), request);
     }
@@ -75,6 +76,23 @@ public class CardController {
     @ApiResponse(responseCode = "400", description = "La tarjeta no existe, ya estaba activa o su nombre ya lo usa otra tarjeta activa del banco")
     public CardResponse activate(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId) {
         return cards.activate(UUID.fromString(jwt.getSubject()), cardId);
+    }
+
+    @PatchMapping("/{cardId}/wallet-name")
+    @Operation(summary = "Asociar el nombre con el que Wallet identifica la tarjeta", description = "Ruta autenticada. Es la única forma de escribir el nombre de Wallet: el alta ya no lo pide y PUT /{cardId} no lo toca. El usuario no escribe este texto, sólo confirma a qué tarjeta suya pertenece el que llegó por el atajo. El nombre es único por usuario entre tarjetas ACTIVAS, no por banco: el atajo busca por nombre y no sabe de qué banco viene el consumo. Reasignar está permitido; quitárselo a otra tarjeta no, hay que borrarlo de esa primero.")
+    @ApiResponse(responseCode = "200", description = "Nombre asociado")
+    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, está desactivada, el nombre viene vacío o ya lo tiene otra tarjeta activa")
+    public CardResponse associateWalletName(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId,
+                                            @Valid @RequestBody WalletNameRequest request) {
+        return cards.associateWalletName(UUID.fromString(jwt.getSubject()), cardId, request.walletName());
+    }
+
+    @DeleteMapping("/{cardId}/wallet-name")
+    @Operation(summary = "Quitar el nombre de Wallet de una tarjeta", description = "Ruta autenticada. Deja la tarjeta sin nombre asociado. A partir de ahí, los consumos que lleguen con ese nombre vuelven a la cola sin asignar. Hace falta para reasignar un nombre de una tarjeta a otra.")
+    @ApiResponse(responseCode = "200", description = "Nombre retirado")
+    @ApiResponse(responseCode = "400", description = "La tarjeta no existe")
+    public CardResponse clearWalletName(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId) {
+        return cards.clearWalletName(UUID.fromString(jwt.getSubject()), cardId);
     }
 
     @DeleteMapping("/{cardId}")

@@ -184,10 +184,10 @@ tenga datos y comprobar que:
 
 ---
 
-## 7. Pendiente y ya diseñado · el nombre de Wallet se asocia
+## 7. El nombre de Wallet se asocia · IMPLEMENTADO
 
-**Nada de esta sección está implementado.** Está diseñada en `pencil-new.pen`,
-fila 11, y documentada para que se decida antes de tocar el esquema.
+Migración `database/paktay_mvp_v0_20_wallet_name_association.sql` y dos rutas
+nuevas. Diseñado en `pencil-new.pen`, fila 11.
 
 ### 7.1 Por qué el modelo actual falla
 
@@ -206,31 +206,76 @@ El nombre deja de escribirse y pasa a **asociarse**. El usuario sólo pone su
 apodo, que es `alias` y ya existe. Cuando llega un consumo cuyo nombre no está
 asociado a ninguna tarjeta, la app pregunta a cuál pertenece y lo fija.
 
-### 7.3 Cambios que exige
+### 7.3 Lo que se cambió
 
 | # | Cambio | Dónde |
 |---|---|---|
-| 1 | `cards.name` pasa a `nullable`, se quita el `check (btrim(name) <> '')` o se permite nulo | migración nueva |
-| 2 | `cards_active_identity_uq` pasa a `(user_id, lower(btrim(name)))` con `where status = 'ACTIVE' and name is not null` | migración nueva |
-| 3 | `CreateCardRequest.name` deja de ser `@NotBlank` | DTO |
-| 4 | `PATCH /api/v1/user/cards/{cardId}/wallet-name` con `{walletName}`, valida que ninguna otra tarjeta **activa del usuario** lo tenga | controller y service |
-| 5 | `DELETE /api/v1/user/cards/{cardId}/wallet-name` para reasignar | controller y service |
+| 1 | `cards.name` pasa a `nullable`, con `check (name is null or btrim(name) <> '')` | v0.20 |
+| 2 | `cards_active_identity_uq` se sustituye por `cards_active_wallet_name_uq`, que es `(user_id, lower(btrim(name)))` con `where status = 'ACTIVE' and name is not null` | v0.20 |
+| 3 | `CreateCardRequest.name` deja de ser `@NotBlank` | `CreateCardRequest` |
+| 4 | `PATCH /{cardId}/wallet-name` con `{walletName}` | `CardController`, `CardService.associateWalletName` |
+| 5 | `DELETE /{cardId}/wallet-name` | `CardController`, `CardService.clearWalletName` |
 
-### 7.4 La decisión que hay que tomar antes
+Detalles que no se ven en la tabla:
+
+- El `check` original del nombre se creó **sin nombre**, así que el suyo lo
+  generó PostgreSQL y depende de la versión. La migración lo busca por su
+  definición con un bloque `do $$`, en vez de adivinarlo: una migración que
+  falla por el nombre de un constraint es una tarde perdida.
+- `associateWalletName` **exige que la tarjeta esté activa**. Una desactivada no
+  recibe consumos, así que asociarle un nombre no significa nada y además
+  ocuparía ese nombre para las que sí pueden usarlo.
+- **Reasignar no le quita el nombre a nadie automáticamente.** Si el nombre ya
+  es de otra tarjeta activa, la ruta contesta 400 y el móvil tiene que llamar
+  antes a `DELETE` sobre la que lo tenía. Es deliberado: cambiar dos tarjetas no
+  puede ser el efecto secundario de un solo toque.
+- `register` sigue aceptando `name` para quien ya lo sepa, como Postman. Si
+  llega, se valida igual que al asociarlo.
+
+### 7.4 La decisión que se tomó
 
 El nombre de Wallet tiene que ser **único por usuario**, no por banco. La
 consulta del atajo no filtra por banco, así que dos tarjetas de bancos distintos
 con el mismo nombre asociado devolverían dos filas.
 
-Esto **contradice el índice que esta misma rama acaba de crear**, que es
-`(user_id, bank_id, lower(name))` y que se hizo así porque el usuario pidió poder
-repetir el nombre entre bancos. La contradicción se resuelve en el modelo nuevo:
-lo que puede repetirse entre bancos es el **apodo**, que es lo que el usuario
-lee y escribe, y el nombre de Wallet deja de ser cosa suya. Pero es un cambio
-del índice recién desplegado y no se tocó sin confirmarlo.
+Esto **sustituye al índice que esta misma rama creó en v0.19**, que era
+`(user_id, bank_id, lower(name))`. Aquel se hizo porque el usuario pidió poder
+repetir el nombre entre bancos, y sigue cumpliéndose: lo que puede repetirse
+entre bancos es el **apodo**, que es lo que el usuario lee y escribe. El nombre
+de Wallet deja de ser cosa suya y pasa a ser único por usuario. El usuario
+confirmó el cambio antes de tocarlo.
 
 Esto también cierra el cabo suelto que quedó anotado en la sección 5.4 de este
-mismo documento: el desempate del atajo cuando dos tarjetas comparten nombre.
+mismo documento: el desempate del atajo cuando dos tarjetas comparten nombre. Ya
+no puede ocurrir.
+
+### 7.6 Qué hay que probar
+
+| Caso | Pasos | Resultado esperado |
+|---|---|---|
+| Alta sin nombre | `POST /cards` sin `name` | `201` con `name: null` |
+| Alta con nombre libre | `POST /cards` con `name` inédito | `201` |
+| Alta con nombre tomado | `POST /cards` con un `name` de otra activa | `400` |
+| Asociar | `PATCH /{id}/wallet-name` sobre una sin nombre | `200`, `name` fijado |
+| Asociar lo ya tomado | El mismo nombre sobre otra tarjeta | `400` |
+| Asociar en otro banco | El mismo nombre en una tarjeta de otro banco | `400`, porque es único por usuario |
+| Reasignar sin soltar | `PATCH` sobre la que ya tiene otro nombre, con uno tomado | `400` |
+| Reasignar bien | `DELETE` en la vieja y `PATCH` en la nueva | `200` las dos |
+| Asociar a una inactiva | Desactivar y `PATCH` | `400` |
+| Liberar y reusar | `DELETE /{id}/wallet-name` y asociarlo a otra | `200` |
+| El atajo asocia | `POST /shortcut/payments` con ese nombre | El consumo cae en la tarjeta correcta |
+| El atajo sin asociar | Mismo `POST` con un nombre inédito | El movimiento queda pendiente sin tarjeta |
+| Índice | `select indexdef from pg_indexes where indexname = 'cards_active_wallet_name_uq'` | Sin `bank_id` |
+| Migración con datos | Aplicar v0.20 sobre una base con dos tarjetas activas del mismo nombre en bancos distintos | Falla: hay que renombrar una antes |
+
+La última fila es la única que puede doler en una base ya poblada. Conviene
+mirarla antes de migrar:
+
+```sql
+select user_id, lower(btrim(name)), count(*)
+  from cards where status = 'ACTIVE' and name is not null
+ group by 1, 2 having count(*) > 1;
+```
 
 ### 7.5 Wallet no manda los cuatro dígitos
 

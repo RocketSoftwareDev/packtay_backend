@@ -89,7 +89,17 @@
         { "name": "Listar mis tarjetas", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/cards" } },
         { "name": "Desactivar tarjeta (sin consumos en 3 meses)", "request": { "method": "PATCH", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/deactivate" } },
         { "name": "Reactivar tarjeta", "request": { "method": "PATCH", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/activate" } },
-        { "name": "Eliminar tarjeta (sin consumos)", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}" } }
+        { "name": "Eliminar tarjeta (sin consumos)", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}" } },
+        {
+          "name": "Asociar nombre de Wallet",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"walletName\": \"VISA MASTERCARD PLATINUM\"\n}" },
+            "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/wallet-name"
+          }
+        },
+        { "name": "Quitar nombre de Wallet", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/wallet-name" } }
       ]
     },
     {
