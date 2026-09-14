@@ -181,3 +181,61 @@ tenga datos y comprobar que:
 - `auth-svc`, Keycloak y todo el flujo de contraseñas.
 - El contrato de `CardResponse`, `CreateCardRequest` y `UpdateCardRequest`.
 - Los gastos: ni se borran ni se reasignan nunca.
+
+---
+
+## 7. Pendiente y ya diseñado · el nombre de Wallet se asocia
+
+**Nada de esta sección está implementado.** Está diseñada en `pencil-new.pen`,
+fila 11, y documentada para que se decida antes de tocar el esquema.
+
+### 7.1 Por qué el modelo actual falla
+
+`cards.name` es hoy dos cosas a la vez: el nombre que el usuario escribe al dar
+de alta la tarjeta, y la clave con la que el atajo la busca
+(`AuthenticatedShortcutPaymentService` y `ShortcutTransactionService` hacen
+`lower(btrim(name)) = lower(btrim(:cardName))`).
+
+El usuario escribe «Visa», Wallet manda «VISA MASTERCARD PLATINUM», y ese
+consumo no se asocia nunca. No es un error del usuario: nadie sabe qué texto
+manda Wallet hasta que llega el primer consumo.
+
+### 7.2 El modelo propuesto
+
+El nombre deja de escribirse y pasa a **asociarse**. El usuario sólo pone su
+apodo, que es `alias` y ya existe. Cuando llega un consumo cuyo nombre no está
+asociado a ninguna tarjeta, la app pregunta a cuál pertenece y lo fija.
+
+### 7.3 Cambios que exige
+
+| # | Cambio | Dónde |
+|---|---|---|
+| 1 | `cards.name` pasa a `nullable`, se quita el `check (btrim(name) <> '')` o se permite nulo | migración nueva |
+| 2 | `cards_active_identity_uq` pasa a `(user_id, lower(btrim(name)))` con `where status = 'ACTIVE' and name is not null` | migración nueva |
+| 3 | `CreateCardRequest.name` deja de ser `@NotBlank` | DTO |
+| 4 | `PATCH /api/v1/user/cards/{cardId}/wallet-name` con `{walletName}`, valida que ninguna otra tarjeta **activa del usuario** lo tenga | controller y service |
+| 5 | `DELETE /api/v1/user/cards/{cardId}/wallet-name` para reasignar | controller y service |
+
+### 7.4 La decisión que hay que tomar antes
+
+El nombre de Wallet tiene que ser **único por usuario**, no por banco. La
+consulta del atajo no filtra por banco, así que dos tarjetas de bancos distintos
+con el mismo nombre asociado devolverían dos filas.
+
+Esto **contradice el índice que esta misma rama acaba de crear**, que es
+`(user_id, bank_id, lower(name))` y que se hizo así porque el usuario pidió poder
+repetir el nombre entre bancos. La contradicción se resuelve en el modelo nuevo:
+lo que puede repetirse entre bancos es el **apodo**, que es lo que el usuario
+lee y escribe, y el nombre de Wallet deja de ser cosa suya. Pero es un cambio
+del índice recién desplegado y no se tocó sin confirmarlo.
+
+Esto también cierra el cabo suelto que quedó anotado en la sección 5.4 de este
+mismo documento: el desempate del atajo cuando dos tarjetas comparten nombre.
+
+### 7.5 Wallet no manda los cuatro dígitos
+
+Confirmado con el usuario. El atajo sólo entrega el nombre de la tarjeta. Los
+cuatro dígitos siguen siendo un dato válido que el usuario escribe para
+reconocer su tarjeta, pero **ya no sirven para asociar** un consumo entrante.
+Cualquier lógica futura que los use como respaldo de asociación está muerta
+mientras el atajo sea la única automatización.
