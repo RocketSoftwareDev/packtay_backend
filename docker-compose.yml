@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: paktay
       POSTGRES_USER: paktay
-      POSTGRES_PASSWORD: ${BUSINESS_DB_PASSWORD:-ChangeThisBusinessDatabasePassword123!}
+      POSTGRES_PASSWORD: ${BUSINESS_DB_PASSWORD:?BUSINESS_DB_PASSWORD es obligatorio}
     ports:
       - "127.0.0.1:5433:5432"
     healthcheck:
@@ -47,7 +47,7 @@ services:
     environment:
       KEYCLOAK_INTERNAL_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
-      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-ChangeThisAdminPassword123!}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD es obligatorio}
       KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:?Define KEYCLOAK_SERVICE_CLIENT_SECRET in .env}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
       KEYCLOAK_ACCESS_TOKEN_LIFESPAN: ${KEYCLOAK_ACCESS_TOKEN_LIFESPAN:-28800}
@@ -72,7 +72,7 @@ services:
       SMTP_PASS: ${SMTP_PASS:?Define SMTP_PASS in .env}
       BUSINESS_DB_URL: jdbc:postgresql://business-db:5432/paktay
       BUSINESS_DB_USERNAME: paktay
-      BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:-ChangeThisBusinessDatabasePassword123!}
+      BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:?BUSINESS_DB_PASSWORD es obligatorio}
       KEYCLOAK_INTERNAL_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
       KEYCLOAK_PUBLIC_URL: ${KEYCLOAK_PUBLIC_URL:-http://localhost:8180}
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8180/realms/paktay}
@@ -99,7 +99,7 @@ services:
       KEYCLOAK_HEALTH_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay
       BUSINESS_DB_URL: jdbc:postgresql://business-db:5432/paktay
       BUSINESS_DB_USERNAME: paktay
-      BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:-ChangeThisBusinessDatabasePassword123!}
+      BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:?BUSINESS_DB_PASSWORD es obligatorio}
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}

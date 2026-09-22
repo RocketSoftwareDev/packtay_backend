@@ -166,13 +166,14 @@ tenga datos y comprobar que:
 
 ### 5.4 Lo que conviene mirar aunque no se pidió
 
-- El atajo autenticado (`AuthenticatedShortcutPaymentService`) y
-  `ShortcutTransactionService` buscan la tarjeta por
-  `lower(btrim(name)) = ... and status = 'ACTIVE'` **sin filtrar por banco**. Con
-  la regla nueva, dos tarjetas activas de bancos distintos pueden llamarse igual,
-  y esa consulta devolvería dos filas. Hay que decidir el desempate antes de que
-  ocurra en producción; no se cambió aquí porque el usuario no lo pidió y toca
-  el camino del atajo, que es el que más cuesta volver a probar.
+- Los servicios de ingesta del atajo que existían en esta fecha buscaban la
+  tarjeta por `lower(btrim(name)) = ... and status = 'ACTIVE'` **sin filtrar por
+  banco**. Con la regla nueva, dos tarjetas activas de bancos distintos pueden
+  llamarse igual, y esa consulta devolvería dos filas. Hay que decidir el
+  desempate antes de que ocurra en producción; no se cambió aquí porque el
+  usuario no lo pidió y toca el camino del atajo, que es el que más cuesta volver
+  a probar. *(Nota 2026-09-22: esos servicios se eliminaron del backend; la
+  asociación por nombre de Wallet la resuelve ahora la app en el teléfono.)*
 
 ---
 
@@ -192,9 +193,8 @@ nuevas. Diseñado en `pencil-new.pen`, fila 11.
 ### 7.1 Por qué el modelo actual falla
 
 `cards.name` es hoy dos cosas a la vez: el nombre que el usuario escribe al dar
-de alta la tarjeta, y la clave con la que el atajo la busca
-(`AuthenticatedShortcutPaymentService` y `ShortcutTransactionService` hacen
-`lower(btrim(name)) = lower(btrim(:cardName))`).
+de alta la tarjeta, y la clave con la que el atajo la busca (los servicios de
+ingesta de la época hacían `lower(btrim(name)) = lower(btrim(:cardName))`).
 
 El usuario escribe «Visa», Wallet manda «VISA MASTERCARD PLATINUM», y ese
 consumo no se asocia nunca. No es un error del usuario: nadie sabe qué texto
@@ -263,8 +263,8 @@ no puede ocurrir.
 | Reasignar bien | `DELETE` en la vieja y `PATCH` en la nueva | `200` las dos |
 | Asociar a una inactiva | Desactivar y `PATCH` | `400` |
 | Liberar y reusar | `DELETE /{id}/wallet-name` y asociarlo a otra | `200` |
-| El atajo asocia | `POST /shortcut/payments` con ese nombre | El consumo cae en la tarjeta correcta |
-| El atajo sin asociar | Mismo `POST` con un nombre inédito | El movimiento queda pendiente sin tarjeta |
+| El atajo asocia | La app envía a `POST /user/expenses` un consumo con ese nombre de Wallet | El consumo cae en la tarjeta correcta |
+| El atajo sin asociar | Mismo consumo con un nombre inédito | La app pide al usuario asociar la tarjeta antes de enviarlo |
 | Índice | `select indexdef from pg_indexes where indexname = 'cards_active_wallet_name_uq'` | Sin `bank_id` |
 | Migración con datos | Aplicar v0.20 sobre una base con dos tarjetas activas del mismo nombre en bancos distintos | Falla: hay que renombrar una antes |
 

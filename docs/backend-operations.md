@@ -271,12 +271,13 @@ Las tarjetas ya no dependen de un producto ni de una marca global. El móvil reg
 
 El historial de gastos vive en PostgreSQL, no en el almacenamiento local del teléfono:
 
-- `POST /api/v1/user/expenses`: crea un gasto manual; `idempotencyKey` evita duplicados.
+- `POST /api/v1/user/expenses`: crea un gasto; `idempotencyKey` evita duplicados.
 - `GET /api/v1/user/expenses`: consulta el historial persistido.
-- `POST /api/v1/user/movements/shortcut`: guarda un consumo entrante en la cola.
-- `GET /api/v1/user/movements/pending`: consulta la cola pendiente.
-- `POST /api/v1/user/movements/{movementId}/confirm`: crea el gasto y confirma la cola atómicamente.
-- `DELETE /api/v1/user/movements/{movementId}`: descarta el evento sin borrar su auditoría.
+
+Los consumos que llegan desde Apple Wallet los captura el Atajo de iOS, quedan en la
+bandeja local del teléfono y la app los envía con el JWT del usuario por la misma ruta
+`POST /api/v1/user/expenses`. El backend no tiene cola de pendientes ni credencial
+propia para el Atajo.
 
 Para una instalación existente se aplica una sola vez:
 

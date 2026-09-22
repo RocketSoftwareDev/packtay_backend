@@ -5,7 +5,6 @@ import java.text.Normalizer;
 import java.util.Locale;
 import java.util.UUID;
 
-import ec.paktay.business.dto.ConfirmPendingMovementRequest;
 import ec.paktay.business.dto.CreateExpenseRequest;
 import ec.paktay.business.dto.ExpenseResponse;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -47,56 +46,6 @@ public class ExpenseService {
                 .param("recurrenceDay", request.recurrenceDay()).query(UUID.class).single();
         remember(userId, request.merchant().trim(), normalize(request.merchant()), request.categoryId());
         return findOne(userId, expenseId);
-    }
-
-    @Transactional
-    public ExpenseResponse confirm(UUID userId, UUID movementId, ConfirmPendingMovementRequest request) {
-        users.ensureActiveUser(userId);
-        validateRecurrence(request.recurring(), request.recurrenceDay());
-        ExpenseResponse existing = jdbc.sql("select id from expenses where user_id = :userId and pending_movement_id = :movementId")
-                .param("userId", userId).param("movementId", movementId).query(UUID.class).optional()
-                .map(id -> findOne(userId, id)).orElse(null);
-        if (existing != null) return existing;
-
-        Incoming movement = jdbc.sql("""
-                select idempotency_key, parsed_amount, parsed_currency_code, merchant_raw,
-                       merchant_normalized, occurred_at, status::text
-                  from pending_movements where id = :id and user_id = :userId for update
-                """).param("id", movementId).param("userId", userId).query((rs, rowNum) -> new Incoming(
-                        rs.getObject("idempotency_key", UUID.class), rs.getBigDecimal("parsed_amount"),
-                        rs.getString("parsed_currency_code"), rs.getString("merchant_raw"),
-                        rs.getString("merchant_normalized"), rs.getObject("occurred_at", java.time.OffsetDateTime.class),
-                        rs.getString("status"))).optional()
-                .orElseThrow(() -> new IllegalArgumentException("El movimiento pendiente no existe"));
-        if (!"PENDING".equals(movement.status())) throw new IllegalArgumentException("El movimiento ya fue resuelto");
-        if (movement.amount() == null || movement.merchant() == null || movement.occurredAt() == null) {
-            throw new IllegalArgumentException("El movimiento no contiene todos los datos necesarios para crear el gasto");
-        }
-        ensureCard(userId, request.cardId());
-        ensureCategory(userId, request.categoryId());
-        BigDecimal rate = request.exchangeRateToUsd() == null ? BigDecimal.ONE : request.exchangeRateToUsd();
-        UUID expenseId = jdbc.sql("""
-                insert into expenses (user_id, idempotency_key, card_id, category_id, pending_movement_id,
-                    origin, amount, currency_code, exchange_rate_to_usd, merchant_raw, merchant_normalized,
-                    normalization_version, occurred_at, is_recurring, recurrence_day)
-                values (:userId, :key, :cardId, :categoryId, :movementId, 'AUTOMATIC', :amount, :currency,
-                    :rate, :merchant, :normalized, 1, :occurredAt, :recurring, :recurrenceDay)
-                returning id
-                """).param("userId", userId).param("key", movement.idempotencyKey())
-                .param("cardId", request.cardId()).param("categoryId", request.categoryId()).param("movementId", movementId)
-                .param("amount", movement.amount()).param("currency", movement.currency()).param("rate", rate)
-                .param("merchant", movement.merchant()).param("normalized", movement.normalized())
-                .param("occurredAt", movement.occurredAt()).param("recurring", request.recurring())
-                .param("recurrenceDay", request.recurrenceDay()).query(UUID.class).single();
-
-        jdbc.sql("update pending_movements set status = 'CONFIRMED', resolved_at = now() where id = :id")
-                .param("id", movementId).update();
-        if (request.rememberCategory()) remember(userId, movement, request.categoryId());
-        return findOne(userId, expenseId);
-    }
-
-    private void remember(UUID userId, Incoming movement, UUID categoryId) {
-        remember(userId, movement.merchant(), movement.normalized(), categoryId);
     }
 
     private void remember(UUID userId, String merchant, String normalized, UUID categoryId) {
@@ -163,7 +112,4 @@ public class ExpenseService {
         return Normalizer.normalize(value, Normalizer.Form.NFD).replaceAll("\\p{M}", "")
                 .replaceAll("[^A-Za-z0-9 ]", " ").replaceAll("\\s+", " ").trim().toUpperCase(Locale.ROOT);
     }
-
-    private record Incoming(UUID idempotencyKey, BigDecimal amount, String currency, String merchant,
-                            String normalized, java.time.OffsetDateTime occurredAt, String status) { }
 }

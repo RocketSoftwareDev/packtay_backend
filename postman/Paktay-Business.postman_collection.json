@@ -103,7 +103,7 @@
       ]
     },
     {
-      "name": "Gastos y movimientos",
+      "name": "Gastos",
       "item": [
         {
           "name": "Registrar gasto manual",
@@ -121,33 +121,6 @@
             "method": "GET",
             "url": { "raw": "{{businessUrl}}/api/v1/user/expenses?from={{expenseFrom}}&to={{expenseTo}}", "host": ["{{businessUrl}}"], "path": ["api", "v1", "user", "expenses"], "query": [{ "key": "from", "value": "{{expenseFrom}}", "disabled": true }, { "key": "to", "value": "{{expenseTo}}", "disabled": true }, { "key": "cardId", "value": "{{cardId}}", "disabled": true }, { "key": "categoryId", "value": "{{categoryId}}", "disabled": true }] }
           }
-        },
-        {
-          "name": "Ingresar consumo desde Shortcut",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"bankId\": \"{{bankId}}\",\n  \"cardLast4\": \"{{cardLast4}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"merchantRaw\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"rawPayload\": \"Payload de prueba desde Postman\",\n  \"rawText\": \"Consumo USD 12.50\"\n}" },
-            "url": "{{businessUrl}}/api/v1/user/movements/shortcut"
-          },
-          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('pendingMovementId', pm.response.json().pendingMovementId);"] } }]
-        },
-        {
-          "name": "Listar consumos pendientes",
-          "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/movements/pending" }
-        },
-        {
-          "name": "Confirmar consumo pendiente",
-          "request": {
-            "method": "POST",
-            "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"cardId\": \"{{cardId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"exchangeRateToUsd\": 1,\n  \"rememberCategory\": true,\n  \"recurring\": false\n}" },
-            "url": "{{businessUrl}}/api/v1/user/movements/{{pendingMovementId}}/confirm"
-          }
-        },
-        {
-          "name": "Descartar consumo pendiente",
-          "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/movements/{{pendingMovementId}}" }
         }
       ]
     },
