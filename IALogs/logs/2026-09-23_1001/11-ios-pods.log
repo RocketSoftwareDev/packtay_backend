@@ -1,0 +1,251 @@
+$ bundle install
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:272:in 'Bundler::SharedHelpers#search_up': undefined method 'untaint' for an instance of String (NoMethodError)
+
+      current  = File.expand_path(SharedHelpers.pwd).untaint
+                                                    ^^^^^^^^
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:259:in 'Bundler::SharedHelpers#find_file'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:251:in 'Bundler::SharedHelpers#find_gemfile'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:27:in 'Bundler::SharedHelpers#root'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:234:in 'Bundler.root'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:246:in 'Bundler.app_config_path'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:273:in 'Bundler.settings'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/feature_flag.rb:21:in 'block in Bundler::FeatureFlag#settings_method'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:97:in '<class:CLI>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:7:in '<module:Bundler>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:6:in '<top (required)>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:23:in 'Kernel#require'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:23:in 'block in <top (required)>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/friendly_errors.rb:124:in 'Bundler.with_friendly_errors'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:22:in '<top (required)>'
+	from /opt/homebrew/Cellar/ruby/4.0.6_1/lib/ruby/4.0.0/rubygems.rb:305:in 'Kernel#load'
+	from /opt/homebrew/Cellar/ruby/4.0.6_1/lib/ruby/4.0.0/rubygems.rb:305:in 'Gem.activate_and_load_bin_path'
+	from /opt/homebrew/bin/bundle:25:in '<main>'
+
+exit=1
+--- bundler falló, se usa pod directo
+$ pod install
+Found 7 modules for target `FinanceApp`
+link_native_modules! {ios_packages: [{configurations: [], name: "@react-native-async-storage/async-storage", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-async-storage/async-storage", path: "../node_modules/@react-native-async-storage/async-storage", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-async-storage/async-storage/AsyncStorage.podspec", script_phases: []}, {configurations: [], name: "@react-native-clipboard/clipboard", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-clipboard/clipboard", path: "../node_modules/@react-native-clipboard/clipboard", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-clipboard/clipboard/RNCClipboard.podspec", script_phases: []}, {configurations: [], name: "react-native-bootsplash", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-bootsplash", path: "../node_modules/react-native-bootsplash", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-bootsplash/RNBootSplash.podspec", script_phases: []}, {configurations: [], name: "react-native-keychain", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-keychain", path: "../node_modules/react-native-keychain", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-keychain/RNKeychain.podspec", script_phases: []}, {configurations: [], name: "react-native-permissions", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-permissions", path: "../node_modules/react-native-permissions", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-permissions/RNPermissions.podspec", script_phases: []}, {configurations: [], name: "react-native-safe-area-context", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-safe-area-context", path: "../node_modules/react-native-safe-area-context", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-safe-area-context/react-native-safe-area-context.podspec", script_phases: []}, {configurations: [], name: "react-native-svg", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-svg", path: "../node_modules/react-native-svg", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-svg/RNSVG.podspec", script_phases: []}], ios_project_root_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios", react_native_path: "../node_modules/react-native"}
+Auto-linking React Native modules for target `FinanceApp`: AsyncStorage, RNBootSplash, RNCClipboard, RNKeychain, RNPermissions, RNSVG, and react-native-safe-area-context
+Framework build type is static library
+[ReactNativeDependencies] Setting up ReactNativeDependencies...
+[ReactNativeDependencies] Building from source: false
+[ReactNativeDependencies] Using tarball from URL: https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/0.86.2/react-native-artifacts-0.86.2-reactnative-dependencies-debug.tar.gz
+[ReactNativeDependencies] Verifying checksum for cached reactnative-dependencies-0.86.2-debug.tar.gz...
+[Cache] SHA1 verified for reactnative-dependencies-0.86.2-debug.tar.gz
+[ReactNativeDependencies] Cache hit: copying reactnative-dependencies-0.86.2-debug.tar.gz from shared cache (/Users/macmalona/Library/Caches/ReactNative)
+[ReactNativeDependencies] Verifying checksum for cached reactnative-dependencies-0.86.2-release.tar.gz...
+[Cache] SHA1 verified for reactnative-dependencies-0.86.2-release.tar.gz
+[ReactNativeDependencies] Cache hit: copying reactnative-dependencies-0.86.2-release.tar.gz from shared cache (/Users/macmalona/Library/Caches/ReactNative)
+[ReactNativeDependencies] Source: {http: "https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/0.86.2/react-native-artifacts-0.86.2-reactnative-dependencies-debug.tar.gz"}
+[ReactNativeCore] Setting up ReactNativeCore...
+[ReactNativeCore] Building from source: false
+Configuring the target with the New Architecture
+[ReactNativeCore] Using React Native Core and React Native Dependencies prebuilt versions.
+[36m[1m[Codegen][0m Analyzing /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/package.json[0m
+[36m[1m[Codegen][0m [33mSearching for codegen-enabled libraries in the app.[0m
+[36m[1m[Codegen][0m [33mThe "codegenConfig" field is not defined in package.json. Assuming there is nothing to generate at the app level.[0m
+[36m[1m[Codegen][0m [33mSearching for codegen-enabled libraries in react-native.config.js[0m
+[36m[1m[Codegen][0m Found @react-native-async-storage/async-storage[0m
+[36m[1m[Codegen][0m Found @react-native-clipboard/clipboard[0m
+[36m[1m[Codegen][0m Found react-native-bootsplash[0m
+[36m[1m[Codegen][0m Found react-native-keychain[0m
+[36m[1m[Codegen][0m Found react-native-permissions[0m
+[36m[1m[Codegen][0m Found react-native-safe-area-context[0m
+[36m[1m[Codegen][0m Found react-native-svg[0m
+[36m[1m[Codegen][0m Processing AsyncStorageSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, visionos for AsyncStorageSpec[0m
+[36m[1m[Codegen][0m Processing rnclipboard[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for rnclipboard[0m
+[36m[1m[Codegen][0m Processing RNBootSplashSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, tvos for RNBootSplashSpec[0m
+[36m[1m[Codegen][0m Processing RNKeychainSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for RNKeychainSpec[0m
+[36m[1m[Codegen][0m Processing RNPermissionsSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, tvos for RNPermissionsSpec[0m
+[36m[1m[Codegen][0m Processing safeareacontext[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for safeareacontext[0m
+[36m[1m[Codegen][0m Processing rnsvg[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for rnsvg[0m
+[36m[1m[Codegen][0m Generating Native Code for AsyncStorageSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for rnclipboard - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for RNBootSplashSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for RNKeychainSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for RNPermissionsSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for safeareacontext - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for rnsvg - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating RCTThirdPartyComponentsProvider.h[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTThirdPartyComponentsProvider.h[0m
+[36m[1m[Codegen][0m Generating RCTThirdPartyComponentsProvider.mm[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTThirdPartyComponentsProvider.mm[0m
+[36m[1m[Codegen][0m Generating RCTModulesProvider.h[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTModuleProviders.h[0m
+[36m[1m[Codegen][0m Generating RCTModuleProviders.mm[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTModuleProviders.mm[0m
+[36m[1m[Codegen][0m Generating RCTAppDependencyProvider[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactAppDependencyProvider/RCTAppDependencyProvider.h[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactAppDependencyProvider/RCTAppDependencyProvider.mm[0m
+[36m[1m[Codegen][0m Generated podspec: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactAppDependencyProvider/ReactAppDependencyProvider.podspec[0m
+[36m[1m[Codegen][0m Generated podspec: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/ReactCodegen.podspec[0m
+[36m[1m[Codegen][0m Generating Package.swift[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/Package.swift[0m
+[36m[1m[Codegen][0m [33mDone.[0m
+No modules to process in combine-js-to-schema-cli. If this is unexpected, please check if you set up your NativeComponent correctly. See combine-js-to-schema.js for how codegen finds modules.
+Analyzing dependencies
+Fetching podspec for `React-Core-prebuilt` from `../node_modules/react-native/React-Core-prebuilt.podspec`
+[ReactNativeCore] Verifying checksum for cached reactnative-core-0.86.2-debug.tar.gz...
+[Cache] SHA1 verified for reactnative-core-0.86.2-debug.tar.gz
+[ReactNativeCore] Cache hit: copying reactnative-core-0.86.2-debug.tar.gz from shared cache (/Users/macmalona/Library/Caches/ReactNative)
+[ReactNativeCore] Verifying checksum for cached reactnative-core-0.86.2-release.tar.gz...
+[Cache] SHA1 verified for reactnative-core-0.86.2-release.tar.gz
+[ReactNativeCore] Cache hit: copying reactnative-core-0.86.2-release.tar.gz from shared cache (/Users/macmalona/Library/Caches/ReactNative)
+[ReactNativeCore] Resolved stable ReactNativeCore-prebuilt version:
+[ReactNativeCore]   ../../ios/Pods/ReactNativeCore-artifacts/reactnative-core-0.86.2-debug.tar.gz
+[ReactNativeCore]   ../../ios/Pods/ReactNativeCore-artifacts/reactnative-core-0.86.2-release.tar.gz
+Fetching podspec for `ReactNativeDependencies` from `../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`
+[ReactNativeDependencies] Using tarball from URL: https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/0.86.2/react-native-artifacts-0.86.2-reactnative-dependencies-debug.tar.gz
+[ReactNativeDependencies] Tarball reactnative-dependencies-0.86.2-debug.tar.gz already exists in Pods. Skipping download.
+[ReactNativeDependencies] Tarball reactnative-dependencies-0.86.2-release.tar.gz already exists in Pods. Skipping download.
+Fetching podspec for `hermes-engine` from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`
+[Hermes] Using release tarball from URL: https://repo1.maven.org/maven2/com/facebook/hermes/hermes-ios/250829098.0.16/hermes-ios-250829098.0.16-hermes-ios-debug.tar.gz
+[Hermes] Verifying checksum for cached hermes-ios-250829098.0.16-debug.tar.gz...
+[Hermes] SHA1 verified for hermes-ios-250829098.0.16-debug.tar.gz
+[Hermes] Cache hit: copying hermes-ios-250829098.0.16-debug.tar.gz from shared cache (/Users/macmalona/Library/Caches/ReactNative)
+[Hermes] Verifying checksum for cached hermes-ios-250829098.0.16-release.tar.gz...
+[Hermes] SHA1 verified for hermes-ios-250829098.0.16-release.tar.gz
+[Hermes] Cache hit: copying hermes-ios-250829098.0.16-release.tar.gz from shared cache (/Users/macmalona/Library/Caches/ReactNative)
+Downloading dependencies
+Installing AsyncStorage (3.1.1)
+Installing FBLazyVector (0.86.2)
+Installing RCTDeprecation (0.86.2)
+Installing RCTRequired (0.86.2)
+Installing RCTSwiftUI (0.86.2)
+Installing RCTSwiftUIWrapper (0.86.2)
+Installing RCTTypeSafety (0.86.2)
+Installing RNBootSplash (7.3.2)
+Installing RNCClipboard (1.16.3)
+Installing RNKeychain (10.0.0)
+Installing RNPermissions (5.6.1)
+Installing RNSVG (15.15.5)
+Installing React (0.86.2)
+Installing React-Core (0.86.2)
+Installing React-Core-prebuilt (0.86.2)
+Installing React-CoreModules (0.86.2)
+Installing React-Fabric (0.86.2)
+Installing React-FabricComponents (0.86.2)
+Installing React-FabricImage (0.86.2)
+Installing React-ImageManager (0.86.2)
+Installing React-Mapbuffer (0.86.2)
+Installing React-NativeModulesApple (0.86.2)
+Installing React-RCTActionSheet (0.86.2)
+Installing React-RCTAnimation (0.86.2)
+Installing React-RCTAppDelegate (0.86.2)
+Installing React-RCTBlob (0.86.2)
+Installing React-RCTFBReactNativeSpec (0.86.2)
+Installing React-RCTFabric (0.86.2)
+Installing React-RCTImage (0.86.2)
+Installing React-RCTLinking (0.86.2)
+Installing React-RCTNetwork (0.86.2)
+Installing React-RCTRuntime (0.86.2)
+Installing React-RCTSettings (0.86.2)
+Installing React-RCTText (0.86.2)
+Installing React-RCTVibration (0.86.2)
+Installing React-RuntimeApple (0.86.2)
+Installing React-RuntimeCore (0.86.2)
+Installing React-RuntimeHermes (0.86.2)
+Installing React-callinvoker (0.86.2)
+Installing React-cxxreact (0.86.2)
+Installing React-debug (0.86.2)
+Installing React-defaultsnativemodule (0.86.2)
+Installing React-domnativemodule (0.86.2)
+Installing React-featureflags (0.86.2)
+Installing React-featureflagsnativemodule (0.86.2)
+Installing React-graphics (0.86.2)
+Installing React-hermes (0.86.2)
+Installing React-idlecallbacksnativemodule (0.86.2)
+Installing React-intersectionobservernativemodule (0.86.2)
+Installing React-jserrorhandler (0.86.2)
+Installing React-jsi (0.86.2)
+Installing React-jsiexecutor (0.86.2)
+Installing React-jsinspector (0.86.2)
+Installing React-jsinspectorcdp (0.86.2)
+Installing React-jsinspectornetwork (0.86.2)
+Installing React-jsinspectortracing (0.86.2)
+Installing React-jsitooling (0.86.2)
+Installing React-jsitracing (0.86.2)
+Installing React-logger (0.86.2)
+Installing React-microtasksnativemodule (0.86.2)
+Installing React-mutationobservernativemodule (0.86.2)
+Installing React-networking (0.86.2)
+Installing React-oscompat (0.86.2)
+Installing React-perflogger (0.86.2)
+Installing React-performancecdpmetrics (0.86.2)
+Installing React-performancetimeline (0.86.2)
+Installing React-rendererconsistency (0.86.2)
+Installing React-renderercss (0.86.2)
+Installing React-rendererdebug (0.86.2)
+Installing React-runtimeexecutor (0.86.2)
+Installing React-runtimescheduler (0.86.2)
+Installing React-timing (0.86.2)
+Installing React-utils (0.86.2)
+Installing React-viewtransitionnativemodule (0.86.2)
+Installing React-webperformancenativemodule (0.86.2)
+Installing ReactAppDependencyProvider (0.86.2)
+Installing ReactCodegen (0.86.2)
+Installing ReactCommon (0.86.2)
+Installing ReactNativeDependencies (0.86.2)
+Installing Yoga (0.0.0)
+Installing hermes-engine (250829098.0.16)
+Installing react-native-safe-area-context (5.8.1)
+Generating Pods project
+Setting USE_HERMES build settings
+Setting REACT_NATIVE_PATH build settings
+Setting SWIFT_ACTIVE_COMPILATION_CONDITIONS build settings
+[Ccache]: Removing Ccache from CC, LD, CXX & LDPLUSPLUS build settings
+Setting SWIFT_ENABLE_EXPLICIT_MODULES build settings
+[ReactNativeCore] Processing VFS overlay file...
+[ReactNativeCore]   Created VFS overlay at /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/Pods/React-Core-prebuilt/React-VFS.yaml
+[ReactNativeCore] VFS overlay setup complete
+[ReactNativeCore] Configuring xcconfig for prebuilt React Native Core...
+[ReactNativeCore] Prebuilt xcconfig configuration complete
+[SPM] Cleaning old SPM dependencies from Pods project
+[SPM] Adding SPM dependencies to Pods project
+[Privacy Manifest Aggregation] Appending aggregated reasons to existing PrivacyInfo.xcprivacy file.
+[Privacy Manifest Aggregation] Reading .xcprivacy files to aggregate all used Required Reason APIs.
+Setting CLANG_CXX_LANGUAGE_STANDARD to c++20 on /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/FinanceApp.xcodeproj
+
+==================== DEPRECATION NOTICE =====================
+Calling `pod install` directly is deprecated in React Native
+because we are moving away from Cocoapods toward alternative
+solutions to build the project.
+* If you are using Expo, please run:
+`npx expo run:ios`
+* If you are using the Community CLI, please run:
+`yarn ios`
+=============================================================
+
+Pod install took 20 [s] to run
+Integrating client project
+Pod installation complete! There are 83 dependencies from the Podfile and 82 total pods installed.
+
+[!] React-Core-prebuilt has added 1 script phase. Please inspect before executing a build. See `https://guides.cocoapods.org/syntax/podspec.html#script_phases` for more information.
+
+[!] ReactNativeDependencies has added 1 script phase. Please inspect before executing a build. See `https://guides.cocoapods.org/syntax/podspec.html#script_phases` for more information.
+
+[!] hermes-engine has added 1 script phase. Please inspect before executing a build. See `https://guides.cocoapods.org/syntax/podspec.html#script_phases` for more information.
+
+exit=0

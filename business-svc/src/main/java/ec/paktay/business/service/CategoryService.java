@@ -177,27 +177,6 @@ public class CategoryService {
         }
     }
 
-    @Transactional
-    public SystemCategoryResponse updateSystemCategory(UUID categoryId, UpdateCategoryRequest request) {
-        try {
-            return jdbc.sql("""
-                    update system_categories
-                       set code = :code, name = :name, normalized_name = :normalized, icon = :icon,
-                           color_dark = :colorDark, color_light = :colorLight,
-                           display_order = :sortOrder, active = :active
-                     where id = :id
-                    returning id, code, name, parent_code, parent_name, icon, color_dark, color_light, display_order, active, created_at
-                    """).param("code", request.code()).param("name", request.name().trim())
-                    .param("normalized", normalize(request.name())).param("icon", request.icon())
-                    .param("colorDark", request.colorDark()).param("colorLight", request.colorLight())
-                    .param("sortOrder", request.sortOrder()).param("active", request.active()).param("id", categoryId)
-                    .query(this::mapSystem).optional()
-                    .orElseThrow(() -> new IllegalArgumentException("La categoría predeterminada no existe"));
-        } catch (DataIntegrityViolationException ex) {
-            throw new IllegalArgumentException("Ya existe una categoría predeterminada con ese código, nombre u orden");
-        }
-    }
-
     private String normalize(String value) {
         return java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
                 .replaceAll("\\p{M}", "").trim().toUpperCase(Locale.ROOT);

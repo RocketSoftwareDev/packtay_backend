@@ -1,0 +1,1 @@
+Reverificación de develop. Se conserva el .env exclusivamente local de la verificación anterior, sin regenerar credenciales ni imprimir valores. Supabase y túnel deshabilitados; SMTP loopback. Compose usa solo paktay-local, incluyendo docker-compose.local-keycloak.yml. Se conservan volúmenes existentes. Node/npm disponibles mediante PATH temporal; Java 17. No se corrige código.

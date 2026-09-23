@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.UUID;
 
 import ec.paktay.business.dto.UserProfileResponse;
-import ec.paktay.business.dto.UpdateAutomaticRequest;
 import ec.paktay.business.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/user/profile")
@@ -60,18 +58,6 @@ public class UserProfileController {
     @ApiResponse(responseCode = "200", description = "Foto eliminada y perfil actualizado")
     public UserProfileResponse remove(@AuthenticationPrincipal Jwt jwt) {
         return profiles.remove(userId(jwt), jwt.getClaimAsString("email"), displayName(jwt));
-    }
-
-    @PutMapping("/automatic")
-    @Operation(summary = "Actualizar mi preferencia automática",
-            description = "Activa o desactiva isAutomatic únicamente para el usuario identificado por el bearer token.")
-    @ApiResponse(responseCode = "200", description = "Preferencia actualizada y perfil resultante")
-    @ApiResponse(responseCode = "400", description = "isAutomatic es obligatorio")
-    @ApiResponse(responseCode = "401", description = "Se requiere un JWT válido")
-    public UserProfileResponse updateAutomatic(@AuthenticationPrincipal Jwt jwt,
-                                               @Valid @org.springframework.web.bind.annotation.RequestBody UpdateAutomaticRequest request) {
-        return profiles.updateAutomatic(userId(jwt), jwt.getClaimAsString("email"), displayName(jwt),
-                request.isAutomatic());
     }
 
     private UUID userId(Jwt jwt) { return UUID.fromString(jwt.getSubject()); }

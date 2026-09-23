@@ -1,0 +1,89 @@
+# Keycloak propio para el entorno aislado `paktay-local`.
+#
+# El docker-compose.yml consume un Keycloak externo (el central de producción en
+# host.docker.internal:8180). Para probar sin tocarlo, este archivo levanta un
+# Keycloak de desarrollo con su propia base, importa infra/keycloak/paktay-realm.json
+# y lo publica en 127.0.0.1:28180, que es donde docker-compose.local.yml lo espera.
+#
+# Uso (siempre con -p paktay-local):
+#   docker compose -p paktay-local --env-file .env --env-file .env.local.example \
+#     -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml \
+#     up --build -d
+services:
+  keycloak-db:
+    image: postgres:16-alpine
+    mem_limit: 256m
+    mem_reservation: 64m
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD es obligatorio}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    volumes:
+      - keycloak-local-data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    mem_limit: 1g
+    mem_reservation: 384m
+    restart: unless-stopped
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD es obligatorio}
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD es obligatorio}
+      KC_HOSTNAME: http://${PAKTAY_LOCAL_HOST:-localhost}:28180
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      JAVA_OPTS_KC_HEAP: -Xms192m -Xmx768m
+    ports:
+      - "127.0.0.1:28180:8080"
+    volumes:
+      - ./infra/keycloak:/opt/keycloak/data/import:ro
+    depends_on:
+      keycloak-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000; echo -e 'GET /health/ready HTTP/1.1\\r\\nhost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3; grep '200 OK' <&3"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  keycloak-init:
+    depends_on:
+      keycloak:
+        condition: service_healthy
+
+  # Buzón de correo de prueba: auth-svc envía aquí los PIN de contraseña y se leen
+  # en http://127.0.0.1:28025. Nada sale a Internet.
+  mailpit:
+    image: axllent/mailpit:latest
+    mem_limit: 64m
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "127.0.0.1:28025:8025"
+
+  auth-svc:
+    environment:
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      SMTP_STARTTLS: "false"
+    depends_on:
+      mailpit:
+        condition: service_started
+
+volumes:
+  keycloak-local-data:
