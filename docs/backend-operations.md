@@ -279,12 +279,8 @@ bandeja local del teléfono y la app los envía con el JWT del usuario por la mi
 `POST /api/v1/user/expenses`. El backend no tiene cola de pendientes ni credencial
 propia para el Atajo.
 
-Para una instalación existente se aplica una sola vez:
-
-```bash
-docker compose exec -T business-db psql -U paktay -d paktay -v ON_ERROR_STOP=1 \
-  < database/paktay_mvp_v0_9_cards_and_expenses.sql
-```
+El esquema lo aplica Flyway al arrancar `business-svc`; no se ejecuta SQL a mano. Ver
+`database/README.md`.
 
 ## Respaldo básico
 

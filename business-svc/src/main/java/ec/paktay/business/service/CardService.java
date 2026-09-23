@@ -198,10 +198,6 @@ public class CardService {
         }
         jdbc.sql("delete from budget_allocations where user_id = :userId and card_id = :cardId")
                 .param("userId", userId).param("cardId", cardId).update();
-        jdbc.sql("delete from monthly_incomes where user_id = :userId and card_id = :cardId")
-                .param("userId", userId).param("cardId", cardId).update();
-        jdbc.sql("update pending_movements set suggested_card_id = null where user_id = :userId and suggested_card_id = :cardId")
-                .param("userId", userId).param("cardId", cardId).update();
         try {
             jdbc.sql("delete from cards where id = :cardId and user_id = :userId")
                     .param("cardId", cardId).param("userId", userId).update();

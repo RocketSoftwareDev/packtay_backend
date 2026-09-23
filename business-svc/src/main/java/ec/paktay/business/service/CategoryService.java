@@ -116,8 +116,6 @@ public class CategoryService {
                     .param("id", categoryId).param("userId", userId).update();
             jdbc.sql("delete from user_consumption_selections where user_id = :userId and category_id = :id")
                     .param("id", categoryId).param("userId", userId).update();
-            jdbc.sql("update pending_movements set suggested_category_id = null where user_id = :userId and suggested_category_id = :id")
-                    .param("id", categoryId).param("userId", userId).update();
             int deleted = jdbc.sql("delete from user_categories where id = :id and user_id = :userId and active")
                     .param("id", categoryId).param("userId", userId).update();
             if (deleted == 0) throw new IllegalArgumentException("La categoría no existe, no pertenece al usuario o ya está inactiva");

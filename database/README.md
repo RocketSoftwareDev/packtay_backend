@@ -1,16 +1,31 @@
 # Base de datos
 
-La especificación de `SUPABASE.txt` es la fuente de diseño funcional de Paktay, pero usa Supabase Auth (`auth.users` y `auth.uid()`).
+Desde el 2026-09-23 el esquema de negocio lo gestiona **Flyway** desde `business-svc`,
+en `business-svc/src/main/resources/db/migration/`:
 
-Paktay usa Keycloak como autoridad de identidad. Antes de crear las migraciones de negocio se debe reemplazar esa dependencia por el UUID `sub` emitido por Keycloak. El servicio `business-svc` será el único que se conecte a Supabase PostgreSQL; la aplicación móvil no accederá directamente a las tablas.
+- `V1__baseline.sql`: el esquema real de ese día, volcado con `pg_dump --schema-only`.
+- `V2__limpieza_tablas_muertas.sql`: quita cuotas, ingresos, la cola de pendientes del
+  atajo, la credencial del atajo y los pagos no registrados.
+- `V3__catalogos.sql`: monedas, bancos, ofertas de tarjeta y categorías del sistema
+  (pendiente de volcar desde la base de pruebas).
 
-## Docker local
+Una base nueva se crea sola al arrancar `business-svc`. En una base que ya existía sin
+historial de Flyway, `V1` se marca como baseline y se aplican `V2` en adelante.
 
-`docker-compose.yml` monta `paktay_mvp_v0_1_postgres.sql` en `/docker-entrypoint-initdb.d/`. PostgreSQL lo ejecuta automáticamente una sola vez al crear un volumen vacío. En este entorno Flyway queda desactivado porque las migraciones `V1-V5` pertenecen al esquema anterior y no deben mezclarse con este archivo.
+Reglas:
 
-Para recrear la base desde cero después de cambiar el SQL:
+- Ningún cambio de esquema fuera de Flyway. Nada de `psql < archivo.sql` a mano.
+- Una migración publicada no se edita; se escribe otra.
+- `auth-svc` no crea tablas: `password_pins` está en `V1`.
+
+Los archivos `paktay_mvp_v0_*.sql` de esta carpeta son el historial anterior y ya no se
+montan en Docker. Se borrarán cuando `V3__catalogos.sql` exista y una base desde cero
+se haya probado.
+
+Para recrear la base local aislada desde cero (nunca sobre producción):
 
 ```bash
-docker compose down -v
-docker compose up --build
+docker compose -p paktay-local --env-file .env --env-file .env.local.example \
+  -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml \
+  down -v
 ```
