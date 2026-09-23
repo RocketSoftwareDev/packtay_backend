@@ -15,6 +15,9 @@ Si algo falla, sigue con el resto y regístralo.
 
 ## Preparación
 
+Si en `develop` hay ramas de corrección pendientes de mezclar, la persona te lo dirá;
+prueba sólo `develop`.
+
 ```bash
 cd <carpeta que contiene packtay_backend y packtay_mobile_front>
 export RUN=$(date +%Y-%m-%d_%H%M)
@@ -38,11 +41,13 @@ y `PAKTAY_ADMIN_PASSWORD`. Si falta alguna, escribe sólo **el nombre** en
 cd packtay_backend
 ./mvnw -B clean package > "$LOGS/01-backend-mvn.log" 2>&1; echo "exit=$?" >> "$LOGS/01-backend-mvn.log"
 
-# 2. Backend: levantar aislado
-C="docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml"
-$C up --build -d keycloak-db business-db keycloak keycloak-init auth-svc business-svc > "$LOGS/02-backend-up.log" 2>&1
-sleep 90
-$C ps >> "$LOGS/02-backend-up.log" 2>&1
+# 2. Backend: levantar aislado, con Keycloak propio en 28180 (nunca el de producción en 8180)
+C="docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml"
+$C config --services > "$LOGS/02-backend-up.log" 2>&1
+$C up --build -d keycloak-db keycloak business-db keycloak-init auth-svc business-svc >> "$LOGS/02-backend-up.log" 2>&1; echo "exit=$?" >> "$LOGS/02-backend-up.log"
+# Keycloak tarda en importar el realm: espera hasta 4 min a que los dos servicios respondan
+for i in $(seq 1 24); do curl -sf localhost:28082/actuator/health >/dev/null && break; sleep 10; done
+$C ps -a >> "$LOGS/02-backend-up.log" 2>&1
 
 # 3. Backend: salud, OpenAPI y Swagger (deben ser 200)
 for u in http://localhost:28081 http://localhost:28082; do
@@ -55,7 +60,7 @@ done > "$LOGS/03-backend-health.log" 2>&1
 curl -s http://localhost:28082/v3/api-docs | grep -Eo '"/api/v1/[^"]+"' | sort -u > "$LOGS/04-backend-rutas.log" 2>&1
 
 # 5. Backend: logs de arranque y apagado sin borrar datos
-$C logs --no-color --tail=300 auth-svc business-svc keycloak-init > "$LOGS/05-backend-docker-logs.log" 2>&1
+$C logs --no-color --tail=300 keycloak keycloak-init auth-svc business-svc > "$LOGS/05-backend-docker-logs.log" 2>&1
 $C down > /dev/null 2>&1
 cd ..
 
@@ -68,7 +73,13 @@ npx jest --ci > "$LOGS/09-front-jest.log" 2>&1; echo "exit=$?" >> "$LOGS/09-fron
 npm run lint > "$LOGS/10-front-lint.log" 2>&1; echo "exit=$?" >> "$LOGS/10-front-lint.log"
 
 # 7. iOS: compilar app y widget para simulador (el widget nunca se ha compilado)
-cd ios && bundle install > "$LOGS/11-ios-pods.log" 2>&1 && bundle exec pod install >> "$LOGS/11-ios-pods.log" 2>&1
+# Gemfile.lock fija Bundler 1.17.2, que no corre en Ruby 4. Si falla, usa CocoaPods directo.
+cd ios
+{ bundle install && bundle exec pod install; } > "$LOGS/11-ios-pods.log" 2>&1 \
+  || { echo "--- bundler falló, se usa pod directo" >> "$LOGS/11-ios-pods.log"; pod install >> "$LOGS/11-ios-pods.log" 2>&1; }
+echo "exit=$?" >> "$LOGS/11-ios-pods.log"
+# Si xcodebuild dice "CoreSimulator is out of date", NO uses sudo: anótalo en el RESUMEN
+# como acción para la persona ("sudo xcodebuild -runFirstLaunch") y sigue.
 xcodebuild -workspace FinanceApp.xcworkspace -scheme FinanceApp -configuration Debug \
   -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' build \
   > "$LOGS/12-ios-build-full.log" 2>&1; echo "exit=$?" >> "$LOGS/12-ios-build-full.log"
