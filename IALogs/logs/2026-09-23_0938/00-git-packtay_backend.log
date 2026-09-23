@@ -1,0 +1,18 @@
+$ git fetch origin
+
+exit=0
+$ git checkout develop
+Already on 'develop'
+Your branch is up to date with 'origin/develop'.
+
+exit=0
+$ git pull --ff-only
+Already up to date.
+
+exit=0
+$ git log --oneline -3
+3065924 chore(ialogs): instrucciones de verificación para Codex y carpeta de logs
+eb27e79 Merge pull request #6 from RocketSoftwareDev/feature/limpieza-codigo-muerto
+01b29ad refactor: elimina credencial del atajo, cola de pendientes y rutas muertas
+
+exit=0

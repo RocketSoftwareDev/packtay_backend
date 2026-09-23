@@ -1,0 +1,15 @@
+$ docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml config --services
+business-db
+keycloak-init
+auth-svc
+business-svc
+
+exit=0
+$ docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml up --build -d keycloak-db business-db keycloak keycloak-init auth-svc business-svc
+no such service: keycloak-db
+
+exit=1
+$ docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml ps
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+
+exit=0

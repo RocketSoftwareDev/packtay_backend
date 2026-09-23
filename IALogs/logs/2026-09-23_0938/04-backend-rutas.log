@@ -1,0 +1,4 @@
+$ bash -o pipefail -c 'curl -sS --max-time 15 http://localhost:28082/v3/api-docs | grep -Eo '"'"'"/api/v1/[^"]+"'"'"' | sort -u'
+curl: (7) Failed to connect to localhost port 28082 after 0 ms: Couldn't connect to server
+
+exit=1

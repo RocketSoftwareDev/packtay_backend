@@ -1,0 +1,28 @@
+$ bundle install
+Bundler 4.0.16 is running, but your lockfile was generated with 1.17.2. Installing Bundler 1.17.2 and restarting using that version.
+Fetching gem metadata from https://rubygems.org/.
+Fetching bundler 1.17.2
+Installing bundler 1.17.2
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:272:in 'Bundler::SharedHelpers#search_up': undefined method 'untaint' for an instance of String (NoMethodError)
+
+      current  = File.expand_path(SharedHelpers.pwd).untaint
+                                                    ^^^^^^^^
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:259:in 'Bundler::SharedHelpers#find_file'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:251:in 'Bundler::SharedHelpers#find_gemfile'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:27:in 'Bundler::SharedHelpers#root'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:234:in 'Bundler.root'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:246:in 'Bundler.app_config_path'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:273:in 'Bundler.settings'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/feature_flag.rb:21:in 'block in Bundler::FeatureFlag#settings_method'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:97:in '<class:CLI>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:7:in '<module:Bundler>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:6:in '<top (required)>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:23:in 'Kernel#require'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:23:in 'block in <top (required)>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/friendly_errors.rb:124:in 'Bundler.with_friendly_errors'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:22:in '<top (required)>'
+	from /opt/homebrew/Cellar/ruby/4.0.6_1/lib/ruby/4.0.0/rubygems.rb:305:in 'Kernel#load'
+	from /opt/homebrew/Cellar/ruby/4.0.6_1/lib/ruby/4.0.0/rubygems.rb:305:in 'Gem.activate_and_load_bin_path'
+	from /opt/homebrew/bin/bundle:25:in '<main>'
+
+exit=1
