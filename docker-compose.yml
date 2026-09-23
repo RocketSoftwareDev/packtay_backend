@@ -17,17 +17,6 @@ services:
       retries: 15
     volumes:
       - business-data:/var/lib/postgresql/data
-      - ./database/paktay_mvp_v0_1_postgres.sql:/docker-entrypoint-initdb.d/001-paktay-schema.sql:ro
-      - ./database/paktay_mvp_v0_11_bank_card_offerings.sql:/docker-entrypoint-initdb.d/011-bank-card-offerings.sql:ro
-      - ./database/paktay_mvp_v0_12_system_category_hierarchy.sql:/docker-entrypoint-initdb.d/012-system-category-hierarchy.sql:ro
-      - ./database/paktay_mvp_v0_13_explicit_user_categories.sql:/docker-entrypoint-initdb.d/013-explicit-user-categories.sql:ro
-      - ./database/paktay_mvp_v0_14_category_groups.sql:/docker-entrypoint-initdb.d/014-category-groups.sql:ro
-      - ./database/paktay_mvp_v0_15_budget_recurrence.sql:/docker-entrypoint-initdb.d/015-budget-recurrence.sql:ro
-      - ./database/paktay_mvp_v0_16_card_name_identity.sql:/docker-entrypoint-initdb.d/016-card-name-identity.sql:ro
-      - ./database/paktay_mvp_v0_17_unregistered_payments.sql:/docker-entrypoint-initdb.d/017-unregistered-payments.sql:ro
-      - ./database/paktay_mvp_v0_18_shortcut_credentials.sql:/docker-entrypoint-initdb.d/018-shortcut-credentials.sql:ro
-      - ./database/paktay_mvp_v0_19_card_lifecycle.sql:/docker-entrypoint-initdb.d/019-card-lifecycle.sql:ro
-      - ./database/paktay_mvp_v0_20_wallet_name_association.sql:/docker-entrypoint-initdb.d/020-wallet-name-association.sql:ro
 
   keycloak-init:
     image: quay.io/keycloak/keycloak:26.2
@@ -103,7 +92,6 @@ services:
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
-      FLYWAY_ENABLED: "false"
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
     ports:
       - "127.0.0.1:8082:8082"

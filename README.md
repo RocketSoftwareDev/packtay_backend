@@ -19,7 +19,7 @@ Primera entrega del backend: OAuth 2.0/OIDC, registro, inicio de sesión, cambio
 
 El contenedor `keycloak-init` asigna al cliente técnico solo los permisos de Keycloak necesarios para administrar usuarios. No utiliza la contraseña del administrador de Keycloak desde los servicios Java.
 
-En el primer arranque, PostgreSQL ejecuta automáticamente `database/paktay_mvp_v0_1_postgres.sql` y carga el esquema junto con los catálogos iniciales de monedas, categorías y bancos. Para repetir la inicialización desde cero usa `docker compose down -v` antes de volver a levantar el entorno.
+El esquema lo crea Flyway al arrancar `business-svc` (`business-svc/src/main/resources/db/migration`); ver `database/README.md`. Para empezar desde cero en el entorno aislado usa `down -v` sólo sobre el proyecto `paktay-local`.
 
 ## Healthchecks y activación en Render
 

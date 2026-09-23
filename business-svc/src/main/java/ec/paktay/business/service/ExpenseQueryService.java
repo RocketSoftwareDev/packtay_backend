@@ -28,11 +28,10 @@ public class ExpenseQueryService {
         users.ensureActiveUser(userId);
         StringBuilder sql = new StringBuilder("""
                 select e.id, c.id as card_id, c.name as card_name, uc.id as category_id, uc.name as category_name,
-                       e.origin::text, e.amount, e.currency_code, e.merchant_raw, e.occurred_at, ip.id as installment_plan_id
+                       e.origin::text, e.amount, e.currency_code, e.merchant_raw, e.occurred_at
                   from expenses e
                   join cards c on c.id = e.card_id
                   join user_categories uc on uc.id = e.category_id
-                  left join installment_plans ip on ip.expense_id = e.id
                  where e.user_id = :userId
                 """);
         if (from != null) sql.append(" and e.occurred_at >= :from");
@@ -53,7 +52,6 @@ public class ExpenseQueryService {
         return new ExpenseResponse(rs.getObject("id", UUID.class), rs.getObject("card_id", UUID.class),
                 rs.getString("card_name"), rs.getObject("category_id", UUID.class), rs.getString("category_name"),
                 rs.getString("origin"), rs.getObject("amount", BigDecimal.class), rs.getString("currency_code"),
-                rs.getString("merchant_raw"), rs.getObject("occurred_at", OffsetDateTime.class),
-                rs.getObject("installment_plan_id", UUID.class));
+                rs.getString("merchant_raw"), rs.getObject("occurred_at", OffsetDateTime.class));
     }
 }
