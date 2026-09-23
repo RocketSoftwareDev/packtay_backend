@@ -1,0 +1,9 @@
+ Container paktay-fresh-business-db-1 Stopping 
+ Container paktay-fresh-business-db-1 Stopped 
+ Container paktay-fresh-business-db-1 Removing 
+ Container paktay-fresh-business-db-1 Removed 
+ Volume paktay-fresh_business-data Removing 
+ Network paktay-fresh_default Removing 
+ Volume paktay-fresh_business-data Removed 
+ Network paktay-fresh_default Removed 
+exit=0
