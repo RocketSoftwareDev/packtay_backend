@@ -1,0 +1,4 @@
+RUN=2026-09-23_1154-dia3
+23f57dd Día 3: contexto del usuario, estados de tarjeta y gasto, y tablas preparatorias
+c1848c0 chore(ialogs): verificación de develop 2026-09-23_1130
+df61112 Merge pull request #10 from RocketSoftwareDev/feature/dia2-esquema-flyway
