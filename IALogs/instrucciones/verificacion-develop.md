@@ -59,6 +59,10 @@ done > "$LOGS/03-backend-health.log" 2>&1
 # 4. Backend: rutas publicadas (no deben aparecer shortcut, movements, unregistered, profile/automatic)
 curl -s http://localhost:28082/v3/api-docs | grep -Eo '"/api/v1/[^"]+"' | sort -u > "$LOGS/04-backend-rutas.log" 2>&1
 
+# 4b. Base de datos: versión de Flyway y catálogos (esperado: 7 monedas, 29 bancos, 38 ofertas, 22 categorías)
+$C exec -T business-db psql -U paktay -d paktay -At -c "select version, description, success from flyway_schema_history order by installed_rank" > "$LOGS/04b-flyway.txt" 2>&1
+$C exec -T business-db psql -U paktay -d paktay -At -c "select 'currencies', count(*) from currencies union all select 'banks', count(*) from banks union all select 'bank_card_offerings', count(*) from bank_card_offerings union all select 'system_categories', count(*) from system_categories" >> "$LOGS/04b-flyway.txt" 2>&1
+
 # 5. Backend: logs de arranque y apagado sin borrar datos
 $C logs --no-color --tail=300 keycloak keycloak-init auth-svc business-svc > "$LOGS/05-backend-docker-logs.log" 2>&1
 $C down > /dev/null 2>&1

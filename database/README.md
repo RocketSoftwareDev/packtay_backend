@@ -6,8 +6,8 @@ en `business-svc/src/main/resources/db/migration/`:
 - `V1__baseline.sql`: el esquema real de ese día, volcado con `pg_dump --schema-only`.
 - `V2__limpieza_tablas_muertas.sql`: quita cuotas, ingresos, la cola de pendientes del
   atajo, la credencial del atajo y los pagos no registrados.
-- `V3__catalogos.sql`: monedas, bancos, ofertas de tarjeta y categorías del sistema
-  (pendiente de volcar desde la base de pruebas).
+- `V3__catalogos.sql`: 7 monedas, 29 bancos, 38 ofertas de tarjeta y 22 categorías del
+  sistema, volcados de la base de pruebas. Idempotente (`ON CONFLICT DO NOTHING`).
 
 Una base nueva se crea sola al arrancar `business-svc`. En una base que ya existía sin
 historial de Flyway, `V1` se marca como baseline y se aplican `V2` en adelante.
@@ -18,9 +18,9 @@ Reglas:
 - Una migración publicada no se edita; se escribe otra.
 - `auth-svc` no crea tablas: `password_pins` está en `V1`.
 
-Los archivos `paktay_mvp_v0_*.sql` de esta carpeta son el historial anterior y ya no se
-montan en Docker. Se borrarán cuando `V3__catalogos.sql` exista y una base desde cero
-se haya probado.
+Los 20 archivos `paktay_mvp_v0_*.sql` que había aquí se borraron el 2026-09-23: ya no
+levantaban una base desde cero y el esquema real se había desviado de ellos. Siguen en
+el historial de git. `SUPABASE.txt` queda como referencia de diseño funcional.
 
 Para recrear la base local aislada desde cero (nunca sobre producción):
 
