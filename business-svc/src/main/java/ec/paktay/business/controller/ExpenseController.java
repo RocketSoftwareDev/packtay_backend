@@ -41,7 +41,7 @@ public class ExpenseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar un gasto manual", description = "Ruta autenticada. Persiste el gasto en PostgreSQL. idempotencyKey permite que el móvil reintente sin crear duplicados.")
+    @Operation(summary = "Registrar un gasto manual", description = "Ruta autenticada. Persiste el gasto en PostgreSQL. idempotencyKey permite que el móvil reintente sin crear duplicados. assignedByRule (opcional, false por defecto) marca las capturas cuya tarjeta o categoría asignó una regla del teléfono. La respuesta incluye cardStatus, kind (EXPENSE/REFUND), status (ACTIVE/VOIDED) y assignedByRule.")
     @ApiResponse(responseCode = "201", description = "Gasto creado o recuperado por idempotencia")
     @ApiResponse(responseCode = "400", description = "Tarjeta, categoría, moneda, monto o recurrencia inválidos")
     public ExpenseResponse create(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateExpenseRequest request) {
@@ -49,7 +49,7 @@ public class ExpenseController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar mis gastos", description = "Filtra gastos propios por rango inclusivo de fechas, tarjeta y categoría. Sin fechas devuelve todo el historial del usuario.")
+    @Operation(summary = "Listar mis gastos", description = "Filtra gastos propios por rango inclusivo de fechas, tarjeta y categoría. Las fechas son días del calendario del usuario, interpretados en la zona horaria de su perfil (PUT /api/v1/user/profile/context). Sin fechas devuelve todo el historial del usuario, incluidos gastos de tarjetas desactivadas o eliminadas (cardStatus) y gastos anulados (status = VOIDED).")
     @ApiResponse(responseCode = "200", description = "Historial consultado")
     public List<ExpenseResponse> list(
             @AuthenticationPrincipal Jwt jwt,

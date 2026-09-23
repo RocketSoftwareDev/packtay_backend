@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import ec.paktay.business.dto.CardResponse;
@@ -24,8 +25,13 @@ public class CardService {
 
     private final JdbcClient jdbc;
     private final UserAccountService users;
+    private final AuditService audit;
 
-    public CardService(JdbcClient jdbc, UserAccountService users) { this.jdbc = jdbc; this.users = users; }
+    public CardService(JdbcClient jdbc, UserAccountService users, AuditService audit) {
+        this.jdbc = jdbc;
+        this.users = users;
+        this.audit = audit;
+    }
 
     @Transactional
     public CardResponse register(UUID userId, CreateCardRequest request) {
@@ -67,6 +73,10 @@ public class CardService {
         return findOne(userId, cardId, periodId);
     }
 
+    /**
+     * Tarjetas del usuario sin las eliminadas (DELETED). El presupuesto que devuelve
+     * es el del mes actual en la zona horaria del usuario.
+     */
     @Transactional
     public List<CardResponse> list(UUID userId) {
         users.ensureActiveUser(userId);
@@ -76,10 +86,11 @@ public class CardService {
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c
                   join banks b on b.id = c.bank_id
+                  join app_users u on u.id = c.user_id
                   left join financial_periods fp on fp.user_id = c.user_id
-                       and fp.period_month = date_trunc('month', current_date)::date
+                       and fp.period_month = date_trunc('month', now() at time zone u.timezone)::date
                   left join budget_allocations ba on ba.period_id = fp.id and ba.card_id = c.id and ba.scope = 'CARD'
-                 where c.user_id = :userId
+                 where c.user_id = :userId and c.status::text <> 'DELETED'
                  order by (c.status = 'ACTIVE') desc, c.created_at desc
                 """).param("userId", userId).query(this::mapCard).list();
     }
@@ -94,13 +105,9 @@ public class CardService {
     public CardResponse deactivate(UUID userId, UUID cardId) {
         users.ensureActiveUser(userId);
         String status = statusOf(userId, cardId);
+        rejectDeleted(status);
         if ("INACTIVE".equals(status)) throw new IllegalArgumentException("La tarjeta ya está desactivada");
-        int recent = jdbc.sql("""
-                select count(*) from expenses
-                 where user_id = :userId and card_id = :cardId
-                   and occurred_at >= now() - make_interval(months => :months)
-                """).param("userId", userId).param("cardId", cardId)
-                .param("months", QUIET_MONTHS_BEFORE_DEACTIVATION).query(Integer.class).single();
+        int recent = recentExpenseCount(userId, cardId);
         if (recent > 0) {
             throw new IllegalArgumentException("La tarjeta tiene " + recent + (recent == 1 ? " consumo" : " consumos")
                     + " en los últimos " + QUIET_MONTHS_BEFORE_DEACTIVATION + " meses y no se puede desactivar");
@@ -109,17 +116,20 @@ public class CardService {
                 update cards set status = 'INACTIVE', deactivated_at = now(), updated_at = now()
                  where id = :cardId and user_id = :userId
                 """).param("cardId", cardId).param("userId", userId).update();
+        audit.record(userId, "DEACTIVATE", "card", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
     /**
      * Reactiva una tarjeta desactivada. El índice cards_active_identity_uq vuelve a
-     * exigir que no exista otra tarjeta ACTIVA con el mismo nombre en el mismo banco.
+     * exigir que no exista otra tarjeta ACTIVA del usuario con el mismo nombre de
+     * Wallet. Una tarjeta eliminada no se reactiva.
      */
     @Transactional
     public CardResponse activate(UUID userId, UUID cardId) {
         users.ensureActiveUser(userId);
         String status = statusOf(userId, cardId);
+        rejectDeleted(status);
         if ("ACTIVE".equals(status)) throw new IllegalArgumentException("La tarjeta ya está activa");
         try {
             jdbc.sql("""
@@ -129,6 +139,7 @@ public class CardService {
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException("Otra tarjeta activa tiene asociado el mismo nombre de Wallet. Quítaselo o desactívala antes de activar esta.");
         }
+        audit.record(userId, "ACTIVATE", "card", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
@@ -148,6 +159,7 @@ public class CardService {
     public CardResponse associateWalletName(UUID userId, UUID cardId, String walletName) {
         users.ensureActiveUser(userId);
         String status = statusOf(userId, cardId);
+        rejectDeleted(status);
         if (!"ACTIVE".equals(status)) {
             throw new IllegalArgumentException("Una tarjeta desactivada no puede recibir consumos, así que no se le asocia un nombre");
         }
@@ -160,6 +172,8 @@ public class CardService {
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException(DUPLICATE_NAME_MESSAGE);
         }
+        // Sin el nombre en sí: es texto que el usuario reconoce y no aporta a la auditoría.
+        audit.record(userId, "LINK", "card_wallet_name", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
@@ -174,42 +188,63 @@ public class CardService {
     @Transactional
     public CardResponse clearWalletName(UUID userId, UUID cardId) {
         users.ensureActiveUser(userId);
-        statusOf(userId, cardId);
+        rejectDeleted(statusOf(userId, cardId));
         jdbc.sql("update cards set name = null, updated_at = now() where id = :cardId and user_id = :userId")
                 .param("cardId", cardId).param("userId", userId).update();
+        audit.record(userId, "UNLINK", "card_wallet_name", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
     /**
-     * Elimina una tarjeta de forma definitiva. Sólo si no tiene ningún consumo en todo
-     * el historial (expenses no admite borrado, así que una tarjeta con gastos sólo se
-     * desactiva). Los presupuestos e ingresos ligados a la tarjeta se borran con ella
-     * y los movimientos pendientes que la sugerían quedan sin sugerencia.
+     * Elimina una tarjeta de forma lógica: pasa a DELETED, desaparece de GET /cards,
+     * libera su nombre de Wallet (name = null) y no se puede reactivar. Sus gastos no
+     * se tocan y siguen contando en totales e historial (ExpenseResponse.cardStatus =
+     * DELETED). Misma condición que desactivar: ningún consumo en los últimos
+     * {@link #QUIET_MONTHS_BEFORE_DEACTIVATION} meses. Vale desde ACTIVE o INACTIVE.
+     * Los presupuestos por tarjeta (budget_allocations) se borran.
      */
     @Transactional
     public void delete(UUID userId, UUID cardId) {
         users.ensureActiveUser(userId);
-        statusOf(userId, cardId);
-        int total = jdbc.sql("select count(*) from expenses where user_id = :userId and card_id = :cardId")
-                .param("userId", userId).param("cardId", cardId).query(Integer.class).single();
-        if (total > 0) {
-            throw new IllegalArgumentException("La tarjeta tiene " + total + (total == 1 ? " consumo" : " consumos")
-                    + " registrados y no se puede eliminar. Desactívala en su lugar.");
+        String status = statusOf(userId, cardId);
+        rejectDeleted(status);
+        int recent = recentExpenseCount(userId, cardId);
+        if (recent > 0) {
+            throw new IllegalArgumentException("La tarjeta tiene " + recent + (recent == 1 ? " consumo" : " consumos")
+                    + " en los últimos " + QUIET_MONTHS_BEFORE_DEACTIVATION + " meses y no se puede eliminar");
         }
         jdbc.sql("delete from budget_allocations where user_id = :userId and card_id = :cardId")
                 .param("userId", userId).param("cardId", cardId).update();
-        try {
-            jdbc.sql("delete from cards where id = :cardId and user_id = :userId")
-                    .param("cardId", cardId).param("userId", userId).update();
-        } catch (DataIntegrityViolationException ex) {
-            throw new IllegalArgumentException("La tarjeta tiene información asociada y no se puede eliminar. Desactívala en su lugar.");
-        }
+        jdbc.sql("""
+                update cards set status = 'DELETED', deactivated_at = now(), name = null, updated_at = now()
+                 where id = :cardId and user_id = :userId
+                """).param("cardId", cardId).param("userId", userId).update();
+        audit.record(userId, "DELETE", "card", cardId, Map.of("previousStatus", status));
+    }
+
+    /**
+     * Consumos de la tarjeta en los últimos {@link #QUIET_MONTHS_BEFORE_DEACTIVATION}
+     * meses. Sólo cuenta gastos ACTIVE de tipo EXPENSE: un gasto anulado o un
+     * reembolso no demuestran que la tarjeta siga en uso.
+     */
+    private int recentExpenseCount(UUID userId, UUID cardId) {
+        return jdbc.sql("""
+                select count(*) from expenses
+                 where user_id = :userId and card_id = :cardId
+                   and status = 'ACTIVE' and kind = 'EXPENSE'
+                   and occurred_at >= now() - make_interval(months => :months)
+                """).param("userId", userId).param("cardId", cardId)
+                .param("months", QUIET_MONTHS_BEFORE_DEACTIVATION).query(Integer.class).single();
     }
 
     private String statusOf(UUID userId, UUID cardId) {
         return jdbc.sql("select status::text from cards where id = :cardId and user_id = :userId")
                 .param("cardId", cardId).param("userId", userId).query(String.class)
                 .optional().orElseThrow(() -> new IllegalArgumentException("La tarjeta no existe"));
+    }
+
+    private void rejectDeleted(String status) {
+        if ("DELETED".equals(status)) throw new IllegalArgumentException("La tarjeta fue eliminada");
     }
 
     /**
@@ -233,9 +268,7 @@ public class CardService {
     @Transactional
     public CardResponse update(UUID userId, UUID cardId, UpdateCardRequest request) {
         users.ensureActiveUser(userId);
-        jdbc.sql("select id from cards where id=:cardId and user_id=:userId")
-                .param("cardId", cardId).param("userId", userId).query(UUID.class)
-                .optional().orElseThrow(() -> new IllegalArgumentException("La tarjeta no existe"));
+        rejectDeleted(statusOf(userId, cardId));
         jdbc.sql("""
                 update cards set alias=:alias, color_dark=:colorDark, color_light=:colorLight, updated_at=now()
                  where id=:cardId and user_id=:userId
@@ -257,10 +290,12 @@ public class CardService {
                 .query(this::mapCard).single();
     }
 
+    /** Período del mes actual en la zona horaria del usuario; lo crea si no existe. */
     private UUID currentPeriod(UUID userId) {
         return jdbc.sql("""
                 insert into financial_periods (user_id, period_month)
-                values (:userId, date_trunc('month', current_date)::date)
+                select u.id, date_trunc('month', now() at time zone u.timezone)::date
+                  from app_users u where u.id = :userId
                 on conflict (user_id, period_month) do update set period_month = excluded.period_month
                 returning id
                 """).param("userId", userId).query(UUID.class).single();

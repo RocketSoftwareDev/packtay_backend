@@ -46,7 +46,7 @@ public class CardController {
     }
 
     @GetMapping
-    @Operation(summary = "Listar mis tarjetas", description = "Devuelve todas las tarjetas del usuario autenticado (ACTIVE primero, luego INACTIVE) y su presupuesto del mes actual. El campo status permite al móvil ocultar las desactivadas de los selectores.")
+    @Operation(summary = "Listar mis tarjetas", description = "Devuelve las tarjetas del usuario autenticado (ACTIVE primero, luego INACTIVE) y su presupuesto del mes actual, calculado en la zona horaria del perfil. Las tarjetas eliminadas (DELETED) no aparecen. El campo status permite al móvil ocultar las desactivadas de los selectores.")
     @ApiResponse(responseCode = "200", description = "Tarjetas con tipo, marca de crédito, últimos cuatro, colores y estado persistidos")
     @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public List<CardResponse> list(@AuthenticationPrincipal Jwt jwt) {
@@ -65,15 +65,15 @@ public class CardController {
     @PatchMapping("/{cardId}/deactivate")
     @Operation(summary = "Desactivar una tarjeta", description = "Ruta autenticada. Pasa la tarjeta a INACTIVE: conserva su historial, deja de aceptar gastos nuevos, desaparece de los selectores del móvil y libera su nombre dentro del banco. Sólo se permite si la tarjeta no registró consumos en los últimos 3 meses.")
     @ApiResponse(responseCode = "200", description = "Tarjeta desactivada")
-    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, ya estaba desactivada o tiene consumos en los últimos 3 meses")
+    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, fue eliminada, ya estaba desactivada o tiene consumos en los últimos 3 meses")
     public CardResponse deactivate(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId) {
         return cards.deactivate(UUID.fromString(jwt.getSubject()), cardId);
     }
 
     @PatchMapping("/{cardId}/activate")
-    @Operation(summary = "Reactivar una tarjeta desactivada", description = "Ruta autenticada. Devuelve la tarjeta a ACTIVE. Falla si ya existe otra tarjeta activa con el mismo nombre en el mismo banco.")
+    @Operation(summary = "Reactivar una tarjeta desactivada", description = "Ruta autenticada. Devuelve una tarjeta INACTIVE a ACTIVE. Falla si otra tarjeta activa del usuario tiene el mismo nombre de Wallet. Una tarjeta eliminada (DELETED) no se puede reactivar.")
     @ApiResponse(responseCode = "200", description = "Tarjeta activa")
-    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, ya estaba activa o su nombre ya lo usa otra tarjeta activa del banco")
+    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, fue eliminada (\"La tarjeta fue eliminada\"), ya estaba activa o su nombre de Wallet ya lo usa otra tarjeta activa")
     public CardResponse activate(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId) {
         return cards.activate(UUID.fromString(jwt.getSubject()), cardId);
     }
@@ -97,9 +97,9 @@ public class CardController {
 
     @DeleteMapping("/{cardId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Eliminar una tarjeta sin consumos", description = "Ruta autenticada. Borra definitivamente la tarjeta junto con sus presupuestos e ingresos asociados. Sólo se permite si la tarjeta no tiene ningún gasto en todo el historial; con gastos, la alternativa es desactivarla.")
+    @Operation(summary = "Eliminar una tarjeta (borrado lógico)", description = "Ruta autenticada. No borra la fila: la tarjeta pasa a DELETED, desaparece de GET /user/cards, libera su nombre de Wallet y no se puede reactivar. Sus gastos se conservan y siguen contando en presupuestos e historial (ExpenseResponse.cardStatus = DELETED). Se borran sus presupuestos por tarjeta. Vale desde ACTIVE o INACTIVE y exige la misma condición que desactivar: ningún consumo en los últimos 3 meses.")
     @ApiResponse(responseCode = "204", description = "Tarjeta eliminada")
-    @ApiResponse(responseCode = "400", description = "La tarjeta no existe o tiene consumos registrados")
+    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, ya fue eliminada o tiene consumos en los últimos 3 meses")
     public void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId) {
         cards.delete(UUID.fromString(jwt.getSubject()), cardId);
     }

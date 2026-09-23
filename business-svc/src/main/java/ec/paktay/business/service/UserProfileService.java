@@ -1,11 +1,15 @@
 package ec.paktay.business.service;
 
 import java.net.URI;
+import java.time.DateTimeException;
 import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Map;
 import java.util.UUID;
 
 import ec.paktay.business.config.SupabaseStorageProperties;
+import ec.paktay.business.dto.UpdateProfileContextRequest;
 import ec.paktay.business.dto.UserProfileResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -22,6 +26,8 @@ public class UserProfileService {
             MediaType.IMAGE_JPEG_VALUE, "jpg",
             MediaType.IMAGE_PNG_VALUE, "png",
             "image/webp", "webp");
+    private static final String INVALID_TIMEZONE_MESSAGE =
+            "Zona horaria inválida: usa un identificador IANA como America/Guayaquil";
 
     private final JdbcClient jdbc;
     private final UserAccountService users;
@@ -85,6 +91,33 @@ public class UserProfileService {
         return find(userId);
     }
 
+    /**
+     * Guarda la zona horaria y el país del usuario.
+     *
+     * La zona debe ser un identificador IANA que entiendan Java y PostgreSQL. Se
+     * rechazan los desplazamientos fijos (+05:00, UTC-5): PostgreSQL los lee con
+     * el signo POSIX invertido y el mes quedaría corrido diez horas.
+     */
+    @Transactional
+    public UserProfileResponse updateContext(UUID userId, String email, String displayName,
+                                             UpdateProfileContextRequest request) {
+        String timezone = request.timezone().trim();
+        ZoneId zone;
+        try {
+            zone = ZoneId.of(timezone);
+        } catch (DateTimeException ex) {
+            throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
+        }
+        if (zone instanceof ZoneOffset) throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
+        boolean knownByDatabase = jdbc.sql("select exists(select 1 from pg_timezone_names where name = :name)")
+                .param("name", timezone).query(Boolean.class).single();
+        if (!knownByDatabase) throw new IllegalArgumentException(INVALID_TIMEZONE_MESSAGE);
+        synchronizeIdentity(userId, email, displayName);
+        jdbc.sql("update app_users set timezone = :timezone, country_code = :country where id = :id")
+                .param("timezone", timezone).param("country", request.countryCode()).param("id", userId).update();
+        return find(userId);
+    }
+
     private void synchronizeIdentity(UUID userId, String email, String displayName) {
         users.ensureActiveUser(userId);
         jdbc.sql("update app_users set email = :email, display_name = :name where id = :id")
@@ -93,7 +126,7 @@ public class UserProfileService {
 
     private UserProfileResponse find(UUID userId) {
         return jdbc.sql("""
-                select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at,
+                select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at, u.timezone, u.country_code,
                        exists(select 1 from cards c where c.user_id = u.id and c.status = 'ACTIVE') as is_have_cards,
                        exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active) as is_have_category
                   from app_users u
@@ -103,7 +136,8 @@ public class UserProfileService {
                         rs.getObject("id", UUID.class), rs.getString("email"), rs.getString("display_name"),
                         rs.getString("avatar_url"), rs.getBoolean("is_have_cards"),
                         rs.getBoolean("is_have_category"),
-                        rs.getObject("avatar_updated_at", OffsetDateTime.class))).single();
+                        rs.getObject("avatar_updated_at", OffsetDateTime.class),
+                        rs.getString("timezone"), rs.getString("country_code"))).single();
     }
 
     private void deleteObject(String path) {

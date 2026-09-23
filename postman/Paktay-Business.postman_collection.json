@@ -27,6 +27,15 @@
       "item": [
         { "name": "Consultar mi perfil", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/profile" } },
         {
+          "name": "Actualizar zona horaria y país",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"timezone\": \"America/Guayaquil\",\n  \"countryCode\": \"EC\"\n}" },
+            "url": "{{businessUrl}}/api/v1/user/profile/context"
+          }
+        },
+        {
           "name": "Subir o reemplazar avatar",
           "request": {
             "method": "PUT",
@@ -89,7 +98,7 @@
         { "name": "Listar mis tarjetas", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/cards" } },
         { "name": "Desactivar tarjeta (sin consumos en 3 meses)", "request": { "method": "PATCH", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/deactivate" } },
         { "name": "Reactivar tarjeta", "request": { "method": "PATCH", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}/activate" } },
-        { "name": "Eliminar tarjeta (sin consumos)", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}" } },
+        { "name": "Eliminar tarjeta (borrado lógico, sin consumos en 3 meses)", "request": { "method": "DELETE", "url": "{{businessUrl}}/api/v1/user/cards/{{cardId}}" } },
         {
           "name": "Asociar nombre de Wallet",
           "request": {
@@ -110,7 +119,7 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
-            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"cardId\": \"{{cardId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"exchangeRateToUsd\": 1,\n  \"merchant\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"recurring\": false\n}" },
+            "body": { "mode": "raw", "raw": "{\n  \"idempotencyKey\": \"{{$guid}}\",\n  \"cardId\": \"{{cardId}}\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"amount\": 12.50,\n  \"currencyCode\": \"USD\",\n  \"exchangeRateToUsd\": 1,\n  \"merchant\": \"Comercio de prueba\",\n  \"occurredAt\": \"{{$isoTimestamp}}\",\n  \"recurring\": false,\n  \"assignedByRule\": false\n}" },
             "url": "{{businessUrl}}/api/v1/user/expenses"
           },
           "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('expenseId', pm.response.json().id);"] } }]

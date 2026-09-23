@@ -107,6 +107,9 @@ public class CategoryService {
     @Transactional
     public void deactivateUserCategory(UUID userId, UUID categoryId) {
         users.ensureActiveUser(userId);
+        // Cuenta cualquier gasto, también anulados (VOIDED) o reembolsos: no es una suma
+        // de consumo sino la guarda del borrado físico, y la FK expenses.category_id
+        // lo impediría igual.
         boolean hasExpenses = jdbc.sql("select exists(select 1 from expenses where user_id = :userId and category_id = :id)")
                 .param("id", categoryId).param("userId", userId).query(Boolean.class).single();
         if (!hasExpenses) {
