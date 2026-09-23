@@ -1,0 +1,4 @@
+$ sudo -n xcodebuild -runFirstLaunch
+sudo: a password is required
+
+exit=1
