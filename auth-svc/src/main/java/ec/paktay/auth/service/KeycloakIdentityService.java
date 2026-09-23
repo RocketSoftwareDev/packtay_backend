@@ -34,10 +34,14 @@ public class KeycloakIdentityService {
 
     public UserResponse register(RegisterRequest request) {
         String adminToken = adminToken();
+        String[] names = splitDisplayName(request.displayName());
+        // Keycloak 26 exige nombre y apellido en su perfil de usuario por defecto: sin
+        // lastName la cuenta se crea pero el login responde "Account is not fully set up".
         Map<String, Object> payload = Map.of(
                 "username", request.email().toLowerCase(),
                 "email", request.email().toLowerCase(),
-                "firstName", request.displayName(),
+                "firstName", names[0],
+                "lastName", names[1],
                 "enabled", true,
                 "emailVerified", false,
                 "credentials", List.of(Map.of("type", "password", "value", request.password(), "temporary", false)));
@@ -146,6 +150,18 @@ public class KeycloakIdentityService {
 
     private String adminPath(String path) {
         return "/admin/realms/" + properties.realm() + "/" + path;
+    }
+
+    /**
+     * Parte el nombre visible en nombre y apellido para Keycloak. La primera palabra es
+     * el nombre y el resto el apellido; con una sola palabra se repite, porque el perfil
+     * de usuario de Keycloak no admite el apellido vacío.
+     */
+    static String[] splitDisplayName(String displayName) {
+        String clean = displayName == null ? "" : displayName.trim().replaceAll("\\s+", " ");
+        int space = clean.indexOf(' ');
+        if (space < 0) return new String[] {clean, clean};
+        return new String[] {clean.substring(0, space), clean.substring(space + 1)};
     }
 
     private String encode(String value) {
