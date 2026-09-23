@@ -1,0 +1,282 @@
+Cambios automáticos producidos por pod install; se guardan como evidencia y se restauran al HEAD después de la verificación.
+diff --git a/ios/FinanceApp.xcodeproj/project.pbxproj b/ios/FinanceApp.xcodeproj/project.pbxproj
+index 7e27a8a..479f9c0 100644
+--- a/ios/FinanceApp.xcodeproj/project.pbxproj
++++ b/ios/FinanceApp.xcodeproj/project.pbxproj
+@@ -10,6 +10,13 @@
+ 		0C80B921A6F3F58F76C31292 /* libPods-FinanceApp.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-FinanceApp.a */; };
+ 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+ 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
++		7A3B9C0000000000000000A2 /* PaktayWidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000A1 /* PaktayWidgetBridge.swift */; };
++		7A3B9C0000000000000000A4 /* PaktayWidgetBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000A3 /* PaktayWidgetBridge.m */; };
++		7A3B9C0000000000000000B2 /* PaktayWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B1 /* PaktayWidgetBundle.swift */; };
++		7A3B9C0000000000000000B4 /* PaktayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B3 /* PaktayWidget.swift */; };
++		7A3B9C0000000000000000B8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B7 /* Assets.xcassets */; };
++		7A3B9C0000000000000000B9 /* PaktayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B0 /* PaktayWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
++		7A3B9C0000000000000000BB /* PaktayWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000BA /* PaktayWidgetSnapshot.swift */; };
+ 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+ 		C9B77E8155147EC706688E5A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
+ 		CF87CE90DCB6464FABE8AB0A /* BootSplash.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 534A2C48E2C5417B97FA2C81 /* BootSplash.storyboard */; };
+@@ -18,13 +25,6 @@
+ 		PK01A1000000000000000004 /* PaktayImagePicker.m in Sources */ = {isa = PBXBuildFile; fileRef = PK01A1000000000000000003 /* PaktayImagePicker.m */; };
+ 		PK02A1000000000000000002 /* PaktayWalletIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = PK02A1000000000000000001 /* PaktayWalletIntent.swift */; };
+ 		PK02A1000000000000000004 /* PaktayWalletInbox.m in Sources */ = {isa = PBXBuildFile; fileRef = PK02A1000000000000000003 /* PaktayWalletInbox.m */; };
+-		7A3B9C0000000000000000A2 /* PaktayWidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000A1 /* PaktayWidgetBridge.swift */; };
+-		7A3B9C0000000000000000A4 /* PaktayWidgetBridge.m in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000A3 /* PaktayWidgetBridge.m */; };
+-		7A3B9C0000000000000000B2 /* PaktayWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B1 /* PaktayWidgetBundle.swift */; };
+-		7A3B9C0000000000000000B4 /* PaktayWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B3 /* PaktayWidget.swift */; };
+-		7A3B9C0000000000000000B8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B7 /* Assets.xcassets */; };
+-		7A3B9C0000000000000000B9 /* PaktayWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000B0 /* PaktayWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+-		7A3B9C0000000000000000BB /* PaktayWidgetSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A3B9C0000000000000000BA /* PaktayWidgetSnapshot.swift */; };
+ /* End PBXBuildFile section */
+ 
+ /* Begin PBXContainerItemProxy section */
+@@ -62,12 +62,6 @@
+ 		5709B34CF0A7D63546082F79 /* Pods-FinanceApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FinanceApp.release.xcconfig"; path = "Target Support Files/Pods-FinanceApp/Pods-FinanceApp.release.xcconfig"; sourceTree = "<group>"; };
+ 		5DCACB8F33CDC322A6C60F78 /* libPods-FinanceApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-FinanceApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+ 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FinanceApp/AppDelegate.swift; sourceTree = "<group>"; };
+-		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FinanceApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
+-		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+-		PK01A1000000000000000001 /* PaktayImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaktayImagePicker.swift; path = FinanceApp/PaktayImagePicker.swift; sourceTree = "<group>"; };
+-		PK01A1000000000000000003 /* PaktayImagePicker.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PaktayImagePicker.m; path = FinanceApp/PaktayImagePicker.m; sourceTree = "<group>"; };
+-		PK02A1000000000000000001 /* PaktayWalletIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaktayWalletIntent.swift; path = FinanceApp/PaktayWalletIntent.swift; sourceTree = "<group>"; };
+-		PK02A1000000000000000003 /* PaktayWalletInbox.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PaktayWalletInbox.m; path = FinanceApp/PaktayWalletInbox.m; sourceTree = "<group>"; };
+ 		7A3B9C0000000000000000A1 /* PaktayWidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaktayWidgetBridge.swift; path = FinanceApp/PaktayWidgetBridge.swift; sourceTree = "<group>"; };
+ 		7A3B9C0000000000000000A3 /* PaktayWidgetBridge.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PaktayWidgetBridge.m; path = FinanceApp/PaktayWidgetBridge.m; sourceTree = "<group>"; };
+ 		7A3B9C0000000000000000A5 /* FinanceApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = FinanceApp.entitlements; path = FinanceApp/FinanceApp.entitlements; sourceTree = "<group>"; };
+@@ -78,6 +72,12 @@
+ 		7A3B9C0000000000000000B6 /* PaktayWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaktayWidget.entitlements; sourceTree = "<group>"; };
+ 		7A3B9C0000000000000000B7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+ 		7A3B9C0000000000000000BA /* PaktayWidgetSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaktayWidgetSnapshot.swift; sourceTree = "<group>"; };
++		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FinanceApp/LaunchScreen.storyboard; sourceTree = "<group>"; };
++		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
++		PK01A1000000000000000001 /* PaktayImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaktayImagePicker.swift; path = FinanceApp/PaktayImagePicker.swift; sourceTree = "<group>"; };
++		PK01A1000000000000000003 /* PaktayImagePicker.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PaktayImagePicker.m; path = FinanceApp/PaktayImagePicker.m; sourceTree = "<group>"; };
++		PK02A1000000000000000001 /* PaktayWalletIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = PaktayWalletIntent.swift; path = FinanceApp/PaktayWalletIntent.swift; sourceTree = "<group>"; };
++		PK02A1000000000000000003 /* PaktayWalletInbox.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PaktayWalletInbox.m; path = FinanceApp/PaktayWalletInbox.m; sourceTree = "<group>"; };
+ /* End PBXFileReference section */
+ 
+ /* Begin PBXFrameworksBuildPhase section */
+@@ -129,13 +129,6 @@
+ 			name = Frameworks;
+ 			sourceTree = "<group>";
+ 		};
+-		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
+-			isa = PBXGroup;
+-			children = (
+-			);
+-			name = Libraries;
+-			sourceTree = "<group>";
+-		};
+ 		7A3B9C0000000000000000C0 /* PaktayWidget */ = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -149,6 +142,13 @@
+ 			path = PaktayWidget;
+ 			sourceTree = "<group>";
+ 		};
++		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
++			isa = PBXGroup;
++			children = (
++			);
++			name = Libraries;
++			sourceTree = "<group>";
++		};
+ 		83CBB9F61A601CBA00E9B192 = {
+ 			isa = PBXGroup;
+ 			children = (
+@@ -459,6 +459,66 @@
+ 			};
+ 			name = Release;
+ 		};
++		7A3B9C0000000000000000C6 /* Debug */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
++				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
++				CODE_SIGN_ENTITLEMENTS = PaktayWidget/PaktayWidget.entitlements;
++				CODE_SIGN_STYLE = Automatic;
++				CURRENT_PROJECT_VERSION = 2026091402;
++				DEVELOPMENT_TEAM = V2N4DBD5CF;
++				GENERATE_INFOPLIST_FILE = NO;
++				INFOPLIST_FILE = PaktayWidget/Info.plist;
++				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
++				LD_RUNPATH_SEARCH_PATHS = (
++					"$(inherited)",
++					"@executable_path/Frameworks",
++					"@executable_path/../../Frameworks",
++				);
++				MARKETING_VERSION = 1.0;
++				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.FinanceApp.PaktayWidget;
++				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.rocketsoftwarecore.paktay.mobile.widget;
++				PRODUCT_NAME = "$(TARGET_NAME)";
++				SKIP_INSTALL = YES;
++				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
++				SWIFT_EMIT_LOC_STRINGS = YES;
++				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
++				SWIFT_VERSION = 5.0;
++				TARGETED_DEVICE_FAMILY = "1,2";
++			};
++			name = Debug;
++		};
++		7A3B9C0000000000000000C7 /* Release */ = {
++			isa = XCBuildConfiguration;
++			buildSettings = {
++				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
++				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
++				CODE_SIGN_ENTITLEMENTS = PaktayWidget/PaktayWidget.entitlements;
++				CODE_SIGN_STYLE = Automatic;
++				CURRENT_PROJECT_VERSION = 2026091402;
++				DEVELOPMENT_TEAM = V2N4DBD5CF;
++				GENERATE_INFOPLIST_FILE = NO;
++				INFOPLIST_FILE = PaktayWidget/Info.plist;
++				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
++				LD_RUNPATH_SEARCH_PATHS = (
++					"$(inherited)",
++					"@executable_path/Frameworks",
++					"@executable_path/../../Frameworks",
++				);
++				MARKETING_VERSION = 1.0;
++				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.FinanceApp.PaktayWidget;
++				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.rocketsoftwarecore.paktay.mobile.widget;
++				PRODUCT_NAME = "$(TARGET_NAME)";
++				SKIP_INSTALL = YES;
++				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
++				SWIFT_EMIT_LOC_STRINGS = YES;
++				SWIFT_OPTIMIZATION_LEVEL = "-O";
++				SWIFT_VERSION = 5.0;
++				TARGETED_DEVICE_FAMILY = "1,2";
++			};
++			name = Release;
++		};
+ 		83CBBA201A601CBA00E9B192 /* Debug */ = {
+ 			isa = XCBuildConfiguration;
+ 			buildSettings = {
+@@ -617,66 +677,6 @@
+ 			};
+ 			name = Release;
+ 		};
+-		7A3B9C0000000000000000C6 /* Debug */ = {
+-			isa = XCBuildConfiguration;
+-			buildSettings = {
+-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+-				CODE_SIGN_ENTITLEMENTS = PaktayWidget/PaktayWidget.entitlements;
+-				CODE_SIGN_STYLE = Automatic;
+-				CURRENT_PROJECT_VERSION = 2026091402;
+-				DEVELOPMENT_TEAM = V2N4DBD5CF;
+-				GENERATE_INFOPLIST_FILE = NO;
+-				INFOPLIST_FILE = PaktayWidget/Info.plist;
+-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+-				LD_RUNPATH_SEARCH_PATHS = (
+-					"$(inherited)",
+-					"@executable_path/Frameworks",
+-					"@executable_path/../../Frameworks",
+-				);
+-				MARKETING_VERSION = 1.0;
+-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.FinanceApp.PaktayWidget;
+-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.rocketsoftwarecore.paktay.mobile.widget;
+-				PRODUCT_NAME = "$(TARGET_NAME)";
+-				SKIP_INSTALL = YES;
+-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+-				SWIFT_EMIT_LOC_STRINGS = YES;
+-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+-				SWIFT_VERSION = 5.0;
+-				TARGETED_DEVICE_FAMILY = "1,2";
+-			};
+-			name = Debug;
+-		};
+-		7A3B9C0000000000000000C7 /* Release */ = {
+-			isa = XCBuildConfiguration;
+-			buildSettings = {
+-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+-				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+-				CODE_SIGN_ENTITLEMENTS = PaktayWidget/PaktayWidget.entitlements;
+-				CODE_SIGN_STYLE = Automatic;
+-				CURRENT_PROJECT_VERSION = 2026091402;
+-				DEVELOPMENT_TEAM = V2N4DBD5CF;
+-				GENERATE_INFOPLIST_FILE = NO;
+-				INFOPLIST_FILE = PaktayWidget/Info.plist;
+-				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
+-				LD_RUNPATH_SEARCH_PATHS = (
+-					"$(inherited)",
+-					"@executable_path/Frameworks",
+-					"@executable_path/../../Frameworks",
+-				);
+-				MARKETING_VERSION = 1.0;
+-				PRODUCT_BUNDLE_IDENTIFIER = org.reactjs.native.example.FinanceApp.PaktayWidget;
+-				"PRODUCT_BUNDLE_IDENTIFIER[sdk=iphoneos*]" = com.rocketsoftwarecore.paktay.mobile.widget;
+-				PRODUCT_NAME = "$(TARGET_NAME)";
+-				SKIP_INSTALL = YES;
+-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+-				SWIFT_EMIT_LOC_STRINGS = YES;
+-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+-				SWIFT_VERSION = 5.0;
+-				TARGETED_DEVICE_FAMILY = "1,2";
+-			};
+-			name = Release;
+-		};
+ /* End XCBuildConfiguration section */
+ 
+ /* Begin XCConfigurationList section */
+@@ -689,20 +689,20 @@
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Release;
+ 		};
+-		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FinanceApp" */ = {
++		7A3B9C0000000000000000C5 /* Build configuration list for PBXNativeTarget "PaktayWidget" */ = {
+ 			isa = XCConfigurationList;
+ 			buildConfigurations = (
+-				83CBBA201A601CBA00E9B192 /* Debug */,
+-				83CBBA211A601CBA00E9B192 /* Release */,
++				7A3B9C0000000000000000C6 /* Debug */,
++				7A3B9C0000000000000000C7 /* Release */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Release;
+ 		};
+-		7A3B9C0000000000000000C5 /* Build configuration list for PBXNativeTarget "PaktayWidget" */ = {
++		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "FinanceApp" */ = {
+ 			isa = XCConfigurationList;
+ 			buildConfigurations = (
+-				7A3B9C0000000000000000C6 /* Debug */,
+-				7A3B9C0000000000000000C7 /* Release */,
++				83CBBA201A601CBA00E9B192 /* Debug */,
++				83CBBA211A601CBA00E9B192 /* Release */,
+ 			);
+ 			defaultConfigurationIsVisible = 0;
+ 			defaultConfigurationName = Release;
+diff --git a/ios/PaktayWidget/Info.plist b/ios/PaktayWidget/Info.plist
+index 8432248..541dcab 100644
+--- a/ios/PaktayWidget/Info.plist
++++ b/ios/PaktayWidget/Info.plist
+@@ -25,5 +25,7 @@
+ 		<key>NSExtensionPointIdentifier</key>
+ 		<string>com.apple.widgetkit-extension</string>
+ 	</dict>
++	<key>RCTNewArchEnabled</key>
++	<true/>
+ </dict>
+ </plist>
+diff --git a/ios/Podfile.lock b/ios/Podfile.lock
+index f8a063b..1b6ba12 100644
+--- a/ios/Podfile.lock
++++ b/ios/Podfile.lock
+@@ -2304,7 +2304,7 @@ EXTERNAL SOURCES:
+ SPEC CHECKSUMS:
+   AsyncStorage: 163ab23f6aa37a58b7f2379d0b4ee7ac84d6655c
+   FBLazyVector: 3c3be9a019176b5699455f7f66c5444b78a411c6
+-  hermes-engine: 088adb881577d81db68ac5d55c7dd46ff206866e
++  hermes-engine: a885f19ab67aaae51c7d0a75ef0395739ed969ce
+   RCTDeprecation: bccb6545c26db881ecddfd83a3f9ea82aba1605f
+   RCTRequired: b2f74764d596fc0051f00fee94b49bf41a6f7f5a
+   RCTSwiftUI: c6d6a31b849b9dfa64c33b55dc91ac15dd55774c
+@@ -2313,7 +2313,7 @@ SPEC CHECKSUMS:
+   React: 4b2532a459d15e1adf6c22d3e399e5c85a94220f
+   React-callinvoker: 0b8ce4057e02a0bd15cf0532596e8eb8c0392e92
+   React-Core: 5af045531a540ba3f65f07de1e3f585ddfb27948
+-  React-Core-prebuilt: 39eb00d8ba4922167a3a70e2039b102fe42b6fe1
++  React-Core-prebuilt: 405cf395d66cf694faf9aed3483a21b5515cec85
+   React-CoreModules: 99b194a721de84ccfc1be149a0de52647dc38c0e
+   React-cxxreact: b7e8e254074fd8111d147202b391ccf7816946a6
+   React-debug: 6bc17013f4dc724c23c91e1c83220251d1eacee6
