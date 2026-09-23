@@ -96,6 +96,21 @@ Todos requieren `Authorization: Bearer <access_token>`.
 | Listar dispositivos | `GET /api/v1/security/devices` | business-svc |
 | Eliminar dispositivo | `DELETE /api/v1/security/devices/{deviceId}` | business-svc |
 | Cambiar contraseña | `PUT /api/v1/auth/password` | auth-svc |
+| Consultar perfil (incluye `timezone`, `countryCode`) | `GET /api/v1/user/profile` | business-svc |
+| Cambiar zona horaria y país | `PUT /api/v1/user/profile/context` | business-svc |
+| Eliminar tarjeta (borrado lógico) | `DELETE /api/v1/user/cards/{cardId}` | business-svc |
+
+Desde el día 3 (V4):
+
+- `PUT /api/v1/user/profile/context` recibe `{ "timezone": "America/Guayaquil", "countryCode": "EC" }`.
+  La zona debe ser IANA; el país, dos letras mayúsculas. La app debería enviar la zona del
+  teléfono al iniciar sesión si difiere de la del perfil: el mes de los presupuestos y los
+  filtros `from`/`to` del historial se calculan con ella.
+- Eliminar una tarjeta la pasa a `DELETED`: desaparece de `GET /api/v1/user/cards`, no se
+  reactiva y sus gastos se conservan. Los gastos traen `cardStatus` para mostrar "Eliminada".
+- `ExpenseResponse` suma `cardStatus`, `kind` (`EXPENSE`/`REFUND`), `status` (`ACTIVE`/`VOIDED`)
+  y `assignedByRule`. `POST /api/v1/user/expenses` acepta `assignedByRule` opcional
+  (`false` por defecto) para marcar capturas asignadas por una regla del teléfono.
 
 ### Registrar una tarjeta
 

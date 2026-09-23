@@ -8,6 +8,9 @@ en `business-svc/src/main/resources/db/migration/`:
   atajo, la credencial del atajo y los pagos no registrados.
 - `V3__catalogos.sql`: 7 monedas, 29 bancos, 38 ofertas de tarjeta y 22 categorías del
   sistema, volcados de la base de pruebas. Idempotente (`ON CONFLICT DO NOTHING`).
+- `V4__contexto_estados_duo.sql`: zona horaria y país del usuario, tarjetas `DELETED`,
+  estados de gasto, tablas preparatorias de Duo, consentimientos y suscripciones, bancos
+  por país / propios, y purga de `audit_log` a 90 días.
 
 Una base nueva se crea sola al arrancar `business-svc`. En una base que ya existía sin
 historial de Flyway, `V1` se marca como baseline y se aplican `V2` en adelante.

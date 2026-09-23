@@ -282,6 +282,37 @@ propia para el Atajo.
 El esquema lo aplica Flyway al arrancar `business-svc`; no se ejecuta SQL a mano. Ver
 `database/README.md`.
 
+## Contexto del usuario, estados y auditoría (V4, día 3)
+
+- **Zona horaria y país.** `app_users.timezone` (IANA, por defecto `America/Guayaquil`) y
+  `app_users.country_code` (por defecto `EC`). Se cambian con
+  `PUT /api/v1/user/profile/context` `{ "timezone": "America/Guayaquil", "countryCode": "EC" }`
+  y se leen en `GET /api/v1/user/profile`. Se rechazan zonas desconocidas y desplazamientos
+  fijos (`+05:00`), porque PostgreSQL invierte su signo.
+- **Mes en la zona del usuario.** El período actual es
+  `date_trunc('month', now() at time zone u.timezone)`, y lo gastado en un período compara
+  `occurred_at` con los límites del mes convertidos con esa zona. Los filtros `from`/`to` de
+  `GET /api/v1/user/expenses` son días del calendario del usuario. El trigger de período
+  cerrado de `expenses` usa la misma regla.
+- **Tarjetas eliminadas.** `DELETE /api/v1/user/cards/{id}` ya no borra la fila: la pasa a
+  `DELETED` (con `deactivated_at` y `name = null`), exige 3 meses sin consumos, vale desde
+  `ACTIVE` o `INACTIVE` y no se revierte. `GET /cards` no la devuelve; sus gastos siguen
+  contando y `ExpenseResponse.cardStatus` la marca como `DELETED`.
+- **Estados de gasto.** `expenses.kind` (`EXPENSE`/`REFUND`), `status` (`ACTIVE`/`VOIDED`),
+  `voided_by_expense_id`, `assigned_by_rule`, `space_id`. Aún no hay rutas para anular ni
+  reembolsar (día 4). Mientras tanto **las sumas y conteos de consumo sólo cuentan
+  `status = 'ACTIVE' and kind = 'EXPENSE'`** (presupuestos y conteo de uso reciente de una
+  tarjeta). La guarda de borrado de categorías cuenta cualquier gasto porque protege una FK.
+  El trigger permite cambiar tarjeta (sólo hacia una `ACTIVE`) y categoría, nunca usuario ni
+  fecha; `VOIDED` no vuelve a `ACTIVE`.
+- **Preparatorio sin rutas.** `spaces`, `space_members` (un Duo activo por usuario, máximo dos
+  miembros activos), `user_consent`, `user_subscription`, `subscription_event`, y bancos por
+  país / bancos `CUSTOM` por usuario. `GET /catalog/banks` sólo devuelve `origin = 'SYSTEM'`.
+- **Auditoría.** `AuditService` escribe en `audit_log`: gasto creado (origen y
+  `assignedByRule`), tarjeta desactivada, reactivada y eliminada, nombre de Wallet asociado y
+  quitado. Sin datos personales. Un job diario (03:30, hora del servidor) purga filas de más
+  de 90 días; el trigger `audit_log_no_delete` sólo admite borrar esas filas.
+
 ## Respaldo básico
 
 ```bash

@@ -78,14 +78,26 @@ public class BudgetService {
                 .param("amount", amount).param("active", active).update();
     }
 
+    /**
+     * Presupuesto del período con lo gastado. El mes del período es un mes del
+     * calendario del usuario: sus límites se convierten a instantes con
+     * app_users.timezone antes de compararlos con occurred_at (timestamptz).
+     * Sólo suman gastos ACTIVE de tipo EXPENSE: los anulados (VOIDED) y los
+     * reembolsos (REFUND) quedan fuera hasta que el día 4 defina cómo se compensan.
+     * Los gastos de tarjetas desactivadas o eliminadas siguen sumando.
+     */
     private BudgetResponse response(UUID userId, UUID periodId) {
         Settings settings = jdbc.sql("""
                 select fp.period_month, s.global_amount, coalesce(s.currency_code, 'USD') currency_code,
                        coalesce((select sum(e.amount_usd) from expenses e
-                                  where e.user_id = :userId and e.occurred_at >= fp.period_month
-                                    and e.occurred_at < fp.period_month + interval '1 month'), 0) spent_amount,
+                                  where e.user_id = :userId
+                                    and e.status = 'ACTIVE' and e.kind = 'EXPENSE'
+                                    and e.occurred_at >= (fp.period_month::timestamp at time zone u.timezone)
+                                    and e.occurred_at < ((fp.period_month + interval '1 month') at time zone u.timezone)), 0) spent_amount,
                        coalesce(s.recurrence, 'THIS_MONTH') recurrence
-                  from financial_periods fp left join user_budget_settings s on s.period_id = fp.id and s.user_id = fp.user_id
+                  from financial_periods fp
+                  join app_users u on u.id = fp.user_id
+                  left join user_budget_settings s on s.period_id = fp.id and s.user_id = fp.user_id
                  where fp.id = :periodId and fp.user_id = :userId
                 """).param("periodId", periodId).param("userId", userId).query((rs, rowNum) ->
                         new Settings(rs.getObject("period_month", LocalDate.class), rs.getBigDecimal("global_amount"),
@@ -94,13 +106,16 @@ public class BudgetService {
                 select uc.id, uc.alias, uc.icon, uc.color_dark, uc.color_light, b.individual_amount, b.active,
                        coalesce((select sum(e.amount_usd) from expenses e
                                   where e.user_id = :userId and e.category_id = uc.id
-                                    and e.occurred_at >= :periodMonth
-                                    and e.occurred_at < :periodMonth + interval '1 month'), 0) spent_amount
-                  from user_category_budgets b join user_categories uc on uc.id = b.category_id
+                                    and e.status = 'ACTIVE' and e.kind = 'EXPENSE'
+                                    and e.occurred_at >= (fp.period_month::timestamp at time zone u.timezone)
+                                    and e.occurred_at < ((fp.period_month + interval '1 month') at time zone u.timezone)), 0) spent_amount
+                  from user_category_budgets b
+                  join user_categories uc on uc.id = b.category_id
+                  join financial_periods fp on fp.id = b.period_id
+                  join app_users u on u.id = b.user_id
                  where b.user_id = :userId and b.period_id = :periodId and b.active
                  order by uc.sort_order, uc.alias
-                """).param("userId", userId).param("periodId", periodId)
-                .param("periodMonth", settings.month()).query((rs, rowNum) ->
+                """).param("userId", userId).param("periodId", periodId).query((rs, rowNum) ->
                         new CategoryBudgetResponse(rs.getObject("id", UUID.class), rs.getString("alias"),
                                 rs.getString("icon"), rs.getString("color_dark"), rs.getString("color_light"),
                                 rs.getBigDecimal("individual_amount"), rs.getBoolean("active"),
@@ -109,10 +124,15 @@ public class BudgetService {
                 settings.spentAmount(), categories);
     }
 
+    /**
+     * Período del mes actual en la zona horaria del usuario (no en la del servidor),
+     * creado si aún no existe, y copia de la plantilla MONTHLY del período anterior.
+     */
     private UUID currentPeriod(UUID userId) {
         UUID periodId = jdbc.sql("""
                 insert into financial_periods (user_id, period_month)
-                values (:userId, date_trunc('month', current_date)::date)
+                select u.id, date_trunc('month', now() at time zone u.timezone)::date
+                  from app_users u where u.id = :userId
                 on conflict (user_id, period_month) do update set period_month = excluded.period_month
                 returning id
                 """).param("userId", userId).query(UUID.class).single();
@@ -120,7 +140,8 @@ public class BudgetService {
                 with previous as (
                     select s.global_amount, s.currency_code, s.recurrence, s.period_id
                       from user_budget_settings s join financial_periods fp on fp.id = s.period_id
-                     where s.user_id = :userId and fp.period_month < date_trunc('month', current_date)::date
+                     where s.user_id = :userId
+                       and fp.period_month < (select cur.period_month from financial_periods cur where cur.id = :periodId)
                        and s.recurrence = 'MONTHLY'
                      order by fp.period_month desc limit 1
                 ), copied as (

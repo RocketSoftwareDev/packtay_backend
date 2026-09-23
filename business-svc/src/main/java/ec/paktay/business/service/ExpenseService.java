@@ -3,6 +3,7 @@ package ec.paktay.business.service;
 import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import ec.paktay.business.dto.CreateExpenseRequest;
@@ -15,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class ExpenseService {
     private final JdbcClient jdbc;
     private final UserAccountService users;
+    private final AuditService audit;
 
-    public ExpenseService(JdbcClient jdbc, UserAccountService users) {
+    public ExpenseService(JdbcClient jdbc, UserAccountService users, AuditService audit) {
         this.jdbc = jdbc;
         this.users = users;
+        this.audit = audit;
     }
 
     @Transactional
@@ -31,20 +34,24 @@ public class ExpenseService {
         ensureCategory(userId, request.categoryId());
         ensureCurrency(request.currencyCode());
         BigDecimal rate = request.exchangeRateToUsd() == null ? BigDecimal.ONE : request.exchangeRateToUsd();
+        boolean assignedByRule = Boolean.TRUE.equals(request.assignedByRule());
         UUID expenseId = jdbc.sql("""
                 insert into expenses (user_id, idempotency_key, card_id, category_id, origin, amount,
                     currency_code, exchange_rate_to_usd, merchant_raw, merchant_normalized,
-                    normalization_version, occurred_at, is_recurring, recurrence_day)
+                    normalization_version, occurred_at, is_recurring, recurrence_day, assigned_by_rule)
                 values (:userId, :key, :cardId, :categoryId, 'MANUAL', :amount, :currency, :rate,
-                    :merchant, :normalized, 1, :occurredAt, :recurring, :recurrenceDay)
+                    :merchant, :normalized, 1, :occurredAt, :recurring, :recurrenceDay, :assignedByRule)
                 returning id
                 """).param("userId", userId).param("key", request.idempotencyKey())
                 .param("cardId", request.cardId()).param("categoryId", request.categoryId())
                 .param("amount", request.amount()).param("currency", request.currencyCode()).param("rate", rate)
                 .param("merchant", request.merchant().trim()).param("normalized", normalize(request.merchant()))
                 .param("occurredAt", request.occurredAt()).param("recurring", request.recurring())
-                .param("recurrenceDay", request.recurrenceDay()).query(UUID.class).single();
+                .param("recurrenceDay", request.recurrenceDay()).param("assignedByRule", assignedByRule)
+                .query(UUID.class).single();
         remember(userId, request.merchant().trim(), normalize(request.merchant()), request.categoryId());
+        audit.record(userId, "CREATE", "expense", expenseId,
+                Map.of("origin", "MANUAL", "assignedByRule", assignedByRule));
         return findOne(userId, expenseId);
     }
 
@@ -68,18 +75,9 @@ public class ExpenseService {
     }
 
     private ExpenseResponse findOne(UUID userId, UUID expenseId) {
-        return jdbc.sql("""
-                select e.id, c.id as card_id, c.name as card_name, uc.id as category_id, uc.name as category_name,
-                       e.origin::text, e.amount, e.currency_code, e.merchant_raw, e.occurred_at
-                  from expenses e join cards c on c.id = e.card_id
-                  join user_categories uc on uc.id = e.category_id
-                 where e.user_id = :userId and e.id = :expenseId
-                """).param("userId", userId).param("expenseId", expenseId).query((rs, rowNum) ->
-                        new ExpenseResponse(rs.getObject("id", UUID.class), rs.getObject("card_id", UUID.class),
-                                rs.getString("card_name"), rs.getObject("category_id", UUID.class), rs.getString("category_name"),
-                                rs.getString("origin"), rs.getBigDecimal("amount"), rs.getString("currency_code"),
-                                rs.getString("merchant_raw"), rs.getObject("occurred_at", java.time.OffsetDateTime.class)))
-                .single();
+        return jdbc.sql(ExpenseQueryService.SELECT_EXPENSE + " where e.user_id = :userId and e.id = :expenseId")
+                .param("userId", userId).param("expenseId", expenseId)
+                .query(ExpenseQueryService::mapRow).single();
     }
 
     private void ensureCard(UUID userId, UUID cardId) {

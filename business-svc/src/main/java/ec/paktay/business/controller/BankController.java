@@ -31,7 +31,7 @@ public class BankController {
     public BankController(JdbcClient jdbc) { this.jdbc = jdbc; }
 
     @GetMapping
-    @Operation(summary = "Listar bancos disponibles", description = "Ruta autenticada. Devuelve únicamente entidades con oferta configurada e incluye supportedCardTypes y creditBrands para construir el formulario dinámico.")
+    @Operation(summary = "Listar bancos disponibles", description = "Ruta autenticada. Devuelve únicamente bancos del catálogo del sistema (origin = SYSTEM, nunca bancos creados por usuarios) con oferta configurada e incluye supportedCardTypes y creditBrands para construir el formulario dinámico.")
     @ApiResponse(responseCode = "200", description = "Entidades, tipos admitidos y marcas de crédito disponibles")
     @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public List<BankResponse> list(@AuthenticationPrincipal Jwt ignored) {
@@ -42,7 +42,7 @@ public class BankController {
                               where o.bank_id=b.id and o.active order by o.card_type) supported_types,
                        array(select distinct o.brand from bank_card_offerings o
                               where o.bank_id=b.id and o.active and o.card_type='CREDIT' order by o.brand) credit_brands
-                  from banks b where b.active
+                  from banks b where b.active and b.origin = 'SYSTEM'
                    and exists(select 1 from bank_card_offerings o where o.bank_id=b.id and o.active)
                  order by b.name
                 """).query(this::map).list();

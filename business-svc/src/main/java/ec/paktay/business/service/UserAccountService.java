@@ -1,5 +1,7 @@
 package ec.paktay.business.service;
 
+import java.time.DateTimeException;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -8,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserAccountService {
+    /** Zona por defecto de app_users.timezone (V4). */
+    public static final String DEFAULT_TIMEZONE = "America/Guayaquil";
+
     private final JdbcClient jdbc;
 
     public UserAccountService(JdbcClient jdbc) { this.jdbc = jdbc; }
@@ -19,5 +24,19 @@ public class UserAccountService {
         String status = jdbc.sql("select status from app_users where id = :id")
                 .param("id", userId).query(String.class).single();
         if (!"ACTIVE".equals(status)) throw new IllegalArgumentException("La cuenta se encuentra desactivada");
+    }
+
+    /**
+     * Zona horaria del usuario (app_users.timezone). Si la fila no existe o guarda
+     * una zona que Java no reconoce, usa {@link #DEFAULT_TIMEZONE}.
+     */
+    public ZoneId zoneOf(UUID userId) {
+        String timezone = jdbc.sql("select timezone from app_users where id = :id")
+                .param("id", userId).query(String.class).optional().orElse(DEFAULT_TIMEZONE);
+        try {
+            return ZoneId.of(timezone);
+        } catch (DateTimeException ex) {
+            return ZoneId.of(DEFAULT_TIMEZONE);
+        }
     }
 }

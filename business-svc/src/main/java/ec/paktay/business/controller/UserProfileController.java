@@ -3,6 +3,7 @@ package ec.paktay.business.controller;
 import java.io.IOException;
 import java.util.UUID;
 
+import ec.paktay.business.dto.UpdateProfileContextRequest;
 import ec.paktay.business.dto.UserProfileResponse;
 import ec.paktay.business.service.UserProfileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -34,10 +36,27 @@ public class UserProfileController {
 
     @GetMapping
     @Operation(summary = "Consultar mi perfil",
-            description = "Devuelve el perfil, isHaveCards e isHaveCategory, calculados a partir de las tarjetas y categorías activas del usuario.")
+            description = "Devuelve el perfil, isHaveCards e isHaveCategory, calculados a partir de las tarjetas y categorías activas del usuario, "
+                    + "y el contexto regional: timezone (IANA, por defecto America/Guayaquil) y countryCode (ISO alfa-2, por defecto EC).")
     @ApiResponse(responseCode = "200", description = "Perfil actual")
     public UserProfileResponse get(@AuthenticationPrincipal Jwt jwt) {
         return profiles.get(userId(jwt), jwt.getClaimAsString("email"), displayName(jwt));
+    }
+
+    @PutMapping(value = "/context", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Actualizar mi zona horaria y país",
+            description = "Ruta autenticada. Guarda la zona horaria IANA (por ejemplo America/Guayaquil) y el país ISO 3166-1 alfa-2 "
+                    + "(por ejemplo EC). La zona define el mes calendario de presupuestos, el presupuesto por tarjeta y los filtros "
+                    + "from/to del historial de gastos. Por defecto cada usuario tiene America/Guayaquil y EC. "
+                    + "Se rechazan zonas desconocidas y desplazamientos fijos como +05:00.")
+    @ApiResponse(responseCode = "200", description = "Perfil actualizado, con timezone y countryCode")
+    @ApiResponse(responseCode = "400", description = "Zona horaria inválida o countryCode que no son dos letras mayúsculas",
+            content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE))
+    @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
+    public UserProfileResponse updateContext(@AuthenticationPrincipal Jwt jwt,
+                                             @Valid @org.springframework.web.bind.annotation.RequestBody
+                                             UpdateProfileContextRequest request) {
+        return profiles.updateContext(userId(jwt), jwt.getClaimAsString("email"), displayName(jwt), request);
     }
 
     @PutMapping(value = "/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -20,5 +21,7 @@ public record CreateExpenseRequest(
         @NotBlank @Size(max = 180) String merchant,
         @NotNull OffsetDateTime occurredAt,
         boolean recurring,
-        Integer recurrenceDay) {
+        Integer recurrenceDay,
+        @Schema(description = "Opcional, false por defecto. true cuando el teléfono asignó tarjeta o categoría por una regla.")
+        Boolean assignedByRule) {
 }
