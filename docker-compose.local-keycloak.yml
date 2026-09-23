@@ -63,5 +63,27 @@ services:
       keycloak:
         condition: service_healthy
 
+  # Buzón de correo de prueba: auth-svc envía aquí los PIN de contraseña y se leen
+  # en http://127.0.0.1:28025. Nada sale a Internet.
+  mailpit:
+    image: axllent/mailpit:latest
+    mem_limit: 64m
+    restart: unless-stopped
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+    ports:
+      - "127.0.0.1:28025:8025"
+
+  auth-svc:
+    environment:
+      SMTP_HOST: mailpit
+      SMTP_PORT: "1025"
+      SMTP_SECURE: "false"
+      SMTP_STARTTLS: "false"
+    depends_on:
+      mailpit:
+        condition: service_started
+
 volumes:
   keycloak-local-data:

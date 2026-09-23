@@ -44,7 +44,7 @@ cd packtay_backend
 # 2. Backend: levantar aislado, con Keycloak propio en 28180 (nunca el de producción en 8180)
 C="docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml"
 $C config --services > "$LOGS/02-backend-up.log" 2>&1
-$C up --build -d keycloak-db keycloak business-db keycloak-init auth-svc business-svc >> "$LOGS/02-backend-up.log" 2>&1; echo "exit=$?" >> "$LOGS/02-backend-up.log"
+$C up --build -d keycloak-db keycloak mailpit business-db keycloak-init auth-svc business-svc >> "$LOGS/02-backend-up.log" 2>&1; echo "exit=$?" >> "$LOGS/02-backend-up.log"
 # Keycloak tarda en importar el realm: espera hasta 4 min a que los dos servicios respondan
 for i in $(seq 1 24); do curl -sf localhost:28082/actuator/health >/dev/null && break; sleep 10; done
 $C ps -a >> "$LOGS/02-backend-up.log" 2>&1
