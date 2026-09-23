@@ -90,8 +90,9 @@ cd ../..
 ## Resumen
 
 Escribe `$LOGS/RESUMEN.md` con una tabla: paso, OK o FALLO, y para cada fallo las
-primeras 20 líneas del error. Si `12-ios-build-full.log` pesa más de 5 MB, bórralo y
-deja sólo `12-ios-build.log`.
+primeras 20 líneas del error. No subas logs de más de 1 MB: de `12-ios-build-full.log`,
+`12-ios-build-widget.log` y `09-front-jest.log` deja sólo las últimas 300 líneas
+(`tail -n 300`). El resto se regenera si hace falta.
 
 ## Subir
 
