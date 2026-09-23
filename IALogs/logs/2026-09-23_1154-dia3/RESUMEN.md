@@ -62,6 +62,17 @@ categories|22
 `13-fresh-flyway.log` confirma migración secuencial de V1→V4 sin errores. `down -v` ejecutado
 (`14-fresh-down.log`, exit=0). `paktay-local` quedó detenido; `paktay-prod` no se tocó.
 
+## 5. Front: rama del día 3 (`feature/dia3-contexto-sesion`)
+
+Rama probada: `feature/dia3-contexto-sesion` (checkout desde el remoto). Resultados:
+
+| Chequeo | Resultado |
+|---|---|
+| `npm ci` | exit=0 |
+| `tsc --noEmit` | exit=0, sin errores (`16-front-tsc.log`) |
+| Jest | **51 suites PASS, 537 tests PASS, 0 fallos** (`17-front-jest.log`) |
+| `lint` | exit=0, **0 errores / 99 warnings** (`18-front-lint.log`) |
+
 ## Hallazgo relevante (no se cambió código)
 
 En el primer intento, el login del usuario recién registrado falló en Keycloak 26 con
