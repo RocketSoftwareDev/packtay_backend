@@ -85,14 +85,6 @@ public class UserProfileService {
         return find(userId);
     }
 
-    @Transactional
-    public UserProfileResponse updateAutomatic(UUID userId, String email, String displayName, boolean isAutomatic) {
-        synchronizeIdentity(userId, email, displayName);
-        jdbc.sql("update app_users set is_automatic = :isAutomatic where id = :id")
-                .param("isAutomatic", isAutomatic).param("id", userId).update();
-        return find(userId);
-    }
-
     private void synchronizeIdentity(UUID userId, String email, String displayName) {
         users.ensureActiveUser(userId);
         jdbc.sql("update app_users set email = :email, display_name = :name where id = :id")
@@ -101,7 +93,7 @@ public class UserProfileService {
 
     private UserProfileResponse find(UUID userId) {
         return jdbc.sql("""
-                select u.id, u.email, u.display_name, u.avatar_url, u.is_automatic, u.avatar_updated_at,
+                select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at,
                        exists(select 1 from cards c where c.user_id = u.id and c.status = 'ACTIVE') as is_have_cards,
                        exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active) as is_have_category
                   from app_users u
@@ -109,7 +101,7 @@ public class UserProfileService {
                 """)
                 .param("id", userId).query((rs, rowNum) -> new UserProfileResponse(
                         rs.getObject("id", UUID.class), rs.getString("email"), rs.getString("display_name"),
-                        rs.getString("avatar_url"), rs.getBoolean("is_automatic"), rs.getBoolean("is_have_cards"),
+                        rs.getString("avatar_url"), rs.getBoolean("is_have_cards"),
                         rs.getBoolean("is_have_category"),
                         rs.getObject("avatar_updated_at", OffsetDateTime.class))).single();
     }
