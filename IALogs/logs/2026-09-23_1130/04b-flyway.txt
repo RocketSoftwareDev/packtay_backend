@@ -1,0 +1,8 @@
+1|<< Flyway Baseline >>|t
+2|limpieza tablas muertas|t
+3|catalogos|t
+currencies|7
+banks|29
+bank_card_offerings|38
+system_categories|22
+exit=0
