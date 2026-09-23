@@ -1,0 +1,72 @@
+PASS __tests__/AddExpenseSheet.test.tsx
+PASS __tests__/ReviewQueueForms.test.tsx
+  ● Console
+PASS __tests__/AuthScreens.test.tsx
+  ● Console
+PASS __tests__/ProfileSettingsScreens.test.tsx
+PASS __tests__/profileContext.test.ts
+PASS __tests__/sessionEvents.test.ts
+PASS __tests__/EditCategoryRuleScreen.test.tsx
+PASS __tests__/CategoryScreens.test.tsx
+PASS __tests__/BankScreens.test.tsx
+  ● Console
+PASS __tests__/MovementScreens.test.tsx
+PASS __tests__/WalletShortcutScreen.test.tsx
+PASS __tests__/BudgetScreens.test.tsx
+  ● Console
+PASS __tests__/AnimatedSplash.test.tsx
+PASS __tests__/CardScreens.test.tsx
+PASS __tests__/AssociateWalletName.test.tsx
+  ● Console
+PASS __tests__/ProfileScreen.test.tsx
+  ● Console
+PASS __tests__/manualPendingExpense.test.ts
+PASS __tests__/CategoriesScreen.test.tsx
+  ● Console
+PASS __tests__/cards.test.ts
+PASS __tests__/moneyInput.test.ts
+PASS __tests__/FirstDayScreens.test.tsx
+  ● Console
+PASS __tests__/AutomatizacionesScreen.test.tsx
+PASS __tests__/theme.test.tsx
+  ● Console
+PASS __tests__/resolveOnboarding.test.ts
+  ● Console
+PASS __tests__/format.test.ts
+PASS __tests__/HomeSummaryScreen.test.tsx
+  ● Console
+PASS __tests__/WidgetTutorialScreen.test.tsx
+PASS __tests__/authSession.test.ts
+  ● Console
+PASS __tests__/parseExpenseLink.test.ts
+PASS __tests__/breakdowns.test.ts
+PASS __tests__/authValidate.test.ts
+PASS __tests__/categoryBudgets.test.ts
+PASS __tests__/categoryMerge.test.ts
+PASS __tests__/shortcutLink.test.ts
+PASS __tests__/customCategories.test.ts
+  ● Console
+PASS __tests__/useExpenseLinks.test.tsx
+PASS __tests__/movementFilters.test.ts
+PASS __tests__/cardFinishes.test.ts
+PASS __tests__/confirmDraft.test.ts
+PASS __tests__/HomeBudgetScreen.test.tsx
+  ● Console
+PASS __tests__/shortcutLinkPublished.test.ts
+PASS __tests__/manualExpense.test.ts
+PASS __tests__/authApi.test.ts
+  ● Console
+PASS __tests__/restoreSession.test.ts
+  ● Console
+PASS __tests__/pendingExpenses.test.ts
+PASS __tests__/passwordApi.test.ts
+PASS __tests__/App.test.tsx
+  ● Console
+PASS __tests__/shortcutStatus.test.ts
+PASS __tests__/monthlySummary.test.ts
+PASS __tests__/startupHealth.test.ts
+  ● Console
+PASS __tests__/bankCatalog.test.ts
+  ● Console
+Test Suites: 51 passed, 51 total
+Tests:       537 passed, 537 total

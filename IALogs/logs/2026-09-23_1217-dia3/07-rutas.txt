@@ -1,0 +1,18 @@
+GET perfil antes
+{"id":"69db8a07-46f9-49cb-9c7b-62994f45d3e4","email":"codex+1790183890@paktay.local","displayName":"Codex Prueba Paktay Test","avatarUrl":null,"isHaveCards":false,"isHaveCategory":false,"avatarUpdatedAt":null,"timezone":"America/Guayaquil","countryCode":"EC"} HTTP200
+PUT contexto valido
+{"id":"69db8a07-46f9-49cb-9c7b-62994f45d3e4","email":"codex+1790183890@paktay.local","displayName":"Codex Prueba Paktay Test","avatarUrl":null,"isHaveCards":false,"isHaveCategory":false,"avatarUpdatedAt":null,"timezone":"Pacific/Galapagos","countryCode":"EC"} HTTP200
+PUT zona invalida (esperado 400)
+{"message":"Zona horaria inválida: usa un identificador IANA como America/Guayaquil","requestId":"62a0e52b-63c9-4ecb-b4e4-9c054b672a9d"} HTTP400
+PUT pais invalido (esperado 400)
+{"message":"countryCode: must match \"^[A-Z]{2}$\"","requestId":"0837e782-435e-45bc-a20c-ff43b72f696b"} HTTP400
+GET perfil despues
+{"id":"69db8a07-46f9-49cb-9c7b-62994f45d3e4","email":"codex+1790183890@paktay.local","displayName":"Codex Prueba Paktay Test","avatarUrl":null,"isHaveCards":false,"isHaveCategory":false,"avatarUpdatedAt":null,"timezone":"Pacific/Galapagos","countryCode":"EC"} HTTP200
+GET tarjetas
+[] HTTP200
+GET presupuesto actual
+{"periodMonth":"2026-09-01","globalAmount":null,"currencyCode":"USD","recurrence":"THIS_MONTH","spentAmount":0,"categories":[]} HTTP200
+GET gastos
+[] HTTP200
+GET bancos (solo SYSTEM)
+17
