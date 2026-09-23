@@ -74,14 +74,32 @@ $F exec -T business-db psql -U paktay -d paktay -At -c "select 'currencies',coun
 $F logs --no-color business-svc | grep -iE "flyway|migrat|error|exception" > "$LOGS/13-fresh-flyway.log"
 $F down -v > "$LOGS/14-fresh-down.log" 2>&1
 git checkout develop
+cd ..
+```
+
+## 5. Front: rama del día 3
+
+```bash
+cd packtay_mobile_front
+git fetch origin && git checkout feature/dia3-contexto-sesion && git pull --ff-only
+npm ci > "$LOGS/15-front-npm-ci.log" 2>&1; echo "exit=$?" >> "$LOGS/15-front-npm-ci.log"
+npm run env > /dev/null 2>&1
+npx tsc --noEmit > "$LOGS/16-front-tsc.log" 2>&1; echo "exit=$?" >> "$LOGS/16-front-tsc.log"
+npx jest --ci > "$LOGS/17-front-jest-full.log" 2>&1; echo "exit=$?" >> "$LOGS/17-front-jest-full.log"
+grep -E "^(PASS|FAIL)|Tests:|Test Suites:|●" "$LOGS/17-front-jest-full.log" > "$LOGS/17-front-jest.log"
+tail -n 300 "$LOGS/17-front-jest-full.log" > "$LOGS/17-front-jest-tail.log"; rm "$LOGS/17-front-jest-full.log"
+npm run lint > "$LOGS/18-front-lint.log" 2>&1; echo "exit=$?" >> "$LOGS/18-front-lint.log"
+git checkout develop
+cd ../packtay_backend
 ```
 
 ## Resumen y subida
 
 `RESUMEN.md`: resultado de Maven, versiones de Flyway en local y en fresh (esperado 1 a 4),
 códigos HTTP de cada línea de `07-rutas.txt` (los dos PUT inválidos deben dar 400 y el
-perfil final debe mostrar `Pacific/Galapagos`), si OpenAPI incluye la ruta, y las primeras
-20 líneas de cualquier error o excepción.
+perfil final debe mostrar `Pacific/Galapagos`), si OpenAPI incluye la ruta, resultado de
+tsc, Jest (suites y tests fallidos con su nombre) y lint del front, y las primeras 20 líneas
+de cualquier error o excepción.
 
 ```bash
 git add IALogs/logs/$RUN
