@@ -1,0 +1,13 @@
+admin-login: OK (token_len=767)
+
+=== ESTADO FINAL (arreglo keycloak) ===
+keycloakservices-local	Up 3 minutes (healthy)	0.0.0.0:28180->8080/tcp
+paktay-local-business-svc-1	Up 23 minutes	0.0.0.0:28082->8082/tcp
+paktay-local-auth-svc-1	Up 23 minutes	0.0.0.0:28081->8081/tcp
+keycloakservices-local-db	Up 46 minutes (healthy)	5432/tcp
+---
+consola admin:      http://localhost:28180/admin  (realm master, usuario admin)
+realm paktay:       http://localhost:28180/realms/paktay/.well-known/openid-configuration
+usuarios realm paktay visibles via admin API (5): admin5265@gmail.com, admin@paktay.local, chriss@test.com, elmocoso@test.com, mv34613@gmail.com
+auth-svc :28081 -> 200 | business-svc :28082 -> 200
+NOTA: la clave entrante difiere del KEYCLOAK_ADMIN_PASSWORD del .env del that original; el volumen central se inicializo antes.
