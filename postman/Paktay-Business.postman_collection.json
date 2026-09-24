@@ -168,6 +168,20 @@
       ]
     },
     {
+      "name": "Resumen",
+      "item": [
+        {
+          "name": "Resumen del mes",
+          "request": {
+            "method": "GET",
+            "description": "Resumen de la pantalla de inicio. month (YYYY-MM) es opcional: sin él, mes actual en la zona horaria del perfil. Mes futuro o mal formado = 400. Mes pasado: daysLeft = 0.",
+            "url": { "raw": "{{businessUrl}}/api/v1/user/summary", "host": ["{{businessUrl}}"], "path": ["api", "v1", "user", "summary"], "query": [{ "key": "month", "value": "{{summaryMonth}}", "disabled": true }] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) {", "  const s = pm.response.json();", "  pm.test('daysLeft cuenta hoy (0 en un mes pasado)', () => { if (s.daysLeft > 0) pm.expect(s.daysLeft).to.eql(s.daysInMonth - s.dayOfMonth + 1); else pm.expect(s.dayOfMonth).to.eql(s.daysInMonth); });", "  pm.test('recent tiene como mucho 3 gastos', () => pm.expect(s.recent.length).to.be.at.most(3));", "}"] } }]
+        }
+      ]
+    },
+    {
       "name": "Dispositivos",
       "item": [
         {

@@ -23,7 +23,7 @@ public class BudgetController {
     public BudgetController(BudgetService budgets) { this.budgets = budgets; }
 
     @GetMapping
-    @Operation(summary = "Consultar mi presupuesto actual", description = "Ruta autenticada. Devuelve el global y sólo las categorías seleccionadas. individualAmount nulo significa que esa categoría hereda globalAmount; cada categoría heredada recibe ese monto como su propio límite.")
+    @Operation(summary = "Consultar mi presupuesto actual", description = "Ruta autenticada. Devuelve el global y sólo las categorías seleccionadas. individualAmount nulo significa que esa categoría hereda globalAmount; cada categoría heredada recibe ese monto como su propio límite. Totales con la misma regla que GET /api/v1/user/summary: effectiveAmount = individualAmount o, si es nulo, globalAmount; budgetAmount = suma de effectiveAmount de las categorías activas seleccionadas; spentAmount sólo suma gastos ACTIVE/EXPENSE en currencyCode; percent redondeado hacia abajo. Las categorías desactivadas no se listan ni suman.")
     @ApiResponse(responseCode = "200", description = "Presupuesto mensual consultado")
     public BudgetResponse current(@AuthenticationPrincipal Jwt jwt) {
         return budgets.current(UUID.fromString(jwt.getSubject()));

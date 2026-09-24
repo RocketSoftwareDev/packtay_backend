@@ -104,6 +104,7 @@ Todos requieren `Authorization: Bearer <access_token>`.
 | Consultar un gasto | `GET /api/v1/user/expenses/{id}` | business-svc |
 | Editar un gasto | `PUT /api/v1/user/expenses/{id}` | business-svc |
 | Anular un gasto | `POST /api/v1/user/expenses/{id}/void` | business-svc |
+| Resumen del mes (inicio) | `GET /api/v1/user/summary?month=YYYY-MM` | business-svc |
 
 Desde el día 3 (V4):
 
@@ -219,6 +220,124 @@ Sin cuerpo. Respuesta `200`:
   "Anulación: <comercio original>".
 - Idempotente: anular de nuevo devuelve el mismo par. Anular un `REFUND` devuelve `409`.
 - Funciona aunque la tarjeta ya esté inactiva o eliminada.
+
+## Resumen del mes
+
+`GET /api/v1/user/summary?month=YYYY-MM` (día 5). `month` es opcional: por defecto, el mes
+actual en la zona horaria del perfil. Un `month` mal formado o futuro devuelve `400`.
+
+Es la única fuente de números de la pantalla de inicio: la app no recalcula nada, sólo
+muestra. `GET /api/v1/user/budgets/current` usa las mismas reglas para sus totales.
+
+### Reglas
+
+- **Mes:** mes calendario en la zona horaria del usuario; vuelve a cero el día 1
+  (`resetsOn`). Con recurrencia `MONTHLY` el presupuesto pasa solo al mes siguiente.
+- **Presupuesto (`budget`):** suma del presupuesto efectivo de cada categoría **activa**
+  seleccionada en el presupuesto. Efectivo = su monto propio si lo tiene; si no, el global.
+  El global es un monto **por categoría**, no un tope: global 100, 10 categorías y una con
+  monto propio 50 = 950. Sin categorías con monto, `budget` es `null`.
+- **Gastado (`spent`):** gastos `ACTIVE` de tipo `EXPENSE` del mes en la moneda del
+  presupuesto (`currency`, USD por ahora). Los gastos en otra moneda no suman: se cuentan en
+  `otherCurrencyCount` para que la app pueda avisarlo.
+- **Días:** `daysLeft = daysInMonth - dayOfMonth + 1` (cuenta hoy: el 24 de septiembre
+  quedan 7). En un mes pasado `dayOfMonth = daysInMonth` y `daysLeft = 0`.
+- **Porcentajes:** siempre redondeados hacia abajo (99.6 % se muestra 99, nunca 100).
+  `percent = spent / budget * 100`; `elapsedPercent = dayOfMonth / daysInMonth * 100`.
+- **Ritmo (`pace`):** `NONE` sin presupuesto; `OVER` si `spent > budget`; `FAST` si
+  `percent > elapsedPercent + 10`; `OK` en el resto.
+- `available = budget - spent` (puede ser negativo, `null` sin presupuesto);
+  `overBy = max(spent - budget, 0)`.
+- **Estado de categoría:** `NO_BUDGET` sin presupuesto efectivo; `OVER` si `spent > budget`;
+  `AT_LIMIT` desde 90 % (incluye exactamente 100 %); `OK` en el resto.
+- **Categorías listadas:** las que tienen gasto en el mes (aunque no estén en el presupuesto o
+  estén desactivadas) y las activas seleccionadas aunque no tengan gasto. Orden: `spent` desc,
+  luego nombre. `name` es el alias visible de la categoría.
+- **Tarjetas:** todas las `ACTIVE` y las `INACTIVE`/`DELETED` con gasto en el mes. Orden:
+  activas primero, luego `spent` desc. `ownLimit` es el límite propio de la tarjeta para ese
+  mes (sólo texto, sin barra); `null` si no tiene.
+- **Recientes:** los 3 gastos `ACTIVE`/`EXPENSE` más recientes del mes, en formato
+  `ExpenseResponse` (cualquier moneda).
+
+### Respuesta
+
+```json
+{
+  "month": "2026-09",
+  "timezone": "America/Guayaquil",
+  "currency": "USD",
+  "daysInMonth": 30,
+  "dayOfMonth": 24,
+  "daysLeft": 7,
+  "resetsOn": "2026-10-01",
+  "budget": 950.00,
+  "spent": 812.40,
+  "available": 137.60,
+  "percent": 85,
+  "elapsedPercent": 80,
+  "pace": "OK",
+  "overBy": 0,
+  "otherCurrencyCount": 0,
+  "categories": [
+    {
+      "categoryId": "UUID",
+      "name": "Comida y restaurantes",
+      "icon": "utensils",
+      "colorDark": "#F59E0B",
+      "colorLight": "#D97706",
+      "budget": 100.00,
+      "budgetSource": "GLOBAL",
+      "spent": 104.50,
+      "percent": 104,
+      "overBy": 4.50,
+      "status": "OVER"
+    },
+    {
+      "categoryId": "UUID",
+      "name": "Mascotas",
+      "icon": "paw-print",
+      "colorDark": "#FDBA74",
+      "colorLight": "#C2410C",
+      "budget": null,
+      "budgetSource": null,
+      "spent": 12.00,
+      "percent": null,
+      "overBy": 0,
+      "status": "NO_BUDGET"
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "UUID",
+      "alias": "Visa del día a día",
+      "walletName": "VISA PLATINUM",
+      "bankName": "Banco Pichincha C.A.",
+      "bankLogoUrl": "https://...",
+      "status": "ACTIVE",
+      "spent": 640.10,
+      "ownLimit": 500.00
+    }
+  ],
+  "recent": [ExpenseResponse, ExpenseResponse, ExpenseResponse],
+  "counts": { "activeCategories": 12, "activeCards": 2 }
+}
+```
+
+`counts` sirve para los estados vacíos (sin tarjetas, sin categorías). Los montos llegan
+como números; la app los formatea con `currency`.
+
+### Cambios en `GET /api/v1/user/budgets/current`
+
+Aditivos, sin quitar campos:
+
+- `budgetAmount`, `availableAmount` y `percent` en la raíz, con las mismas reglas del resumen.
+- En cada categoría: `effectiveAmount` (monto propio o global), `budgetSource`
+  (`OWN`/`GLOBAL`/`null`), `percent` y `status`.
+- `spentAmount` (raíz y categoría) ahora suma sólo gastos en la moneda del presupuesto
+  (antes sumaba `amount_usd` de todas las monedas; con todo en USD el valor es el mismo).
+- Las categorías desactivadas ya no aparecen en la lista aunque sigan marcadas.
+
+## Tarjetas
 
 ### Registrar una tarjeta
 
