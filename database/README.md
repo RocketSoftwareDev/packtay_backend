@@ -11,6 +11,9 @@ en `business-svc/src/main/resources/db/migration/`:
 - `V4__contexto_estados_duo.sql`: zona horaria y país del usuario, tarjetas `DELETED`,
   estados de gasto, tablas preparatorias de Duo, consentimientos y suscripciones, bancos
   por país / propios, y purga de `audit_log` a 90 días.
+- `V5__anulacion_gastos.sql`: acción de auditoría `VOID` y alta de registros `REFUND` en
+  tarjetas inactivas o eliminadas (el requisito de tarjeta activa en el alta queda sólo
+  para `kind = 'EXPENSE'`).
 
 Una base nueva se crea sola al arrancar `business-svc`. En una base que ya existía sin
 historial de Flyway, `V1` se marca como baseline y se aplican `V2` en adelante.

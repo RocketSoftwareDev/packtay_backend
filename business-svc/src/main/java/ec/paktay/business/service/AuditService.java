@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * {@code data} va a {@code after_value} y nunca debe llevar datos personales
  * (correo, nombre, nombre de Wallet): sólo identificadores y banderas.
- * La acción debe existir en el enum audit_action (V1 + V4).
+ * La acción debe existir en el enum audit_action (V1 + V4 + V5: VOID).
  */
 @Service
 public class AuditService {

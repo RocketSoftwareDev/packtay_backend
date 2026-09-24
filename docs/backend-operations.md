@@ -272,7 +272,7 @@ Las tarjetas ya no dependen de un producto ni de una marca global. El móvil reg
 El historial de gastos vive en PostgreSQL, no en el almacenamiento local del teléfono:
 
 - `POST /api/v1/user/expenses`: crea un gasto; `idempotencyKey` evita duplicados.
-- `GET /api/v1/user/expenses`: consulta el historial persistido.
+- `GET /api/v1/user/expenses`: consulta el historial persistido, paginado (ver V5 abajo).
 
 Los consumos que llegan desde Apple Wallet los captura el Atajo de iOS, quedan en la
 bandeja local del teléfono y la app los envía con el JWT del usuario por la misma ruta
@@ -312,6 +312,28 @@ El esquema lo aplica Flyway al arrancar `business-svc`; no se ejecuta SQL a mano
   `assignedByRule`), tarjeta desactivada, reactivada y eliminada, nombre de Wallet asociado y
   quitado. Sin datos personales. Un job diario (03:30, hora del servidor) purga filas de más
   de 90 días; el trigger `audit_log_no_delete` sólo admite borrar esas filas.
+
+## Gastos desde el servidor: edición y anulación (V5, día 4)
+
+- **Historial paginado.** `GET /api/v1/user/expenses` devuelve `{ items, nextCursor }` con
+  paginación por clave (sin OFFSET): `occurred_at desc, id desc`, o con `since`
+  `updated_at asc, id asc` para la sincronización incremental del teléfono. `limit` 1..200
+  (50 por defecto). El cursor es Base64 opaco (`ExpenseCursor`). Detalle en
+  `docs/mobile-app-integration.md`.
+- **Detalle, edición y anulación.** `GET /{id}` (404 si no es del usuario), `PUT /{id}`
+  (tarjeta y categoría siempre; monto y comercio sólo en `MANUAL`; sólo `ACTIVE` + `EXPENSE`;
+  no toca `user_consumption_selections`) y `POST /{id}/void` (original a `VOIDED` + registro
+  `REFUND` con la misma fecha, tarjeta, categoría y monto; idempotente; fila bloqueada con
+  `FOR UPDATE`).
+- **V5.** Acción de auditoría `VOID` y `validate_expense_ownership` exige tarjeta `ACTIVE` en
+  el alta sólo para `kind = 'EXPENSE'`, para poder anular gastos de tarjetas inactivas o
+  eliminadas. La edición se audita como `UPDATE` (nombres de campos cambiados y montos).
+- **Errores.** `NotFoundException` → 404, `ConflictException` → 409, violaciones de
+  restricciones → 409 "Conflicto con datos existentes", `RAISE EXCEPTION` de triggers
+  (SQLSTATE `P0001`, por ejemplo período cerrado) → 409 con el mensaje del trigger, caída de
+  conexión → 503, otros errores SQL → 500.
+- **Idempotencia del alta.** `INSERT ... ON CONFLICT (user_id, idempotency_key) DO NOTHING`
+  cubre la carrera de dos reintentos simultáneos sin abortar la transacción.
 
 ## Respaldo básico
 

@@ -125,11 +125,45 @@
           "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.environment.set('expenseId', pm.response.json().id);"] } }]
         },
         {
-          "name": "Listar mis gastos",
+          "name": "Listar mis gastos (paginado)",
           "request": {
             "method": "GET",
-            "url": { "raw": "{{businessUrl}}/api/v1/user/expenses?from={{expenseFrom}}&to={{expenseTo}}", "host": ["{{businessUrl}}"], "path": ["api", "v1", "user", "expenses"], "query": [{ "key": "from", "value": "{{expenseFrom}}", "disabled": true }, { "key": "to", "value": "{{expenseTo}}", "disabled": true }, { "key": "cardId", "value": "{{cardId}}", "disabled": true }, { "key": "categoryId", "value": "{{categoryId}}", "disabled": true }] }
+            "description": "Devuelve { items, nextCursor }. Para la página siguiente activa cursor (se llena solo con nextCursor) y repite los mismos filtros.",
+            "url": { "raw": "{{businessUrl}}/api/v1/user/expenses?limit=50", "host": ["{{businessUrl}}"], "path": ["api", "v1", "user", "expenses"], "query": [{ "key": "limit", "value": "50" }, { "key": "cursor", "value": "{{expenseCursor}}", "disabled": true }, { "key": "from", "value": "{{expenseFrom}}", "disabled": true }, { "key": "to", "value": "{{expenseTo}}", "disabled": true }, { "key": "cardId", "value": "{{cardId}}", "disabled": true }, { "key": "categoryId", "value": "{{categoryId}}", "disabled": true }] }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200) {", "  const page = pm.response.json();", "  if (page.nextCursor) pm.environment.set('expenseCursor', page.nextCursor); else pm.environment.unset('expenseCursor');", "  if (page.items.length && !pm.environment.get('expenseId')) pm.environment.set('expenseId', page.items[0].id);", "}"] } }]
+        },
+        {
+          "name": "Sincronizar gastos desde (since)",
+          "request": {
+            "method": "GET",
+            "description": "Filas con updatedAt >= since, por updatedAt asc. Incluye VOIDED y REFUND. El cursor de esta consulta no sirve sin since.",
+            "url": { "raw": "{{businessUrl}}/api/v1/user/expenses?since={{expenseSince}}&limit=200", "host": ["{{businessUrl}}"], "path": ["api", "v1", "user", "expenses"], "query": [{ "key": "since", "value": "{{expenseSince}}" }, { "key": "limit", "value": "200" }, { "key": "cursor", "value": "{{expenseSyncCursor}}", "disabled": true }] }
+          },
+          "event": [
+            { "listen": "prerequest", "script": { "exec": ["if (!pm.environment.get('expenseSince')) pm.environment.set('expenseSince', '2026-01-01T00:00:00Z');"] } },
+            { "listen": "test", "script": { "exec": ["if (pm.response.code === 200) {", "  const page = pm.response.json();", "  if (page.nextCursor) pm.environment.set('expenseSyncCursor', page.nextCursor); else pm.environment.unset('expenseSyncCursor');", "}"] } }
+          ]
+        },
+        { "name": "Consultar un gasto", "request": { "method": "GET", "url": "{{businessUrl}}/api/v1/user/expenses/{{expenseId}}" } },
+        {
+          "name": "Editar gasto",
+          "request": {
+            "method": "PUT",
+            "description": "categoryId y cardId obligatorios. amount y merchantRaw opcionales, sólo en gastos MANUAL.",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"categoryId\": \"{{categoryId}}\",\n  \"cardId\": \"{{cardId}}\",\n  \"amount\": 15.00,\n  \"merchantRaw\": \"Comercio corregido\"\n}" },
+            "url": "{{businessUrl}}/api/v1/user/expenses/{{expenseId}}"
           }
+        },
+        {
+          "name": "Anular gasto",
+          "request": {
+            "method": "POST",
+            "description": "Devuelve { voided, refund }. Idempotente.",
+            "url": "{{businessUrl}}/api/v1/user/expenses/{{expenseId}}/void"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 200 && pm.response.json().refund) pm.environment.set('refundExpenseId', pm.response.json().refund.id);"] } }]
         }
       ]
     },
