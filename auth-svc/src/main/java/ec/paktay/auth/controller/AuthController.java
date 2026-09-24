@@ -1,6 +1,8 @@
 package ec.paktay.auth.controller;
 
 import ec.paktay.auth.config.KeycloakProperties;
+import ec.paktay.auth.dto.AccountDeletionRequest;
+import ec.paktay.auth.service.AccountDeletionService;
 import ec.paktay.auth.dto.LoginRequest;
 import ec.paktay.auth.dto.MessageResponse;
 import ec.paktay.auth.dto.OAuthConfigResponse;
@@ -32,9 +34,12 @@ public class AuthController {
     private final KeycloakIdentityService identities;
     private final KeycloakProperties properties;
     private final ec.paktay.auth.service.PasswordPinService pins;
+    private final AccountDeletionService accounts;
 
-    public AuthController(KeycloakIdentityService identities, KeycloakProperties properties, ec.paktay.auth.service.PasswordPinService pins) {
+    public AuthController(KeycloakIdentityService identities, KeycloakProperties properties, ec.paktay.auth.service.PasswordPinService pins,
+                          AccountDeletionService accounts) {
         this.pins = pins;
+        this.accounts = accounts;
         this.identities = identities;
         this.properties = properties;
     }
@@ -112,6 +117,20 @@ public class AuthController {
     @ApiResponse(responseCode = "500", description = "No fue posible verificar la identidad")
     public ec.paktay.auth.dto.PasswordVerificationResponse verifyReset(@Valid @RequestBody ec.paktay.auth.dto.PasswordVerifyRequest request) {
         return new ec.paktay.auth.dto.PasswordVerificationResponse(pins.verifyReset(request.email(), request.pin()), 600);
+    }
+
+    @PostMapping("/account/delete")
+    @Operation(summary = "Eliminar mi cuenta", description = "Ruta autenticada. Confirma la contraseña, borra de inmediato todos los datos del usuario "
+            + "(tarjetas, gastos, categorías, reglas, presupuestos, dispositivos y bitácora) y elimina la identidad en Keycloak, lo que cierra todas sus sesiones. "
+            + "Sólo se conserva el registro de compras de planes. Idempotente: si los datos ya se borraron y falló Keycloak, se puede repetir.")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponse(responseCode = "200", description = "Cuenta eliminada")
+    @ApiResponse(responseCode = "400", description = "Contraseña vacía o incorrecta")
+    @ApiResponse(responseCode = "401", description = "Token inválido")
+    @ApiResponse(responseCode = "502", description = "Los datos se borraron pero Keycloak no respondió; repetir la llamada")
+    public MessageResponse deleteAccount(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody AccountDeletionRequest request) {
+        accounts.delete(jwt.getSubject(), request.password());
+        return new MessageResponse("Cuenta eliminada");
     }
 
     @PostMapping("/password/verify")

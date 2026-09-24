@@ -3,6 +3,7 @@ package ec.paktay.business.controller;
 import java.util.List;
 import java.util.UUID;
 
+import ec.paktay.business.dto.CardLimitRequest;
 import ec.paktay.business.dto.CardResponse;
 import ec.paktay.business.dto.CreateCardRequest;
 import ec.paktay.business.dto.UpdateCardRequest;
@@ -41,6 +42,7 @@ public class CardController {
     @Operation(summary = "Registrar una tarjeta", description = "Ruta autenticada. El alias es el apodo del usuario y puede repetirse. El nombre de Wallet es OPCIONAL desde v0.20: la app ya no lo pide porque el usuario no sabe qué texto manda Wallet hasta que llega el primer consumo; se asocia después con PATCH /{cardId}/wallet-name. Si se envía, no puede estar asociado a otra tarjeta activa del usuario. CREDIT exige creditBrand permitido; DEBIT prohíbe marca.")
     @ApiResponse(responseCode = "201", description = "Tarjeta creada")
     @ApiResponse(responseCode = "400", description = "Banco, moneda o tarjeta inválidos, o nombre de Wallet ya asociado a otra tarjeta activa")
+    @ApiResponse(responseCode = "409", description = "Plan Free con 2 tarjetas registradas (activas o desactivadas): hay que pasar a Pro o eliminar una")
     public CardResponse register(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateCardRequest request) {
         return cards.register(UUID.fromString(jwt.getSubject()), request);
     }
@@ -60,6 +62,18 @@ public class CardController {
     public CardResponse update(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId,
                                @Valid @RequestBody UpdateCardRequest request) {
         return cards.update(UUID.fromString(jwt.getSubject()), cardId, request);
+    }
+
+    @PutMapping("/{cardId}/limit")
+    @Operation(summary = "Poner, cambiar o quitar mi límite mensual de una tarjeta", description = "Ruta autenticada. Es un tope que se pone el usuario, no el cupo del banco. "
+            + "Rige desde el mes actual (zona horaria del perfil) y se repite cada mes. amount null quita el límite desde este mes y no vuelve el mes siguiente. "
+            + "Sólo tarjetas activas.")
+    @ApiResponse(responseCode = "200", description = "Tarjeta con su límite del mes en currentPeriodBudget")
+    @ApiResponse(responseCode = "400", description = "La tarjeta no existe, no está activa o el monto no es positivo")
+    @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
+    public CardResponse setLimit(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID cardId,
+                                 @Valid @RequestBody CardLimitRequest request) {
+        return cards.setLimit(UUID.fromString(jwt.getSubject()), cardId, request.amount());
     }
 
     @PatchMapping("/{cardId}/deactivate")
