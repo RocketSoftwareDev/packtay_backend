@@ -1,0 +1,8 @@
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.032 s -- in ec.paktay.auth.service.KeycloakIdentityServiceTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.559 s -- in ec.paktay.auth.service.PasswordPinServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in ec.paktay.auth.service.PasswordMailServiceTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.044 s -- in ec.paktay.business.service.ExpenseCursorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in ec.paktay.business.exception.ApiExceptionHandlerTest
+[INFO] Tests run: 25, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
