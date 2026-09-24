@@ -2,28 +2,51 @@ package ec.paktay.business.service;
 
 import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import ec.paktay.business.dto.CreateExpenseRequest;
 import ec.paktay.business.dto.ExpenseResponse;
+import ec.paktay.business.dto.UpdateExpenseRequest;
+import ec.paktay.business.dto.VoidExpenseResponse;
+import ec.paktay.business.exception.ConflictException;
+import ec.paktay.business.exception.NotFoundException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ExpenseService {
+    /** Prefijo del comercio del registro compensatorio. merchant_raw admite 180 caracteres. */
+    static final String VOID_PREFIX = "Anulación: ";
+    private static final int MERCHANT_MAX = 180;
+
     private final JdbcClient jdbc;
     private final UserAccountService users;
     private final AuditService audit;
+    private final ExpenseQueryService query;
 
-    public ExpenseService(JdbcClient jdbc, UserAccountService users, AuditService audit) {
+    public ExpenseService(JdbcClient jdbc, UserAccountService users, AuditService audit, ExpenseQueryService query) {
         this.jdbc = jdbc;
         this.users = users;
         this.audit = audit;
+        this.query = query;
     }
 
+    /**
+     * Alta manual idempotente por (user_id, idempotency_key).
+     *
+     * La carrera de dos reintentos simultáneos se resuelve con ON CONFLICT DO NOTHING
+     * sobre el índice único parcial expenses_user_idempotency_uq, no atrapando
+     * DuplicateKeyException: en PostgreSQL un error deja la transacción abortada y el
+     * SELECT posterior fallaría. Si el INSERT no devuelve fila, otra transacción ya
+     * confirmó ese gasto y se devuelve el existente con el mismo cuerpo.
+     */
     @Transactional
     public ExpenseResponse createManual(UUID userId, CreateExpenseRequest request) {
         users.ensureActiveUser(userId);
@@ -35,12 +58,13 @@ public class ExpenseService {
         ensureCurrency(request.currencyCode());
         BigDecimal rate = request.exchangeRateToUsd() == null ? BigDecimal.ONE : request.exchangeRateToUsd();
         boolean assignedByRule = Boolean.TRUE.equals(request.assignedByRule());
-        UUID expenseId = jdbc.sql("""
+        Optional<UUID> inserted = jdbc.sql("""
                 insert into expenses (user_id, idempotency_key, card_id, category_id, origin, amount,
                     currency_code, exchange_rate_to_usd, merchant_raw, merchant_normalized,
                     normalization_version, occurred_at, is_recurring, recurrence_day, assigned_by_rule)
                 values (:userId, :key, :cardId, :categoryId, 'MANUAL', :amount, :currency, :rate,
                     :merchant, :normalized, 1, :occurredAt, :recurring, :recurrenceDay, :assignedByRule)
+                on conflict (user_id, idempotency_key) where idempotency_key is not null do nothing
                 returning id
                 """).param("userId", userId).param("key", request.idempotencyKey())
                 .param("cardId", request.cardId()).param("categoryId", request.categoryId())
@@ -48,11 +72,155 @@ public class ExpenseService {
                 .param("merchant", request.merchant().trim()).param("normalized", normalize(request.merchant()))
                 .param("occurredAt", request.occurredAt()).param("recurring", request.recurring())
                 .param("recurrenceDay", request.recurrenceDay()).param("assignedByRule", assignedByRule)
-                .query(UUID.class).single();
+                .query(UUID.class).optional();
+        if (inserted.isEmpty()) {
+            ExpenseResponse raced = findByIdempotency(userId, request.idempotencyKey());
+            if (raced == null) throw new IllegalStateException("Conflicto de idempotencia sin gasto existente");
+            return raced;
+        }
+        UUID expenseId = inserted.get();
         remember(userId, request.merchant().trim(), normalize(request.merchant()), request.categoryId());
         audit.record(userId, "CREATE", "expense", expenseId,
                 Map.of("origin", "MANUAL", "assignedByRule", assignedByRule));
-        return findOne(userId, expenseId);
+        return query.findOne(userId, expenseId);
+    }
+
+    /**
+     * Edición de un gasto propio. Tarjeta y categoría siempre; monto y comercio sólo
+     * en gastos MANUAL. Sólo gastos ACTIVE de tipo EXPENSE. No toca
+     * user_consumption_selections: editar nunca enseña ni cambia reglas.
+     */
+    @Transactional
+    public ExpenseResponse update(UUID userId, UUID expenseId, UpdateExpenseRequest request) {
+        users.ensureActiveUser(userId);
+        Current current = lockOwned(userId, expenseId);
+        if (!"EXPENSE".equals(current.kind())) {
+            throw new ConflictException("Un registro de anulación no se puede editar");
+        }
+        if (!"ACTIVE".equals(current.status())) {
+            throw new ConflictException("Un gasto anulado no se puede editar");
+        }
+        boolean manual = "MANUAL".equals(current.origin());
+
+        List<String> changed = new ArrayList<>();
+        Map<String, Object> data = new LinkedHashMap<>();
+
+        BigDecimal amount = current.amount();
+        if (request.amount() != null && request.amount().compareTo(current.amount()) != 0) {
+            if (!manual) throw new IllegalArgumentException("El monto de un gasto capturado por Wallet no se puede cambiar");
+            amount = request.amount();
+            changed.add("amount");
+            data.put("amountBefore", current.amount());
+            data.put("amountAfter", amount);
+        }
+
+        String merchant = current.merchantRaw();
+        if (request.merchantRaw() != null) {
+            String trimmed = request.merchantRaw().trim();
+            if (trimmed.isEmpty()) throw new IllegalArgumentException("merchantRaw no puede estar vacío");
+            if (!trimmed.equals(current.merchantRaw())) {
+                if (!manual) throw new IllegalArgumentException("El comercio de un gasto capturado por Wallet no se puede cambiar");
+                merchant = trimmed;
+                changed.add("merchantRaw");
+            }
+        }
+
+        if (!request.cardId().equals(current.cardId())) {
+            ensureCard(userId, request.cardId());
+            changed.add("cardId");
+        }
+        if (!request.categoryId().equals(current.categoryId())) {
+            ensureCategory(userId, request.categoryId());
+            changed.add("categoryId");
+        }
+
+        if (changed.isEmpty()) return query.findOne(userId, expenseId);
+
+        boolean merchantChanged = changed.contains("merchantRaw");
+        jdbc.sql("""
+                update expenses
+                   set card_id = :cardId, category_id = :categoryId, amount = :amount,
+                       merchant_raw = :merchant,
+                       merchant_normalized = case when :merchantChanged then :normalized else merchant_normalized end,
+                       normalization_version = case when :merchantChanged then 1 else normalization_version end
+                 where id = :id and user_id = :userId
+                """).param("cardId", request.cardId()).param("categoryId", request.categoryId())
+                .param("amount", amount).param("merchant", merchant)
+                .param("merchantChanged", merchantChanged).param("normalized", normalize(merchant))
+                .param("id", expenseId).param("userId", userId).update();
+
+        data.put("fields", changed);
+        data.put("origin", current.origin());
+        audit.record(userId, "UPDATE", "expense", expenseId, data);
+        return query.findOne(userId, expenseId);
+    }
+
+    /**
+     * Anulación: el original pasa a VOIDED y deja de contar, y se inserta un registro
+     * REFUND ACTIVE con el mismo usuario, tarjeta, categoría, moneda, monto (positivo),
+     * origen y fecha del original, para que quede en el mismo mes. Todo en una
+     * transacción y con la fila original bloqueada (FOR UPDATE), así dos anulaciones
+     * simultáneas no crean dos REFUND. Anular un gasto ya anulado devuelve el par
+     * existente sin crear otro.
+     */
+    @Transactional
+    public VoidExpenseResponse voidExpense(UUID userId, UUID expenseId) {
+        users.ensureActiveUser(userId);
+        Current current = lockOwned(userId, expenseId);
+        if ("REFUND".equals(current.kind())) {
+            throw new ConflictException("Un registro de anulación no se puede anular");
+        }
+        if ("VOIDED".equals(current.status())) {
+            ExpenseResponse refund = current.voidedByExpenseId() == null ? null
+                    : query.findOne(userId, current.voidedByExpenseId());
+            return new VoidExpenseResponse(query.findOne(userId, expenseId), refund);
+        }
+
+        UUID refundId = jdbc.sql("""
+                insert into expenses (user_id, idempotency_key, card_id, category_id, origin, amount,
+                    currency_code, exchange_rate_to_usd, merchant_raw, merchant_normalized,
+                    normalization_version, occurred_at, is_recurring, recurrence_day,
+                    kind, status, assigned_by_rule, space_id)
+                select e.user_id, gen_random_uuid(), e.card_id, e.category_id, e.origin, e.amount,
+                       e.currency_code, e.exchange_rate_to_usd, left(:prefix || e.merchant_raw, :merchantMax),
+                       e.merchant_normalized, e.normalization_version, e.occurred_at, false, null::smallint,
+                       'REFUND', 'ACTIVE', false, e.space_id
+                  from expenses e
+                 where e.id = :id and e.user_id = :userId
+                returning id
+                """).param("prefix", VOID_PREFIX).param("merchantMax", MERCHANT_MAX)
+                .param("id", expenseId).param("userId", userId)
+                .query(UUID.class).single();
+
+        jdbc.sql("""
+                update expenses set status = 'VOIDED', voided_by_expense_id = :refundId
+                 where id = :id and user_id = :userId
+                """).param("refundId", refundId).param("id", expenseId).param("userId", userId).update();
+
+        audit.record(userId, "VOID", "expense", expenseId,
+                Map.of("refundExpenseId", refundId, "origin", current.origin()));
+        return new VoidExpenseResponse(query.findOne(userId, expenseId), query.findOne(userId, refundId));
+    }
+
+    /** Estado mínimo del gasto para decidir una edición o anulación, con la fila bloqueada. */
+    private record Current(String origin, String kind, String status, UUID cardId, UUID categoryId,
+                           BigDecimal amount, String merchantRaw, UUID voidedByExpenseId) {
+    }
+
+    private Current lockOwned(UUID userId, UUID expenseId) {
+        return jdbc.sql("""
+                select origin::text as origin, kind, status, card_id, category_id, amount, merchant_raw,
+                       voided_by_expense_id
+                  from expenses
+                 where id = :id and user_id = :userId
+                   for update
+                """).param("id", expenseId).param("userId", userId)
+                .query((rs, rowNum) -> new Current(rs.getString("origin"), rs.getString("kind"),
+                        rs.getString("status"), rs.getObject("card_id", UUID.class),
+                        rs.getObject("category_id", UUID.class), rs.getBigDecimal("amount"),
+                        rs.getString("merchant_raw"), rs.getObject("voided_by_expense_id", UUID.class)))
+                .optional()
+                .orElseThrow(() -> new NotFoundException(ExpenseQueryService.NOT_FOUND));
     }
 
     private void remember(UUID userId, String merchant, String normalized, UUID categoryId) {
@@ -71,13 +239,7 @@ public class ExpenseService {
     private ExpenseResponse findByIdempotency(UUID userId, UUID key) {
         return jdbc.sql("select id from expenses where user_id = :userId and idempotency_key = :key")
                 .param("userId", userId).param("key", key).query(UUID.class).optional()
-                .map(id -> findOne(userId, id)).orElse(null);
-    }
-
-    private ExpenseResponse findOne(UUID userId, UUID expenseId) {
-        return jdbc.sql(ExpenseQueryService.SELECT_EXPENSE + " where e.user_id = :userId and e.id = :expenseId")
-                .param("userId", userId).param("expenseId", expenseId)
-                .query(ExpenseQueryService::mapRow).single();
+                .map(id -> query.findOne(userId, id)).orElse(null);
     }
 
     private void ensureCard(UUID userId, UUID cardId) {
