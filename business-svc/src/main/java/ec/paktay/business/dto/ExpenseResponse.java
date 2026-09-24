@@ -35,5 +35,9 @@ public record ExpenseResponse(UUID id, UUID cardId,
                               @Schema(description = "Instante del consumo; un REFUND conserva el del gasto original")
                               OffsetDateTime occurredAt,
                               @Schema(description = "Última modificación de la fila; sirve para la sincronización incremental (since)")
-                              OffsetDateTime updatedAt) {
+                              OffsetDateTime updatedAt,
+                              @Schema(description = "Monto de la compra en su moneda original (pago en otra moneda); null si fue en la moneda del gasto")
+                              BigDecimal originalAmount,
+                              @Schema(description = "Moneda de originalAmount; null si no aplica")
+                              String originalCurrencyCode) {
 }

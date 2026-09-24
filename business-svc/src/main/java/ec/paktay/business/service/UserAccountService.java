@@ -17,12 +17,20 @@ public class UserAccountService {
 
     public UserAccountService(JdbcClient jdbc) { this.jdbc = jdbc; }
 
+    /**
+     * Crea app_users en la primera petición del usuario. Una cuenta eliminada
+     * (deleted_accounts, V6) no se vuelve a crear aunque su token siga vigente.
+     */
     @Transactional
     public void ensureActiveUser(UUID userId) {
-        jdbc.sql("insert into app_users (id) values (:id) on conflict (id) do nothing")
-                .param("id", userId).update();
+        jdbc.sql("""
+                insert into app_users (id)
+                select :id where not exists (select 1 from deleted_accounts where user_id = :id)
+                on conflict (id) do nothing
+                """).param("id", userId).update();
         String status = jdbc.sql("select status from app_users where id = :id")
-                .param("id", userId).query(String.class).single();
+                .param("id", userId).query(String.class).optional()
+                .orElseThrow(() -> new IllegalArgumentException("La cuenta fue eliminada"));
         if (!"ACTIVE".equals(status)) throw new IllegalArgumentException("La cuenta se encuentra desactivada");
     }
 

@@ -46,12 +46,18 @@ public class ExpenseController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar un gasto manual", description = "Ruta autenticada. Persiste el gasto en PostgreSQL. idempotencyKey permite que el móvil reintente sin crear duplicados: un reintento, aunque llegue en paralelo, devuelve el mismo gasto con el mismo cuerpo. assignedByRule (opcional, false por defecto) marca las capturas cuya tarjeta o categoría asignó una regla del teléfono.")
-    @ApiResponse(responseCode = "201", description = "Gasto creado o recuperado por idempotencia")
-    @ApiResponse(responseCode = "400", description = "Tarjeta, categoría, moneda, monto o recurrencia inválidos")
+    @Operation(summary = "Registrar un gasto", description = "Ruta autenticada. Persiste un gasto manual (origin MANUAL, por defecto) o una captura de Wallet "
+            + "confirmada (origin AUTOMATIC). idempotencyKey permite que el móvil reintente sin crear duplicados: un reintento, aunque llegue en paralelo, "
+            + "devuelve el mismo gasto con el mismo cuerpo. Una captura AUTOMATIC con el mismo comercio, monto y tarjeta que otra ya guardada y menos de 60 s "
+            + "de diferencia es un duplicado: se devuelve la existente y el envío repetido queda en la bitácora para soporte. "
+            + "Sólo las capturas AUTOMATIC crean o actualizan la regla de su comercio. Un gasto MANUAL admite fechas de hoy hasta 7 días atrás "
+            + "(calendario del usuario). Pago en otra moneda: amount es lo que cobró el banco en currencyCode y originalAmount/originalCurrencyCode "
+            + "guardan la compra como referencia. assignedByRule marca las capturas que el teléfono asignó solo.")
+    @ApiResponse(responseCode = "201", description = "Gasto creado, recuperado por idempotencia o duplicado ya existente")
+    @ApiResponse(responseCode = "400", description = "Tarjeta, categoría, moneda, monto, fecha (manual fuera de los 7 días o futura) o recurrencia inválidos")
     @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public ExpenseResponse create(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateExpenseRequest request) {
-        return expenseWriter.createManual(UUID.fromString(jwt.getSubject()), request);
+        return expenseWriter.create(UUID.fromString(jwt.getSubject()), request);
     }
 
     @GetMapping
@@ -93,12 +99,12 @@ public class ExpenseController {
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Editar un gasto", description = "Ruta autenticada. categoryId y cardId son obligatorios y siempre editables; "
-            + "si cambian, deben ser del usuario y estar activos. amount y merchantRaw son opcionales y sólo se pueden cambiar en gastos MANUAL: "
-            + "en un gasto AUTOMATIC (Wallet) se aceptan únicamente si coinciden con el valor actual. Sólo se editan gastos ACTIVE de tipo EXPENSE. "
-            + "Editar no modifica las reglas ni las sugerencias de categoría. Sin cambios reales devuelve el gasto tal cual.")
+    @Operation(summary = "Editar un gasto", description = "Ruta autenticada. categoryId y cardId son obligatorios. La categoría siempre se puede cambiar; "
+            + "la tarjeta, amount y merchantRaw sólo en gastos MANUAL: en un gasto AUTOMATIC (Wallet) se aceptan únicamente si coinciden con el valor actual. "
+            + "Sólo se editan gastos ACTIVE de tipo EXPENSE. Cambiar la categoría de un gasto AUTOMATIC mueve la regla de su comercio a esa categoría "
+            + "desde el próximo pago; los gastos ya guardados no cambian. Editar un gasto MANUAL no toca las reglas. Sin cambios reales devuelve el gasto tal cual.")
     @ApiResponse(responseCode = "200", description = "Gasto actualizado")
-    @ApiResponse(responseCode = "400", description = "Validación fallida, tarjeta o categoría inválida, o intento de cambiar monto/comercio de un gasto de Wallet")
+    @ApiResponse(responseCode = "400", description = "Validación fallida, tarjeta o categoría inválida, o intento de cambiar tarjeta/monto/comercio de un gasto de Wallet")
     @ApiResponse(responseCode = "404", description = "El gasto no existe o no pertenece al usuario")
     @ApiResponse(responseCode = "409", description = "El gasto está anulado, es un registro REFUND o pertenece a un período cerrado")
     @ApiResponse(responseCode = "401", description = "Token ausente o inválido")

@@ -25,7 +25,8 @@ public class ExpenseQueryService {
             select e.id, c.id as card_id, c.name as card_name, c.status::text as card_status,
                    uc.id as category_id, uc.name as category_name,
                    e.origin::text as origin, e.kind, e.status, e.voided_by_expense_id, e.assigned_by_rule,
-                   e.amount, e.currency_code, e.merchant_raw, e.occurred_at, e.updated_at
+                   e.amount, e.currency_code, e.merchant_raw, e.occurred_at, e.updated_at,
+                   e.original_amount, e.original_currency_code
               from expenses e
               join cards c on c.id = e.card_id
               join user_categories uc on uc.id = e.category_id
@@ -119,7 +120,8 @@ public class ExpenseQueryService {
                 rs.getObject("voided_by_expense_id", UUID.class), rs.getBoolean("assigned_by_rule"),
                 rs.getObject("amount", BigDecimal.class), rs.getString("currency_code"),
                 rs.getString("merchant_raw"), rs.getObject("occurred_at", OffsetDateTime.class),
-                rs.getObject("updated_at", OffsetDateTime.class));
+                rs.getObject("updated_at", OffsetDateTime.class),
+                rs.getObject("original_amount", BigDecimal.class), rs.getString("original_currency_code"));
     }
 
     private static OffsetDateTime utc(Instant instant) {

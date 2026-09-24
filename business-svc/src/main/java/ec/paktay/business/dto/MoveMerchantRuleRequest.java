@@ -1,0 +1,8 @@
+package ec.paktay.business.dto;
+
+import java.util.UUID;
+
+import jakarta.validation.constraints.NotNull;
+
+public record MoveMerchantRuleRequest(@NotNull UUID categoryId) {
+}

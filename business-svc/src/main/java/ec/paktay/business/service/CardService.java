@@ -11,6 +11,7 @@ import java.util.UUID;
 import ec.paktay.business.dto.CardResponse;
 import ec.paktay.business.dto.CreateCardRequest;
 import ec.paktay.business.dto.UpdateCardRequest;
+import ec.paktay.business.exception.ConflictException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class CardService {
     /** Meses sin consumos que exige la desactivación de una tarjeta. */
     public static final int QUIET_MONTHS_BEFORE_DEACTIVATION = 3;
+    /** Tarjetas registradas (activas o desactivadas) que admite el plan Free. */
+    public static final int FREE_PLAN_CARDS = 2;
     static final String DUPLICATE_NAME_MESSAGE =
             "Ese nombre de Wallet ya está asociado a otra de tus tarjetas activas";
 
@@ -45,6 +48,7 @@ public class CardService {
         // ya sabe qué manda Wallet— se valida igual que al asociarlo después.
         String walletName = trimToNull(request.name());
         if (walletName != null) ensureWalletNameFree(userId, walletName, null);
+        ensureFreePlanRoom(userId);
 
         UUID cardId;
         try {
@@ -74,6 +78,54 @@ public class CardService {
     }
 
     /**
+     * Plan Free: como máximo {@link #FREE_PLAN_CARDS} tarjetas registradas, activas o
+     * desactivadas. Reactivar no suma (la tarjeta ya contaba); para una tercera hay
+     * que pasar a Pro o eliminar una. Sin fila en user_subscription el usuario es
+     * tester con Pro, como toda la beta.
+     */
+    private void ensureFreePlanRoom(UUID userId) {
+        String plan = jdbc.sql("select plan from user_subscription where user_id = :userId and status = 'ACTIVE'")
+                .param("userId", userId).query(String.class).optional().orElse("PRO");
+        if (!"FREE".equals(plan)) return;
+        int registered = jdbc.sql("select count(*) from cards where user_id = :userId and status::text <> 'DELETED'")
+                .param("userId", userId).query(Integer.class).single();
+        if (registered >= FREE_PLAN_CARDS) {
+            throw new ConflictException("Tienes " + registered + " tarjetas registradas. Pasa al plan Pro o elimina una para agregar otra.");
+        }
+    }
+
+    /**
+     * Límite propio del mes actual. Con amount null se desactiva la fila del mes
+     * (active = false) en vez de borrarla: CardLimitCarryOver mira la última fila de
+     * cada tarjeta y así el límite quitado no reaparece el mes siguiente.
+     */
+    @Transactional
+    public CardResponse setLimit(UUID userId, UUID cardId, BigDecimal amount) {
+        users.ensureActiveUser(userId);
+        if (!"ACTIVE".equals(statusOf(userId, cardId))) {
+            throw new IllegalArgumentException("Sólo una tarjeta activa tiene límite mensual");
+        }
+        UUID periodId = currentPeriod(userId);
+        if (amount == null) {
+            jdbc.sql("""
+                    update budget_allocations set active = false, updated_at = now()
+                     where user_id = :userId and period_id = :periodId and card_id = :cardId and scope = 'CARD'
+                    """).param("userId", userId).param("periodId", periodId).param("cardId", cardId).update();
+        } else {
+            jdbc.sql("""
+                    insert into budget_allocations (user_id, period_id, scope, card_id, amount, currency_code, exchange_rate_to_usd)
+                    select :userId, :periodId, 'CARD', c.id, :amount, c.default_currency_code, 1
+                      from cards c where c.id = :cardId and c.user_id = :userId
+                    on conflict (period_id, card_id) where scope = 'CARD' do update
+                       set amount = excluded.amount, active = true, updated_at = now()
+                    """).param("userId", userId).param("periodId", periodId).param("cardId", cardId)
+                    .param("amount", amount).update();
+        }
+        audit.record(userId, "UPDATE", "card_limit", cardId, amount == null ? Map.of("removed", true) : Map.of("amount", amount));
+        return findOne(userId, cardId, periodId);
+    }
+
+    /**
      * Tarjetas del usuario sin las eliminadas (DELETED). El presupuesto que devuelve
      * es el del mes actual en la zona horaria del usuario.
      */
@@ -89,7 +141,7 @@ public class CardService {
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c
                   join banks b on b.id = c.bank_id
-                  left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD'
+                  left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD' and ba.active
                  where c.user_id = :userId and c.status::text <> 'DELETED'
                  order by (c.status = 'ACTIVE') desc, c.created_at desc
                 """).param("userId", userId).param("periodId", periodId).query(this::mapCard).list();
@@ -284,7 +336,7 @@ public class CardService {
                        c.card_type, c.credit_brand, c.name, c.alias, c.last4, c.color_dark, c.color_light, c.default_currency_code,
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c join banks b on b.id = c.bank_id
-                  left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD'
+                  left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD' and ba.active
                  where c.user_id = :userId and c.id = :cardId
                 """).param("userId", userId).param("cardId", cardId).param("periodId", periodId)
                 .query(this::mapCard).single();
