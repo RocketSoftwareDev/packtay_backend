@@ -1,2 +1,0 @@
-{"message":"username: must not be blank","timestamp":"2026-09-24T15:31:10.075387172Z","requestId":"b58bef9d-e07b-4084-9ac5-e63c84eab3f4","status":400}
-HTTP400
