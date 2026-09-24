@@ -209,6 +209,7 @@ public class BudgetService {
                  where exists(select 1 from copied)
                 on conflict (user_id, period_id, category_id) do nothing
                 """).param("userId", userId).param("periodId", periodId).update();
+        CardLimitCarryOver.apply(jdbc, userId, periodId);
         return periodId;
     }
 
