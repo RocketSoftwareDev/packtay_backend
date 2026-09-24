@@ -24,6 +24,19 @@ git checkout feature/dia6 && git pull --ff-only
 grep -E "Tests run:|BUILD|FAIL|ERROR\]" /tmp/mvn.log | head -n 200 > "$LOGS/01-mvn.txt"
 ```
 
+### Reglas actuales antes de migrar (revisión del dueño)
+
+Antes de levantar la rama nueva, guarda las reglas que hay hoy en la base local (V5), para
+compararlas con las que deja V6. Levanta sólo la base:
+
+```bash
+$L up -d business-db > /dev/null 2>&1; sleep 5
+$L exec -T business-db psql -U paktay -d paktay -c "select s.normalization_version v, s.merchant_normalized comercio, uc.name categoria, s.selection_count usos, s.last_selected_at::date ultimo from user_consumption_selections s join user_categories uc on uc.id = s.category_id where s.active order by s.user_id, s.selection_count desc limit 300" > "$LOGS/00-reglas-antes.txt" 2>&1
+```
+
+Después de la sección 2 (con V6 ya aplicada) repite la consulta y guárdala en
+`$LOGS/05b-reglas-despues.txt`.
+
 ### Buzón de correo (Mailpit) para probar el PIN de contraseña
 
 El PIN nunca se probó. Levanta un Mailpit suelto en la red de `paktay-local` y apunta el SMTP
@@ -224,6 +237,7 @@ except Exception as e:
 ```
 
 ```bash
+$L exec -T business-db psql -U paktay -d paktay -c "select s.normalization_version v, s.merchant_normalized comercio, uc.name categoria, s.selection_count usos, s.last_selected_at::date ultimo from user_consumption_selections s join user_categories uc on uc.id = s.category_id where s.active and s.consumption_name not like 'FYBECA%' and s.consumption_name not like 'JUAN VALDEZ%' and s.consumption_name not like 'SUPERMAXI 042%' order by s.user_id, s.selection_count desc limit 300" > "$LOGS/05b-reglas-despues.txt" 2>&1
 curl -s localhost:28082/v3/api-docs | python3 -c 'import sys,json;p=json.load(sys.stdin)["paths"];print({k: k in p for k in ["/api/v1/user/merchant-rules","/api/v1/user/merchant-rules/{id}","/api/v1/catalog/countries","/api/v1/user/cards/{cardId}/limit"]})' > "$LOGS/06-openapi.txt"
 curl -s localhost:28081/v3/api-docs | python3 -c 'import sys,json;print("/api/v1/auth/account/delete" in json.load(sys.stdin)["paths"])' >> "$LOGS/06-openapi.txt"
 for u in http://localhost:28081 http://localhost:28082; do for p in /actuator/health /v3/api-docs /swagger-ui/index.html; do echo "$u$p $(curl -s -o /dev/null -w '%{http_code}' $u$p)"; done; done > "$LOGS/07-health.txt"
