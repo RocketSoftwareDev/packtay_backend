@@ -16,6 +16,8 @@ $L up --build -d > "$LOGS/02-up.log" 2>&1; wait_up; echo "up=$?" >> "$LOGS/02-up
 export BANK_ROW=$($L exec -T business-db psql -U paktay -d paktay -At -F, -c "select o.bank_id, o.card_type, coalesce(o.brand,'') from bank_card_offerings o join banks b on b.id=o.bank_id where b.active limit 1")
 ```
 
+El script lee el comando de compose de la variable `L`: expórtala antes (`export L`).
+
 Simula el cambio de mes moviendo el período actual al mes anterior. Guarda como `/tmp/dia5b.py`
 y ejecútalo con `python3 /tmp/dia5b.py > "$LOGS/03-limite.txt" 2>&1`.
 
