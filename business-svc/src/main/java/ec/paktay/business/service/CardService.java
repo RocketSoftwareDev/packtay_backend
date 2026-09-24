@@ -80,19 +80,19 @@ public class CardService {
     @Transactional
     public List<CardResponse> list(UUID userId) {
         users.ensureActiveUser(userId);
+        // Resolver el período del mes arrastra los límites propios de las tarjetas
+        // (CardLimitCarryOver): sin esto, el 1 del mes la lista saldría sin límite.
+        UUID periodId = currentPeriod(userId);
         return jdbc.sql("""
                 select c.id, b.id as bank_id, b.name as bank_name, b.logo_url as bank_logo_url,
                        c.card_type, c.credit_brand, c.name, c.alias, c.last4, c.color_dark, c.color_light, c.default_currency_code,
                        c.status::text, ba.amount_usd as current_period_budget, c.created_at
                   from cards c
                   join banks b on b.id = c.bank_id
-                  join app_users u on u.id = c.user_id
-                  left join financial_periods fp on fp.user_id = c.user_id
-                       and fp.period_month = date_trunc('month', now() at time zone u.timezone)::date
-                  left join budget_allocations ba on ba.period_id = fp.id and ba.card_id = c.id and ba.scope = 'CARD'
+                  left join budget_allocations ba on ba.period_id = :periodId and ba.card_id = c.id and ba.scope = 'CARD'
                  where c.user_id = :userId and c.status::text <> 'DELETED'
                  order by (c.status = 'ACTIVE') desc, c.created_at desc
-                """).param("userId", userId).query(this::mapCard).list();
+                """).param("userId", userId).param("periodId", periodId).query(this::mapCard).list();
     }
 
     /**
@@ -292,13 +292,15 @@ public class CardService {
 
     /** Período del mes actual en la zona horaria del usuario; lo crea si no existe. */
     private UUID currentPeriod(UUID userId) {
-        return jdbc.sql("""
+        UUID periodId = jdbc.sql("""
                 insert into financial_periods (user_id, period_month)
                 select u.id, date_trunc('month', now() at time zone u.timezone)::date
                   from app_users u where u.id = :userId
                 on conflict (user_id, period_month) do update set period_month = excluded.period_month
                 returning id
                 """).param("userId", userId).query(UUID.class).single();
+        CardLimitCarryOver.apply(jdbc, userId, periodId);
+        return periodId;
     }
 
     private CardResponse mapCard(ResultSet rs, int rowNum) throws SQLException {
