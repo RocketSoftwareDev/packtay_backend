@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import ec.paktay.business.dto.BudgetResponse;
@@ -82,16 +83,22 @@ public class BudgetService {
      * Presupuesto del período con lo gastado. El mes del período es un mes del
      * calendario del usuario: sus límites se convierten a instantes con
      * app_users.timezone antes de compararlos con occurred_at (timestamptz).
-     * Sólo suman gastos ACTIVE de tipo EXPENSE: los anulados (VOIDED) y los
-     * reembolsos (REFUND) quedan fuera hasta que el día 4 defina cómo se compensan.
-     * Los gastos de tarjetas desactivadas o eliminadas siguen sumando.
+     * Sólo suman gastos ACTIVE de tipo EXPENSE en la moneda del presupuesto
+     * (misma regla que GET /api/v1/user/summary). Los gastos de tarjetas
+     * desactivadas o eliminadas siguen sumando.
+     *
+     * Totales (día 5, SummaryMath): cada categoría seleccionada y activa vale su
+     * monto propio o, si no tiene, el global; budgetAmount es la suma de esos
+     * efectivos. Las categorías desactivadas (user_categories.active = false) ya
+     * no se listan ni suman aunque sigan marcadas en user_category_budgets.
      */
     private BudgetResponse response(UUID userId, UUID periodId) {
         Settings settings = jdbc.sql("""
                 select fp.period_month, s.global_amount, coalesce(s.currency_code, 'USD') currency_code,
-                       coalesce((select sum(e.amount_usd) from expenses e
+                       coalesce((select sum(e.amount) from expenses e
                                   where e.user_id = :userId
                                     and e.status = 'ACTIVE' and e.kind = 'EXPENSE'
+                                    and e.currency_code = coalesce(s.currency_code, 'USD')
                                     and e.occurred_at >= (fp.period_month::timestamp at time zone u.timezone)
                                     and e.occurred_at < ((fp.period_month + interval '1 month') at time zone u.timezone)), 0) spent_amount,
                        coalesce(s.recurrence, 'THIS_MONTH') recurrence
@@ -102,26 +109,73 @@ public class BudgetService {
                 """).param("periodId", periodId).param("userId", userId).query((rs, rowNum) ->
                         new Settings(rs.getObject("period_month", LocalDate.class), rs.getBigDecimal("global_amount"),
                                 rs.getString("currency_code"), rs.getString("recurrence"), rs.getBigDecimal("spent_amount"))).single();
+        BigDecimal global = settings.globalAmount();
         List<CategoryBudgetResponse> categories = jdbc.sql("""
                 select uc.id, uc.alias, uc.icon, uc.color_dark, uc.color_light, b.individual_amount, b.active,
-                       coalesce((select sum(e.amount_usd) from expenses e
+                       coalesce((select sum(e.amount) from expenses e
                                   where e.user_id = :userId and e.category_id = uc.id
                                     and e.status = 'ACTIVE' and e.kind = 'EXPENSE'
+                                    and e.currency_code = :currency
                                     and e.occurred_at >= (fp.period_month::timestamp at time zone u.timezone)
                                     and e.occurred_at < ((fp.period_month + interval '1 month') at time zone u.timezone)), 0) spent_amount
                   from user_category_budgets b
                   join user_categories uc on uc.id = b.category_id
                   join financial_periods fp on fp.id = b.period_id
                   join app_users u on u.id = b.user_id
-                 where b.user_id = :userId and b.period_id = :periodId and b.active
+                 where b.user_id = :userId and b.period_id = :periodId and b.active and uc.active
                  order by uc.sort_order, uc.alias
-                """).param("userId", userId).param("periodId", periodId).query((rs, rowNum) ->
-                        new CategoryBudgetResponse(rs.getObject("id", UUID.class), rs.getString("alias"),
-                                rs.getString("icon"), rs.getString("color_dark"), rs.getString("color_light"),
-                                rs.getBigDecimal("individual_amount"), rs.getBoolean("active"),
-                                rs.getBigDecimal("spent_amount"))).list();
-        return new BudgetResponse(settings.month(), settings.globalAmount(), settings.currency(), settings.recurrence(),
-                settings.spentAmount(), categories);
+                """).param("userId", userId).param("periodId", periodId).param("currency", settings.currency())
+                .query((rs, rowNum) -> {
+                    BigDecimal own = rs.getBigDecimal("individual_amount");
+                    BigDecimal spent = rs.getBigDecimal("spent_amount");
+                    BigDecimal effective = SummaryMath.effectiveBudget(own, global);
+                    return new CategoryBudgetResponse(rs.getObject("id", UUID.class), rs.getString("alias"),
+                            rs.getString("icon"), rs.getString("color_dark"), rs.getString("color_light"),
+                            own, rs.getBoolean("active"), spent, effective,
+                            SummaryMath.budgetSource(own, global), SummaryMath.percent(spent, effective),
+                            SummaryMath.categoryStatus(spent, effective));
+                }).list();
+        BigDecimal budget = SummaryMath.totalBudget(categories.stream()
+                .map(c -> new SummaryMath.CategoryBudget(true, true, c.individualAmount())).toList(), global);
+        return new BudgetResponse(settings.month(), global, settings.currency(), settings.recurrence(),
+                settings.spentAmount(), categories, budget,
+                SummaryMath.available(settings.spentAmount(), budget),
+                SummaryMath.percent(settings.spentAmount(), budget));
+    }
+
+    /**
+     * Período del mes actual del usuario, creado si falta y con la plantilla MONTHLY
+     * heredada. Lo usa el resumen del mes para leer el mismo presupuesto que
+     * GET /budgets/current.
+     */
+    public UUID ensureCurrentPeriod(UUID userId) {
+        return currentPeriod(userId);
+    }
+
+    /**
+     * Período cuyo presupuesto rige un mes pasado, sin crear nada: el del propio mes
+     * si tiene configuración (user_budget_settings o categorías seleccionadas); si
+     * no, el último período anterior con recurrence = MONTHLY, que es lo que
+     * currentPeriod habría copiado si el usuario hubiera abierto la app ese mes.
+     * Vacío si el mes no tiene presupuesto.
+     */
+    public Optional<UUID> budgetPeriodFor(UUID userId, LocalDate periodMonth) {
+        return jdbc.sql("""
+                select id from (
+                    select fp.id, 0 as priority, fp.period_month
+                      from financial_periods fp
+                     where fp.user_id = :userId and fp.period_month = :month
+                       and (exists (select 1 from user_budget_settings s where s.period_id = fp.id and s.user_id = :userId)
+                            or exists (select 1 from user_category_budgets b where b.period_id = fp.id and b.user_id = :userId))
+                    union all
+                    select fp.id, 1 as priority, fp.period_month
+                      from financial_periods fp
+                      join user_budget_settings s on s.period_id = fp.id and s.user_id = fp.user_id
+                     where fp.user_id = :userId and fp.period_month < :month and s.recurrence = 'MONTHLY'
+                ) candidates
+                 order by priority, period_month desc
+                 limit 1
+                """).param("userId", userId).param("month", periodMonth).query(UUID.class).optional();
     }
 
     /**
