@@ -1,0 +1,225 @@
+auth-svc-1  | 
+auth-svc-1  |   .   ____          _            __ _ _
+auth-svc-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+auth-svc-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+auth-svc-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+auth-svc-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+auth-svc-1  |  =========|_|==============|___/=/_/_/_/
+auth-svc-1  | 
+auth-svc-1  |  :: Spring Boot ::                (v3.4.5)
+auth-svc-1  | 
+auth-svc-1  | 2026-09-23T17:22:00.620Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : Starting AuthApplication v0.1.0-SNAPSHOT using Java 17.0.20 with PID 1 (/app/app.jar started by root in /app)
+auth-svc-1  | 2026-09-23T17:22:00.622Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : No active profile set, falling back to 1 default profile: "default"
+auth-svc-1  | 2026-09-23T17:22:01.633Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+auth-svc-1  | 2026-09-23T17:22:01.639Z  INFO 1 --- [paktay-auth-svc] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+auth-svc-1  | 2026-09-23T17:22:01.639Z  INFO 1 --- [paktay-auth-svc] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+auth-svc-1  | 2026-09-23T17:22:01.651Z  INFO 1 --- [paktay-auth-svc] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+auth-svc-1  | 2026-09-23T17:22:01.652Z  INFO 1 --- [paktay-auth-svc] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 992 ms
+auth-svc-1  | 2026-09-23T17:22:02.309Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+auth-svc-1  | 2026-09-23T17:22:02.591Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+auth-svc-1  | 2026-09-23T17:22:02.605Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : Started AuthApplication in 2.238 seconds (process running for 2.561)
+auth-svc-1  | 2026-09-23T17:22:10.314Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+auth-svc-1  | 2026-09-23T17:22:10.315Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+auth-svc-1      | 2026-09-23T17:22:10.315Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+auth-svc-1      | 2026-09-23T17:22:10.367Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+auth-svc-1      | 2026-09-23T17:22:10.426Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@17a5b75c
+auth-svc-1      | 2026-09-23T17:22:10.427Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+auth-svc-1      | 2026-09-23T17:55:04.907Z ERROR 1 --- [paktay-auth-svc] [nio-8081-exec-1] e.p.a.service.KeycloakIdentityService    : keycloak_service_token_failed status=401 errorCode=unauthorized_client
+auth-svc-1      | 2026-09-23T17:55:04.908Z ERROR 1 --- [paktay-auth-svc] [nio-8081-exec-1] e.p.auth.exception.ApiExceptionHandler   : upstream_operation_failed requestId=6f7d4189-2dcf-4ff7-83ac-13c3cc67eeca
+auth-svc-1      | 2026-09-23T17:55:04.913Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] e.p.auth.config.RequestLoggingFilter     : http_request requestId=6f7d4189-2dcf-4ff7-83ac-13c3cc67eeca method=POST path=/api/v1/auth/register status=502 durationMs=197
+auth-svc-1      | 2026-09-23T17:57:02.095Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-3] e.p.auth.config.RequestLoggingFilter     : http_request requestId=d86b0041-8297-43e7-a16e-627a6622bae6 method=POST path=/api/v1/auth/register status=201 durationMs=180
+auth-svc-1      | 2026-09-23T17:57:12.027Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-5] e.p.auth.config.RequestLoggingFilter     : http_request requestId=9427c221-b506-43d8-820a-585ffadd0966 method=POST path=/api/v1/auth/login status=200 durationMs=55
+auth-svc-1      | 2026-09-23T17:57:28.543Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-9] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 128 ms
+auth-svc-1      | 2026-09-23T17:57:28.551Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-9] e.p.auth.config.RequestLoggingFilter     : http_request requestId=f6b540e6-e824-4c05-af3f-d5b234877700 method=GET path=/v3/api-docs status=200 durationMs=141
+auth-svc-1      | 2026-09-23T17:57:28.571Z  INFO 1 --- [paktay-auth-svc] [io-8081-exec-10] e.p.auth.config.RequestLoggingFilter     : http_request requestId=7f63b8ff-ce23-4cc7-81e0-2a8704274b0c method=GET path=/swagger-ui/index.html status=200 durationMs=2
+business-svc-1  | 
+business-svc-1  |   .   ____          _            __ _ _
+business-svc-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+business-svc-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+business-svc-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+business-svc-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+business-svc-1  |  =========|_|==============|___/=/_/_/_/
+business-svc-1  | 
+business-svc-1  |  :: Spring Boot ::                (v3.4.5)
+business-svc-1  | 
+business-svc-1  | 2026-09-23T17:22:00.687Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : Starting BusinessApplication v0.1.0-SNAPSHOT using Java 17.0.20 with PID 1 (/app/app.jar started by root in /app)
+business-svc-1  | 2026-09-23T17:22:00.691Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : No active profile set, falling back to 1 default profile: "default"
+business-svc-1  | 2026-09-23T17:22:01.828Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+business-svc-1  | 2026-09-23T17:22:01.833Z  INFO 1 --- [paktay-business-svc] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+business-svc-1  | 2026-09-23T17:22:01.834Z  INFO 1 --- [paktay-business-svc] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+business-svc-1  | 2026-09-23T17:22:01.857Z  INFO 1 --- [paktay-business-svc] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+business-svc-1  | 2026-09-23T17:22:01.859Z  INFO 1 --- [paktay-business-svc] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1132 ms
+business-svc-1  | 2026-09-23T17:22:02.144Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+business-svc-1  | 2026-09-23T17:22:02.249Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@48a46b0f
+business-svc-1  | 2026-09-23T17:22:02.251Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+business-svc-1  | 2026-09-23T17:22:02.265Z  INFO 1 --- [paktay-business-svc] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://business-db:5432/paktay (PostgreSQL 16.14)
+business-svc-1  | 2026-09-23T17:22:02.308Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 5 migrations (execution time 00:00.024s)
+business-svc-1  | 2026-09-23T17:22:02.330Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 4
+business-svc-1  | 2026-09-23T17:22:02.333Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+business-svc-1  | 2026-09-23T17:22:02.849Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+business-svc-1  | 2026-09-23T17:22:03.031Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+business-svc-1  | 2026-09-23T17:22:03.043Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : Started BusinessApplication in 2.648 seconds (process running for 3.009)
+business-svc-1  | 2026-09-23T17:22:03.058Z DEBUG 1 --- [paktay-business-svc] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:22:03.059Z DEBUG 1 --- [paktay-business-svc] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select current_database() as database_name, current_user as database_user]
+business-svc-1  | 2026-09-23T17:22:03.062Z  INFO 1 --- [paktay-business-svc] [           main] e.p.b.config.DatabaseConnectionLogger    : business_database_connected database=paktay user=paktay
+business-svc-1  | 2026-09-23T17:22:10.179Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+business-svc-1  | 2026-09-23T17:22:10.179Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+business-svc-1  | 2026-09-23T17:22:10.180Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+business-svc-1  | 2026-09-23T17:57:17.885Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:17.886Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into app_users (id) values (?) on conflict (id) do nothing]
+business-svc-1  | 2026-09-23T17:57:17.895Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:17.895Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select status from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:17.897Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:17.898Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [update app_users set email = ?, display_name = ? where id = ?]
+business-svc-1  | 2026-09-23T17:57:17.901Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:17.902Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at, u.timezone, u.country_code,
+business-svc-1  |        exists(select 1 from cards c where c.user_id = u.id and c.status = 'ACTIVE') as is_have_cards,
+business-svc-1  |        exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active) as is_have_category
+business-svc-1  |   from app_users u
+business-svc-1  |  where u.id = ?
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:17.915Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] e.p.b.config.RequestLoggingFilter        : http_request requestId=5b73fad3-f4e5-4733-8657-718ed894556b method=GET path=/api/v1/user/profile status=200 durationMs=44
+business-svc-1  | 2026-09-23T17:57:17.982Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:17.982Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select exists(select 1 from pg_timezone_names where name = ?)]
+business-svc-1  | 2026-09-23T17:57:17.999Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:17.999Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into app_users (id) values (?) on conflict (id) do nothing]
+business-svc-1  | 2026-09-23T17:57:17.999Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:17.999Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select status from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:17.999Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:17.999Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [update app_users set email = ?, display_name = ? where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.000Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.000Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [update app_users set timezone = ?, country_code = ? where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.000Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.000Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at, u.timezone, u.country_code,
+business-svc-1  |        exists(select 1 from cards c where c.user_id = u.id and c.status = 'ACTIVE') as is_have_cards,
+business-svc-1  |        exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active) as is_have_category
+business-svc-1  |   from app_users u
+business-svc-1  |  where u.id = ?
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.002Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-3] e.p.b.config.RequestLoggingFilter        : http_request requestId=3aef207f-d6f6-4701-93b8-4d1146d033a0 method=PUT path=/api/v1/user/profile/context status=200 durationMs=64
+business-svc-1  | 2026-09-23T17:57:18.017Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-5] e.p.b.exception.ApiExceptionHandler      : request_rejected requestId=aef6b196-c592-4e8c-ba52-644df6c93a66 reason=Zona horaria inválida: usa un identificador IANA como America/Guayaquil
+business-svc-1  | 2026-09-23T17:57:18.020Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-5] e.p.b.config.RequestLoggingFilter        : http_request requestId=aef6b196-c592-4e8c-ba52-644df6c93a66 method=PUT path=/api/v1/user/profile/context status=400 durationMs=5
+business-svc-1  | 2026-09-23T17:57:18.039Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-6] e.p.b.exception.ApiExceptionHandler      : request_validation_failed requestId=d5962d73-2524-4b07-b33a-8aa5b47e8b88 field=countryCode: must match "^[A-Z]{2}$"
+business-svc-1  | 2026-09-23T17:57:18.040Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-6] e.p.b.config.RequestLoggingFilter        : http_request requestId=d5962d73-2524-4b07-b33a-8aa5b47e8b88 method=PUT path=/api/v1/user/profile/context status=400 durationMs=9
+business-svc-1  | 2026-09-23T17:57:18.051Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.051Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into app_users (id) values (?) on conflict (id) do nothing]
+business-svc-1  | 2026-09-23T17:57:18.051Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.051Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select status from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.052Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.052Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [update app_users set email = ?, display_name = ? where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.052Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.052Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-7] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at, u.timezone, u.country_code,
+business-svc-1  |        exists(select 1 from cards c where c.user_id = u.id and c.status = 'ACTIVE') as is_have_cards,
+business-svc-1  |        exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active) as is_have_category
+business-svc-1  |   from app_users u
+business-svc-1  |  where u.id = ?
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.053Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-7] e.p.b.config.RequestLoggingFilter        : http_request requestId=20934bfd-9c46-44b1-975f-a3ca7b0b87b4 method=GET path=/api/v1/user/profile status=200 durationMs=2
+business-svc-1  | 2026-09-23T17:57:18.064Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-9] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.064Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-9] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into app_users (id) values (?) on conflict (id) do nothing]
+business-svc-1  | 2026-09-23T17:57:18.064Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-9] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.064Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-9] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select status from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.065Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-9] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.065Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-9] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select c.id, b.id as bank_id, b.name as bank_name, b.logo_url as bank_logo_url,
+business-svc-1  |        c.card_type, c.credit_brand, c.name, c.alias, c.last4, c.color_dark, c.color_light, c.default_currency_code,
+business-svc-1  |        c.status::text, ba.amount_usd as current_period_budget, c.created_at
+business-svc-1  |   from cards c
+business-svc-1  |   join banks b on b.id = c.bank_id
+business-svc-1  |   join app_users u on u.id = c.user_id
+business-svc-1  |   left join financial_periods fp on fp.user_id = c.user_id
+business-svc-1  |        and fp.period_month = date_trunc('month', now() at time zone u.timezone)::date
+business-svc-1  |   left join budget_allocations ba on ba.period_id = fp.id and ba.card_id = c.id and ba.scope = 'CARD'
+business-svc-1  |  where c.user_id = ? and c.status::text <> 'DELETED'
+business-svc-1  |  order by (c.status = 'ACTIVE') desc, c.created_at desc
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.070Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-9] e.p.b.config.RequestLoggingFilter        : http_request requestId=c0637188-086a-4aef-8c76-7164942b18fc method=GET path=/api/v1/user/cards status=200 durationMs=7
+business-svc-1  | 2026-09-23T17:57:18.081Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.082Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into app_users (id) values (?) on conflict (id) do nothing]
+business-svc-1  | 2026-09-23T17:57:18.082Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.082Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select status from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.082Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.082Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into financial_periods (user_id, period_month)
+business-svc-1  | select u.id, date_trunc('month', now() at time zone u.timezone)::date
+business-svc-1  |   from app_users u where u.id = ?
+business-svc-1  | on conflict (user_id, period_month) do update set period_month = excluded.period_month
+business-svc-1  | returning id
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.083Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.083Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [with previous as (
+business-svc-1  |     select s.global_amount, s.currency_code, s.recurrence, s.period_id
+business-svc-1  |       from user_budget_settings s join financial_periods fp on fp.id = s.period_id
+business-svc-1  |      where s.user_id = ?
+business-svc-1  |        and fp.period_month < (select cur.period_month from financial_periods cur where cur.id = ?)
+business-svc-1  |        and s.recurrence = 'MONTHLY'
+business-svc-1  |      order by fp.period_month desc limit 1
+business-svc-1  | ), copied as (
+business-svc-1  |     insert into user_budget_settings (user_id, period_id, global_amount, currency_code, recurrence)
+business-svc-1  |     select ?, ?, global_amount, currency_code, recurrence from previous
+business-svc-1  |     on conflict (user_id, period_id) do nothing returning 1
+business-svc-1  | )
+business-svc-1  | insert into user_category_budgets (user_id, period_id, category_id, individual_amount, active)
+business-svc-1  | select ?, ?, b.category_id, b.individual_amount, b.active
+business-svc-1  |   from previous p join user_category_budgets b on b.period_id = p.period_id and b.user_id = ?
+business-svc-1  |  where exists(select 1 from copied)
+business-svc-1  | on conflict (user_id, period_id, category_id) do nothing
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.084Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.085Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select fp.period_month, s.global_amount, coalesce(s.currency_code, 'USD') currency_code,
+business-svc-1  |        coalesce((select sum(e.amount_usd) from expenses e
+business-svc-1  |                   where e.user_id = ?
+business-svc-1  |                     and e.status = 'ACTIVE' and e.kind = 'EXPENSE'
+business-svc-1  |                     and e.occurred_at >= (fp.period_month::timestamp at time zone u.timezone)
+business-svc-1  |                     and e.occurred_at < ((fp.period_month + interval '1 month') at time zone u.timezone)), 0) spent_amount,
+business-svc-1  |        coalesce(s.recurrence, 'THIS_MONTH') recurrence
+business-svc-1  |   from financial_periods fp
+business-svc-1  |   join app_users u on u.id = fp.user_id
+business-svc-1  |   left join user_budget_settings s on s.period_id = fp.id and s.user_id = fp.user_id
+business-svc-1  |  where fp.id = ? and fp.user_id = ?
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.086Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.086Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select uc.id, uc.alias, uc.icon, uc.color_dark, uc.color_light, b.individual_amount, b.active,
+business-svc-1  |        coalesce((select sum(e.amount_usd) from expenses e
+business-svc-1  |                   where e.user_id = ? and e.category_id = uc.id
+business-svc-1  |                     and e.status = 'ACTIVE' and e.kind = 'EXPENSE'
+business-svc-1  |                     and e.occurred_at >= (fp.period_month::timestamp at time zone u.timezone)
+business-svc-1  |                     and e.occurred_at < ((fp.period_month + interval '1 month') at time zone u.timezone)), 0) spent_amount
+business-svc-1  |   from user_category_budgets b
+business-svc-1  |   join user_categories uc on uc.id = b.category_id
+business-svc-1  |   join financial_periods fp on fp.id = b.period_id
+business-svc-1  |   join app_users u on u.id = b.user_id
+business-svc-1  |  where b.user_id = ? and b.period_id = ? and b.active
+business-svc-1  |  order by uc.sort_order, uc.alias
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.091Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] e.p.b.config.RequestLoggingFilter        : http_request requestId=ad800031-0af0-402a-8ba6-5d5a1b37141c method=GET path=/api/v1/user/budgets/current status=200 durationMs=10
+business-svc-1  | 2026-09-23T17:57:18.102Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+business-svc-1  | 2026-09-23T17:57:18.102Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [insert into app_users (id) values (?) on conflict (id) do nothing]
+business-svc-1  | 2026-09-23T17:57:18.103Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.103Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select status from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.103Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.103Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select timezone from app_users where id = ?]
+business-svc-1  | 2026-09-23T17:57:18.104Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.104Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-3] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select e.id, c.id as card_id, c.name as card_name, c.status::text as card_status,
+business-svc-1  |        uc.id as category_id, uc.name as category_name,
+business-svc-1  |        e.origin::text, e.amount, e.currency_code, e.merchant_raw, e.occurred_at,
+business-svc-1  |        e.kind, e.status, e.assigned_by_rule
+business-svc-1  |   from expenses e
+business-svc-1  |   join cards c on c.id = e.card_id
+business-svc-1  |   join user_categories uc on uc.id = e.category_id
+business-svc-1  |  where e.user_id = ? order by e.occurred_at desc, e.created_at desc]
+business-svc-1  | 2026-09-23T17:57:18.106Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-3] e.p.b.config.RequestLoggingFilter        : http_request requestId=8ed35e2c-84ea-438b-89bd-7815e51fe676 method=GET path=/api/v1/user/expenses status=200 durationMs=4
+business-svc-1  | 2026-09-23T17:57:18.138Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-5] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1  | 2026-09-23T17:57:18.138Z DEBUG 1 --- [paktay-business-svc] [nio-8082-exec-5] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select b.id, b.name, b.logo_url,
+business-svc-1  |        array(select distinct o.card_type from bank_card_offerings o
+business-svc-1  |               where o.bank_id=b.id and o.active order by o.card_type) supported_types,
+business-svc-1  |        array(select distinct o.brand from bank_card_offerings o
+business-svc-1  |               where o.bank_id=b.id and o.active and o.card_type='CREDIT' order by o.brand) credit_brands
+business-svc-1  |   from banks b where b.active and b.origin = 'SYSTEM'
+business-svc-1  |    and exists(select 1 from bank_card_offerings o where o.bank_id=b.id and o.active)
+business-svc-1  |  order by b.name
+business-svc-1  | ]
+business-svc-1  | 2026-09-23T17:57:18.142Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-5] e.p.business.controller.BankController   : catalog_banks_query_completed count=17
+business-svc-1  | 2026-09-23T17:57:18.145Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-5] e.p.b.config.RequestLoggingFilter        : http_request requestId=27d2fa30-da76-4d9d-b128-95df56bba0cb method=GET path=/api/v1/catalog/banks status=200 durationMs=7
+business-svc-1  | 2026-09-23T17:57:28.362Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-7] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 326 ms
+business-svc-1  | 2026-09-23T17:57:28.374Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-7] e.p.b.config.RequestLoggingFilter        : http_request requestId=b6c90b0d-4529-4edb-9dc7-23ce74c0f1fa method=GET path=/v3/api-docs status=200 durationMs=345
+business-svc-1  | 2026-09-23T17:57:28.601Z  INFO 1 --- [paktay-business-svc] [io-8082-exec-10] e.p.b.config.RequestLoggingFilter        : http_request requestId=4e3867ce-d319-41cb-90fe-8f8f56015b72 method=GET path=/v3/api-docs status=200 durationMs=3
+business-svc-1  | 2026-09-23T17:57:28.616Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-2] e.p.b.config.RequestLoggingFilter        : http_request requestId=32c01edd-1051-42cd-b244-734444cc89d4 method=GET path=/swagger-ui/index.html status=200 durationMs=4

@@ -1,0 +1,10 @@
+ v |   comercio    |        categoria        | usos |   ultimo   
+---+---------------+-------------------------+------+------------
+ 2 | STARBUCKS     | Galapagos               |    2 | 2026-08-15
+ 2 | GASTO MANUAL  | Supermercado y despensa |    1 | 2026-09-10
+ 2 | A             | Categoria 0             |    1 | 2026-09-24
+ 2 | B             | Categoria 1             |    1 | 2026-09-24
+ 2 | C             | Categoria 2             |    1 | 2026-09-24
+ 2 | PRUEBA MANUAL | Comida                  |    1 | 2026-09-24
+(6 rows)
+

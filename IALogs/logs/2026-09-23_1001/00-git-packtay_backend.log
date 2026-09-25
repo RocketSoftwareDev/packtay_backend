@@ -1,0 +1,18 @@
+$ git fetch origin
+
+exit=0
+$ git checkout develop
+Already on 'develop'
+Your branch is up to date with 'origin/develop'.
+
+exit=0
+$ git pull --ff-only
+Already up to date.
+
+exit=0
+$ git log --oneline -3
+b1a8022 Merge pull request #7 from RocketSoftwareDev/fix/verificacion-local
+3a7599d fix(local): mvnw ejecutable y Keycloak propio para paktay-local
+d76b5be chore(ialogs): verificación de develop 2026-09-23_0938
+
+exit=0

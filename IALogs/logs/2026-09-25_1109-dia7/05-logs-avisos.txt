@@ -1,0 +1,3 @@
+2026-09-25T16:36:47.047Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.service.PushSender    : push_sender_ready enabled=false
+2026-09-25T16:42:25.534Z  INFO 1 --- [paktay-business-svc] [io-8082-exec-10] e.p.business.service.BudgetAlertService  : budget_alert_no_device userId=2ab1ba05-7fb6-40bc-9bc9-3d625cfe68b0 count=1
+2026-09-25T16:42:25.800Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-6] e.p.business.service.BudgetAlertService  : budget_alert_no_device userId=2ab1ba05-7fb6-40bc-9bc9-3d625cfe68b0 count=1

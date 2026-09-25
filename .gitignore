@@ -10,9 +10,7 @@ target/
 .env.*
 !.env.example
 .claude/
-doc/
-docs/
-IALogs/
-IAlogs/
 Postman/
 postman/
+# En develop, docs/ e IALogs/ sí se versionan: son las guías y el circuito de pruebas con
+# Codex. main los ignora; al integrar develop en main, conservar el .gitignore de main.

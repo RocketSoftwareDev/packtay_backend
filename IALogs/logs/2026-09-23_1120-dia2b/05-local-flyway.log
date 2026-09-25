@@ -1,0 +1,8 @@
+business-svc-1  | 2026-09-23T16:22:02.841Z  INFO 1 --- [paktay-business-svc] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://business-db:5432/paktay (PostgreSQL 16.14)
+business-svc-1  | 2026-09-23T16:22:02.863Z  INFO 1 --- [paktay-business-svc] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+business-svc-1  | 2026-09-23T16:22:02.865Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 2 migrations (execution time 00:00.010s)
+business-svc-1  | 2026-09-23T16:22:02.872Z  INFO 1 --- [paktay-business-svc] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" with baseline ...
+business-svc-1  | 2026-09-23T16:22:02.899Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbBaseline     : Successfully baselined schema with version: 1
+business-svc-1  | 2026-09-23T16:22:02.927Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 1
+business-svc-1  | 2026-09-23T16:22:02.933Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "2 - limpieza tablas muertas"
+business-svc-1  | 2026-09-23T16:22:02.986Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "public", now at version v2 (execution time 00:00.042s)

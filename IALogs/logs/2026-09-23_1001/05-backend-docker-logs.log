@@ -1,0 +1,272 @@
+$ docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml logs --no-color --tail=300 keycloak auth-svc business-svc keycloak-init
+auth-svc-1      | 
+keycloak-init-1  | Logging into http://host.docker.internal:28180 as user admin of realm master
+keycloak-init-1  | Logging into http://host.docker.internal:28180 as user admin of realm master
+auth-svc-1       |   .   ____          _            __ _ _
+auth-svc-1       |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+auth-svc-1       | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+auth-svc-1       |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+keycloak-1       | JAVA_OPTS_KC_HEAP already set in environment; overriding default settings
+keycloak-1       | Updating the configuration and installing your custom providers, if any. Please wait.
+auth-svc-1       |   '  |____| .__|_| |_|_| |_\__, | / / / /
+keycloak-1       | 2026-09-23 15:02:50,257 INFO  [io.quarkus.deployment.QuarkusAugmentor] (main) Quarkus augmentation completed in 2731ms
+keycloak-1       | Running the server in development mode. DO NOT use this configuration in production.
+keycloak-1       | 2026-09-23 15:02:50,771 INFO  [org.keycloak.url.HostnameV2ProviderFactory] (main) If hostname is specified, hostname-strict is effectively ignored
+auth-svc-1       |  =========|_|==============|___/=/_/_/_/
+keycloak-1       | 2026-09-23 15:02:52,223 INFO  [org.keycloak.quarkus.runtime.storage.database.liquibase.QuarkusJpaUpdaterProvider] (main) Initializing database schema. Using changelog META-INF/jpa-changelog-master.xml
+auth-svc-1       | 
+keycloak-1       | 2026-09-23 15:02:54,718 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Starting Infinispan embedded cache manager
+auth-svc-1       |  :: Spring Boot ::                (v3.4.5)
+keycloak-1       | 2026-09-23 15:02:54,744 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) JGroups JDBC_PING discovery enabled.
+business-svc-1  | 
+keycloak-1       | 2026-09-23 15:02:54,792 INFO  [org.infinispan.CONTAINER] (main) Virtual threads support enabled
+business-svc-1   |   .   ____          _            __ _ _
+auth-svc-1       | 
+business-svc-1   |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+auth-svc-1       | 2026-09-23T15:04:41.694Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : Starting AuthApplication v0.1.0-SNAPSHOT using Java 17.0.20 with PID 1 (/app/app.jar started by root in /app)
+auth-svc-1       | 2026-09-23T15:04:41.696Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : No active profile set, falling back to 1 default profile: "default"
+auth-svc-1       | 2026-09-23T15:04:42.675Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+business-svc-1   | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+business-svc-1   |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+auth-svc-1       | 2026-09-23T15:04:42.680Z  INFO 1 --- [paktay-auth-svc] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+auth-svc-1       | 2026-09-23T15:04:42.681Z  INFO 1 --- [paktay-auth-svc] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+auth-svc-1       | 2026-09-23T15:04:42.698Z  INFO 1 --- [paktay-auth-svc] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+auth-svc-1       | 2026-09-23T15:04:42.699Z  INFO 1 --- [paktay-auth-svc] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 977 ms
+auth-svc-1       | 2026-09-23T15:04:42.979Z  INFO 1 --- [paktay-auth-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+business-svc-1   |   '  |____| .__|_| |_|_| |_\__, | / / / /
+business-svc-1   |  =========|_|==============|___/=/_/_/_/
+business-svc-1   | 
+auth-svc-1       | 2026-09-23T15:04:43.111Z  INFO 1 --- [paktay-auth-svc] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7c2b6acb
+keycloak-1       | 2026-09-23 15:02:54,862 INFO  [org.infinispan.CONTAINER] (main) ISPN000556: Starting user marshaller 'org.infinispan.commons.marshall.ImmutableProtoStreamMarshaller'
+auth-svc-1       | 2026-09-23T15:04:43.113Z  INFO 1 --- [paktay-auth-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+keycloak-1       | 2026-09-23 15:02:55,003 INFO  [org.keycloak.connections.infinispan.DefaultInfinispanConnectionProviderFactory] (main) Node name: node_542012, Site name: null
+keycloak-1       | 2026-09-23 15:02:55,066 INFO  [org.keycloak.exportimport.dir.DirImportProvider] (main) Importing from directory /opt/keycloak/bin/../data/import
+keycloak-1       | 2026-09-23 15:02:55,070 INFO  [org.keycloak.services] (main) KC-SERVICES0050: Initializing master realm
+keycloak-1       | 2026-09-23 15:02:55,856 INFO  [org.keycloak.services] (main) KC-SERVICES0030: Full model import requested. Strategy: IGNORE_EXISTING
+auth-svc-1       | 2026-09-23T15:04:43.446Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+keycloak-1       | 2026-09-23 15:02:56,480 INFO  [org.keycloak.exportimport.util.ImportUtils] (main) Realm 'paktay' imported
+auth-svc-1       | 2026-09-23T15:04:43.742Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+keycloak-1       | 2026-09-23 15:02:56,501 INFO  [org.keycloak.services] (main) KC-SERVICES0032: Import finished successfully
+business-svc-1   |  :: Spring Boot ::                (v3.4.5)
+keycloak-1       | 2026-09-23 15:02:56,552 INFO  [org.keycloak.services] (main) KC-SERVICES0077: Created temporary admin user with username admin
+keycloak-1       | 2026-09-23 15:02:56,627 INFO  [io.quarkus] (main) Keycloak 26.2.5 on JVM (powered by Quarkus 3.20.1) started in 6.315s. Listening on: http://0.0.0.0:8080. Management interface listening on http://0.0.0.0:9000.
+keycloak-1       | 2026-09-23 15:02:56,627 INFO  [io.quarkus] (main) Profile dev activated. 
+keycloak-1       | 2026-09-23 15:02:56,627 INFO  [io.quarkus] (main) Installed features: [agroal, cdi, hibernate-orm, jdbc-postgresql, keycloak, narayana-jta, opentelemetry, reactive-routes, rest, rest-jackson, smallrye-context-propagation, smallrye-health, vertx]
+keycloak-1       | 2026-09-23 15:02:57,775 WARN  [org.keycloak.cookie.DefaultCookieProvider] (executor-thread-1) Non-secure context detected; cookies are not secured, and will not be available in cross-origin POST requests
+keycloak-1       | 2026-09-23 15:04:36,970 WARN  [org.keycloak.cookie.DefaultCookieProvider] (executor-thread-1) Non-secure context detected; cookies are not secured, and will not be available in cross-origin POST requests
+auth-svc-1       | 2026-09-23T15:04:43.750Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : Started AuthApplication in 2.311 seconds (process running for 2.582)
+auth-svc-1       | 2026-09-23T15:04:55.187Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+auth-svc-1       | 2026-09-23T15:04:55.187Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+business-svc-1   | 
+business-svc-1   | 2026-09-23T15:04:41.643Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : Starting BusinessApplication v0.1.0-SNAPSHOT using Java 17.0.20 with PID 1 (/app/app.jar started by root in /app)
+business-svc-1   | 2026-09-23T15:04:41.644Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : No active profile set, falling back to 1 default profile: "default"
+business-svc-1   | 2026-09-23T15:04:42.580Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+business-svc-1   | 2026-09-23T15:04:42.585Z  INFO 1 --- [paktay-business-svc] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+business-svc-1   | 2026-09-23T15:04:42.585Z  INFO 1 --- [paktay-business-svc] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+business-svc-1   | 2026-09-23T15:04:42.601Z  INFO 1 --- [paktay-business-svc] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+auth-svc-1       | 2026-09-23T15:04:55.188Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+auth-svc-1       | 2026-09-23T15:04:55.246Z  WARN 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.b.actuate.mail.MailHealthIndicator   : Mail health check failed
+auth-svc-1       | 
+auth-svc-1       | org.eclipse.angus.mail.util.MailConnectException: Couldn't connect to host, port: 127.0.0.1, 1025; timeout 5000
+auth-svc-1       | 	at org.eclipse.angus.mail.smtp.SMTPTransport.openServer(SMTPTransport.java:2243) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	at org.eclipse.angus.mail.smtp.SMTPTransport.protocolConnect(SMTPTransport.java:729) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	at jakarta.mail.Service.connect(Service.java:345) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	at org.springframework.mail.javamail.JavaMailSenderImpl.connectTransport(JavaMailSenderImpl.java:480) ~[spring-context-support-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.mail.javamail.JavaMailSenderImpl.testConnection(JavaMailSenderImpl.java:360) ~[spring-context-support-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.boot.actuate.mail.MailHealthIndicator.doHealthCheck(MailHealthIndicator.java:52) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.AbstractHealthIndicator.health(AbstractHealthIndicator.java:82) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthIndicator.getHealth(HealthIndicator.java:37) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointWebExtension.getHealth(HealthEndpointWebExtension.java:94) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+business-svc-1   | 2026-09-23T15:04:42.601Z  INFO 1 --- [paktay-business-svc] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 926 ms
+business-svc-1   | 2026-09-23T15:04:43.142Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+business-svc-1   | 2026-09-23T15:04:43.466Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+business-svc-1   | 2026-09-23T15:04:43.478Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : Started BusinessApplication in 2.082 seconds (process running for 2.321)
+business-svc-1   | 2026-09-23T15:04:43.501Z DEBUG 1 --- [paktay-business-svc] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointWebExtension.getHealth(HealthEndpointWebExtension.java:47) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+business-svc-1   | 2026-09-23T15:04:43.502Z DEBUG 1 --- [paktay-business-svc] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select current_database() as database_name, current_user as database_user]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointSupport.getLoggedHealth(HealthEndpointSupport.java:172) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointSupport.getContribution(HealthEndpointSupport.java:145) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointSupport.getAggregateContribution(HealthEndpointSupport.java:156) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointSupport.getContribution(HealthEndpointSupport.java:141) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointSupport.getHealth(HealthEndpointSupport.java:110) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointSupport.getHealth(HealthEndpointSupport.java:81) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+business-svc-1   | 2026-09-23T15:04:43.503Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+business-svc-1   | 2026-09-23T15:04:43.649Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5ffd35dd
+business-svc-1   | 2026-09-23T15:04:43.653Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+business-svc-1   | 2026-09-23T15:04:43.666Z  INFO 1 --- [paktay-business-svc] [           main] e.p.b.config.DatabaseConnectionLogger    : business_database_connected database=paktay user=paktay
+business-svc-1   | 2026-09-23T15:04:45.020Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+business-svc-1   | 2026-09-23T15:04:45.020Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+business-svc-1   | 2026-09-23T15:04:45.021Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+business-svc-1   | 2026-09-23T15:04:55.759Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-5] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 292 ms
+business-svc-1   | 2026-09-23T15:04:55.767Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-5] e.p.b.config.RequestLoggingFilter        : http_request requestId=434b1259-0041-463d-8917-4a7da003b7d7 method=GET path=/v3/api-docs status=200 durationMs=303
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointWebExtension.health(HealthEndpointWebExtension.java:80) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+business-svc-1   | 2026-09-23T15:04:55.788Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-6] e.p.b.config.RequestLoggingFilter        : http_request requestId=f003843f-30cb-4e1e-9d01-32a3f882e833 method=GET path=/swagger-ui/index.html status=200 durationMs=2
+business-svc-1   | 2026-09-23T15:04:55.901Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-7] e.p.b.config.RequestLoggingFilter        : http_request requestId=38183203-3b74-4aba-ae36-d06be991dac5 method=GET path=/v3/api-docs status=200 durationMs=3
+auth-svc-1       | 	at org.springframework.boot.actuate.health.HealthEndpointWebExtension.health(HealthEndpointWebExtension.java:69) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+auth-svc-1       | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+auth-svc-1       | 	at org.springframework.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:281) ~[spring-core-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.boot.actuate.endpoint.invoke.reflect.ReflectiveOperationInvoker.invoke(ReflectiveOperationInvoker.java:74) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.endpoint.annotation.AbstractDiscoveredOperation.invoke(AbstractDiscoveredOperation.java:60) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$ServletWebOperationAdapter.handle(AbstractWebMvcEndpointHandlerMapping.java:327) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at org.springframework.boot.actuate.endpoint.web.servlet.AbstractWebMvcEndpointHandlerMapping$OperationHandler.handle(AbstractWebMvcEndpointHandlerMapping.java:434) ~[spring-boot-actuator-3.4.5.jar!/:3.4.5]
+auth-svc-1       | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+auth-svc-1       | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+auth-svc-1       | 	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:258) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:191) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:986) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:891) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:101) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.doFilterInternal(BearerTokenAuthenticationFilter.java:128) ~[spring-security-oauth2-resource-server-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:243) ~[spring-webmvc-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:238) ~[spring-security-config-6.4.5.jar!/:6.4.5]
+auth-svc-1       | 	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:101) ~[spring-web-6.2.6.jar!/:6.2.6]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1740) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1       | 	at java.base/java.lang.Thread.run(Unknown Source) ~[na:na]
+auth-svc-1       | Caused by: java.net.ConnectException: Connection refused
+auth-svc-1       | 	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[na:na]
+auth-svc-1       | 	at java.base/sun.nio.ch.Net.pollConnectNow(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/sun.nio.ch.NioSocketImpl.connect(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/java.net.SocksSocketImpl.connect(Unknown Source) ~[na:na]
+auth-svc-1       | 	at java.base/java.net.Socket.connect(Unknown Source) ~[na:na]
+auth-svc-1       | 	at org.eclipse.angus.mail.util.WriteTimeoutSocket.connect(WriteTimeoutSocket.java:118) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	at org.eclipse.angus.mail.util.SocketFetcher.createSocket(SocketFetcher.java:366) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	at org.eclipse.angus.mail.util.SocketFetcher.getSocket(SocketFetcher.java:243) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	at org.eclipse.angus.mail.smtp.SMTPTransport.openServer(SMTPTransport.java:2193) ~[jakarta.mail-2.0.3.jar!/:na]
+auth-svc-1       | 	... 166 common frames omitted
+auth-svc-1       | 
+auth-svc-1       | 2026-09-23T15:04:55.405Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-2] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 123 ms
+auth-svc-1       | 2026-09-23T15:04:55.413Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-2] e.p.auth.config.RequestLoggingFilter     : http_request requestId=446328e8-90c1-4036-aa69-fc0a0ce0222d method=GET path=/v3/api-docs status=200 durationMs=133
+auth-svc-1       | 2026-09-23T15:04:55.434Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-3] e.p.auth.config.RequestLoggingFilter     : http_request requestId=938410e6-790b-4e87-8998-311cddc2fde2 method=GET path=/swagger-ui/index.html status=200 durationMs=4
+
+exit=0

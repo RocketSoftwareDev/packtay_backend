@@ -1,0 +1,183 @@
+business-db-1  | The files belonging to this database system will be owned by user "postgres".
+business-db-1  | This user must also own the server process.
+business-db-1  | 
+business-db-1  | The database cluster will be initialized with locale "en_US.utf8".
+business-db-1  | The default database encoding has accordingly been set to "UTF8".
+business-db-1  | The default text search configuration will be set to "english".
+business-db-1  | 
+business-db-1  | Data page checksums are disabled.
+business-db-1  | 
+business-db-1  | fixing permissions on existing directory /var/lib/postgresql/data ... ok
+business-db-1  | creating subdirectories ... ok
+business-db-1  | selecting dynamic shared memory implementation ... posix
+business-db-1  | selecting default max_connections ... 100
+business-db-1  | selecting default shared_buffers ... 128MB
+business-db-1  | selecting default time zone ... UTC
+business-db-1  | creating configuration files ... ok
+business-db-1  | running bootstrap script ... ok
+business-db-1  | sh: locale: not found
+business-db-1  | 2026-09-23 16:08:48.637 UTC [35] WARNING:  no usable system locales were found
+business-db-1  | performing post-bootstrap initialization ... ok
+business-db-1  | initdb: warning: enabling "trust" authentication for local connections
+business-db-1  | initdb: hint: You can change this by editing pg_hba.conf or using the option -A, or --auth-local and --auth-host, the next time you run initdb.
+business-db-1  | syncing data to disk ... ok
+business-db-1  | 
+business-db-1  | 
+business-db-1  | Success. You can now start the database server using:
+business-db-1  | 
+business-db-1  |     pg_ctl -D /var/lib/postgresql/data -l logfile start
+business-db-1  | 
+business-db-1  | waiting for server to start....2026-09-23 16:08:48.822 UTC [41] LOG:  starting PostgreSQL 16.14 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+business-db-1  | 2026-09-23 16:08:48.823 UTC [41] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+business-db-1  | 2026-09-23 16:08:48.824 UTC [44] LOG:  database system was shut down at 2026-09-23 16:08:48 UTC
+business-db-1  | 2026-09-23 16:08:48.826 UTC [41] LOG:  database system is ready to accept connections
+business-db-1  |  done
+business-db-1  | server started
+business-db-1  | CREATE DATABASE
+business-db-1  | 
+business-db-1  | 
+business-db-1  | /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/001-paktay-schema.sql
+business-db-1  | BEGIN
+business-db-1  | CREATE EXTENSION
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TYPE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TABLE
+business-db-1  | CREATE INDEX
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE FUNCTION
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE TRIGGER
+business-db-1  | CREATE VIEW
+business-db-1  | INSERT 0 7
+business-db-1  | 2026-09-23 16:08:49.019 UTC [54] ERROR:  null value in column "alias" of relation "system_categories" violates not-null constraint
+business-db-1  | 2026-09-23 16:08:49.019 UTC [54] DETAIL:  Failing row contains (caac08e3-0fea-4415-a6b7-87f92464ef11, arriendo, Arriendo o hipoteca, null, ARRIENDO O HIPOTECA, null, null, key, #2DD4BF, #0D9488, t, 1, 2026-09-23 16:08:48.949848+00).
+business-db-1  | 2026-09-23 16:08:49.019 UTC [54] STATEMENT:  insert into system_categories (code, name, normalized_name, icon, color_dark, color_light, display_order) values
+business-db-1  | 	    ('arriendo', 'Arriendo o hipoteca', 'ARRIENDO O HIPOTECA', 'key', '#2DD4BF', '#0D9488', 1),
+business-db-1  | 	    ('servicios', 'Luz, agua y gas', 'LUZ AGUA Y GAS', 'lightbulb', '#FACC15', '#CA8A04', 2),
+business-db-1  | 	    ('supermercado', 'Supermercado y despensa', 'SUPERMERCADO Y DESPENSA', 'shopping-cart', '#A3E635', '#65A30D', 3),
+business-db-1  | 	    ('comida', 'Comida y restaurantes', 'COMIDA Y RESTAURANTES', 'utensils', '#F59E0B', '#D97706', 4),
+business-db-1  | 	    ('casa', 'Casa y hogar', 'CASA Y HOGAR', 'house', '#34D399', '#059669', 5),
+business-db-1  | 	    ('transporte', 'Transporte y taxis', 'TRANSPORTE Y TAXIS', 'car', '#38BDF8', '#0284C7', 6),
+business-db-1  | 	    ('gasolina', 'Gasolina y peajes', 'GASOLINA Y PEAJES', 'fuel', '#FB923C', '#EA580C', 7),
+business-db-1  | 	    ('telefono', 'Teléfono e internet', 'TELEFONO E INTERNET', 'wifi', '#818CF8', '#4F46E5', 8),
+business-db-1  | 	    ('salud', 'Salud y consultas', 'SALUD Y CONSULTAS', 'heart-pulse', '#FB7185', '#E11D48', 9),
+business-db-1  | 	    ('farmacia', 'Farmacia y medicinas', 'FARMACIA Y MEDICINAS', 'pill', '#F0ABFC', '#C026D3', 10),
+business-db-1  | 	    ('educacion', 'Educación y cursos', 'EDUCACION Y CURSOS', 'graduation-cap', '#3B82F6', '#1D4ED8', 11),
+business-db-1  | 	    ('subscripciones', 'Suscripciones y apps', 'SUSCRIPCIONES Y APPS', 'tv', '#A78BFA', '#7C5CE0', 12),
+business-db-1  | 	    ('entretenimiento', 'Entretenimiento y ocio', 'ENTRETENIMIENTO Y OCIO', 'gamepad-2', '#C084FC', '#9333EA', 13),
+business-db-1  | 	    ('ropa', 'Ropa', 'ROPA', 'shirt', '#F472B6', '#DB2777', 14),
+business-db-1  | 	    ('cuidado', 'Cuidado personal', 'CUIDADO PERSONAL', 'scissors', '#E0B085', '#B45309', 15),
+business-db-1  | 	    ('electronicos', 'Electrónicos', 'ELECTRONICOS', 'laptop', '#60A5FA', '#2563EB', 16),
+business-db-1  | 	    ('gimnasio', 'Gimnasio y deporte', 'GIMNASIO Y DEPORTE', 'dumbbell', '#22D3EE', '#0E7490', 17),
+business-db-1  | 	    ('mascotas', 'Mascotas', 'MASCOTAS', 'paw-print', '#FDBA74', '#C2410C', 18),
+business-db-1  | 	    ('viajes', 'Viajes', 'VIAJES', 'plane', '#5EEAD4', '#0F766E', 19),
+business-db-1  | 	    ('regalos', 'Regalos', 'REGALOS', 'gift', '#F9A8D4', '#BE185D', 20),
+business-db-1  | 	    ('deudas', 'Deudas y préstamos', 'DEUDAS Y PRESTAMOS', 'landmark', '#C4B5FD', '#6D28D9', 21),
+business-db-1  | 	    ('otros', 'Otros', 'OTROS', 'circle-ellipsis', '#8B93A3', '#5B6575', 22)
+business-db-1  | 	on conflict (normalized_name) do update set
+business-db-1  | 	    code = excluded.code,
+business-db-1  | 	    name = excluded.name,
+business-db-1  | 	    icon = excluded.icon,
+business-db-1  | 	    color_dark = excluded.color_dark,
+business-db-1  | psql:/docker-entrypoint-initdb.d/001-paktay-schema.sql:820: ERROR:  null value in column "alias" of relation "system_categories" violates not-null constraint
+business-db-1  | DETAIL:  Failing row contains (caac08e3-0fea-4415-a6b7-87f92464ef11, arriendo, Arriendo o hipoteca, null, ARRIENDO O HIPOTECA, null, null, key, #2DD4BF, #0D9488, t, 1, 2026-09-23 16:08:48.949848+00).
+business-db-1  | 	    color_light = excluded.color_light,
+business-db-1  | 	    display_order = excluded.display_order,
+business-db-1  | 	    active = true;
+business-db-1  | 
+business-db-1  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+business-db-1  | 
+business-db-1  | 2026-09-23 16:08:49.264 UTC [1] LOG:  starting PostgreSQL 16.14 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+business-db-1  | 2026-09-23 16:08:49.264 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+business-db-1  | 2026-09-23 16:08:49.264 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+business-db-1  | 2026-09-23 16:08:49.266 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+business-db-1  | 2026-09-23 16:08:49.269 UTC [28] LOG:  database system was interrupted; last known up at 2026-09-23 16:08:48 UTC
+business-db-1  | 2026-09-23 16:08:49.298 UTC [28] LOG:  database system was not properly shut down; automatic recovery in progress
+business-db-1  | 2026-09-23 16:08:49.301 UTC [28] LOG:  redo starts at 0/14F7158
+business-db-1  | 2026-09-23 16:08:49.308 UTC [28] LOG:  invalid magic number 0000 in WAL segment 000000010000000000000001, LSN 0/1A00000, offset 10485760
+business-db-1  | 2026-09-23 16:08:49.308 UTC [28] LOG:  redo done at 0/19FFF98 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+business-db-1  | 2026-09-23 16:08:49.309 UTC [26] LOG:  checkpoint starting: end-of-recovery immediate wait
+business-db-1  | 2026-09-23 16:08:49.326 UTC [26] LOG:  checkpoint complete: wrote 1075 buffers (6.6%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.005 s, sync=0.012 s, total=0.017 s; sync files=401, longest=0.003 s, average=0.001 s; distance=5155 kB, estimate=5155 kB; lsn=0/1A00048, redo lsn=0/1A00048
+business-db-1  | 2026-09-23 16:08:49.327 UTC [1] LOG:  database system is ready to accept connections

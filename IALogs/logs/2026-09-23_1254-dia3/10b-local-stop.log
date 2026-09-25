@@ -1,0 +1,5 @@
+ Container paktay-local-business-svc-1 Stopping 
+ Container paktay-local-auth-svc-1 Stopping 
+ Container paktay-local-business-svc-1 Stopped 
+ Container paktay-local-auth-svc-1 Stopped 
+no such service: mailpit

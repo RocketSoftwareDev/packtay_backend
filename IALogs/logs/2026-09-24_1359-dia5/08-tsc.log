@@ -1,0 +1,3 @@
+__tests__/InicioScreen.test.tsx(280,13): error TS2367: This comparison appears to be unintentional because the types 'ElementType' and '"View"' have no overlap.
+src/features/expenses/monthSummaryStore.ts(289,45): error TS2339: Property 'multiRemove' does not exist on type 'AsyncStorage'.
+exit=2

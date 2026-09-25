@@ -1,0 +1,5 @@
+wait loop terminado
+{"status":"UP","groups":["liveness","readiness"]}
+HTTP 200
+{"status":"UP","groups":["liveness","readiness"]}
+HTTP 200

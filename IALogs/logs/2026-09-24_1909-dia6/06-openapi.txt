@@ -1,0 +1,2 @@
+{'/api/v1/user/merchant-rules': True, '/api/v1/user/merchant-rules/{id}': True, '/api/v1/catalog/countries': True, '/api/v1/user/cards/{cardId}/limit': True}
+True

@@ -1,0 +1,82 @@
+keycloak-1       | JAVA_OPTS_KC_HEAP already set in environment; overriding default settings
+keycloak-1       | Updating the configuration and installing your custom providers, if any. Please wait.
+keycloak-1       | 2026-09-23 15:47:43,602 INFO  [io.quarkus.deployment.QuarkusAugmentor] (main) Quarkus augmentation completed in 2639ms
+keycloak-1       | Running the server in development mode. DO NOT use this configuration in production.
+keycloak-1       | 2026-09-23 15:47:44,156 INFO  [org.keycloak.url.HostnameV2ProviderFactory] (main) If hostname is specified, hostname-strict is effectively ignored
+keycloak-1       | 2026-09-23 15:47:45,277 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) Starting Infinispan embedded cache manager
+keycloak-1       | 2026-09-23 15:47:45,303 INFO  [org.keycloak.quarkus.runtime.storage.infinispan.CacheManagerFactory] (main) JGroups JDBC_PING discovery enabled.
+keycloak-1       | 2026-09-23 15:47:45,342 INFO  [org.infinispan.CONTAINER] (main) Virtual threads support enabled
+keycloak-1       | 2026-09-23 15:47:45,402 INFO  [org.infinispan.CONTAINER] (main) ISPN000556: Starting user marshaller 'org.infinispan.commons.marshall.ImmutableProtoStreamMarshaller'
+keycloak-1       | 2026-09-23 15:47:45,544 INFO  [org.keycloak.connections.infinispan.DefaultInfinispanConnectionProviderFactory] (main) Node name: node_464087, Site name: null
+keycloak-1       | 2026-09-23 15:47:45,611 INFO  [org.keycloak.exportimport.dir.DirImportProvider] (main) Importing from directory /opt/keycloak/bin/../data/import
+keycloak-1       | 2026-09-23 15:47:45,848 INFO  [org.keycloak.services] (main) KC-SERVICES0030: Full model import requested. Strategy: IGNORE_EXISTING
+keycloak-1       | 2026-09-23 15:47:45,932 INFO  [org.keycloak.exportimport.util.ImportUtils] (main) Realm 'paktay' already exists. Import skipped
+keycloak-1       | 2026-09-23 15:47:45,935 INFO  [org.keycloak.services] (main) KC-SERVICES0032: Import finished successfully
+keycloak-1       | 2026-09-23 15:47:46,002 INFO  [io.quarkus] (main) Keycloak 26.2.5 on JVM (powered by Quarkus 3.20.1) started in 2.355s. Listening on: http://0.0.0.0:8080. Management interface listening on http://0.0.0.0:9000.
+keycloak-1       | 2026-09-23 15:47:46,002 INFO  [io.quarkus] (main) Profile dev activated. 
+keycloak-1       | 2026-09-23 15:47:46,002 INFO  [io.quarkus] (main) Installed features: [agroal, cdi, hibernate-orm, jdbc-postgresql, keycloak, narayana-jta, opentelemetry, reactive-routes, rest, rest-jackson, smallrye-context-propagation, smallrye-health, vertx]
+keycloak-1       | 2026-09-23 15:47:51,462 WARN  [org.keycloak.cookie.DefaultCookieProvider] (executor-thread-1) Non-secure context detected; cookies are not secured, and will not be available in cross-origin POST requests
+keycloak-init-1  | Logging into http://host.docker.internal:28180 as user admin of realm master
+auth-svc-1       | 
+auth-svc-1       |   .   ____          _            __ _ _
+auth-svc-1       |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+auth-svc-1       | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+auth-svc-1       |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+auth-svc-1       |   '  |____| .__|_| |_|_| |_\__, | / / / /
+auth-svc-1       |  =========|_|==============|___/=/_/_/_/
+auth-svc-1       | 
+auth-svc-1       |  :: Spring Boot ::                (v3.4.5)
+auth-svc-1       | 
+auth-svc-1       | 2026-09-23T15:47:55.213Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : Starting AuthApplication v0.1.0-SNAPSHOT using Java 17.0.20 with PID 1 (/app/app.jar started by root in /app)
+auth-svc-1       | 2026-09-23T15:47:55.215Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : No active profile set, falling back to 1 default profile: "default"
+auth-svc-1       | 2026-09-23T15:47:56.382Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8081 (http)
+auth-svc-1       | 2026-09-23T15:47:56.391Z  INFO 1 --- [paktay-auth-svc] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+auth-svc-1       | 2026-09-23T15:47:56.392Z  INFO 1 --- [paktay-auth-svc] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+auth-svc-1       | 2026-09-23T15:47:56.413Z  INFO 1 --- [paktay-auth-svc] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+auth-svc-1       | 2026-09-23T15:47:56.415Z  INFO 1 --- [paktay-auth-svc] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1168 ms
+auth-svc-1       | 2026-09-23T15:47:56.744Z  INFO 1 --- [paktay-auth-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+auth-svc-1       | 2026-09-23T15:47:56.893Z  INFO 1 --- [paktay-auth-svc] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3c28181b
+auth-svc-1       | 2026-09-23T15:47:56.894Z  INFO 1 --- [paktay-auth-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+auth-svc-1       | 2026-09-23T15:47:57.327Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+auth-svc-1       | 2026-09-23T15:47:57.617Z  INFO 1 --- [paktay-auth-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8081 (http) with context path '/'
+auth-svc-1       | 2026-09-23T15:47:57.626Z  INFO 1 --- [paktay-auth-svc] [           main] ec.paktay.auth.AuthApplication           : Started AuthApplication in 2.721 seconds (process running for 3.118)
+auth-svc-1       | 2026-09-23T15:48:06.098Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+auth-svc-1       | 2026-09-23T15:48:06.098Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+auth-svc-1       | 2026-09-23T15:48:06.099Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+auth-svc-1       | 2026-09-23T15:48:15.248Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-7] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 144 ms
+auth-svc-1       | 2026-09-23T15:48:15.258Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-7] e.p.auth.config.RequestLoggingFilter     : http_request requestId=d2422da8-a548-4d08-8234-e8e7f0985241 method=GET path=/v3/api-docs status=200 durationMs=158
+auth-svc-1       | 2026-09-23T15:48:15.271Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-9] e.p.auth.config.RequestLoggingFilter     : http_request requestId=570ea3a5-869f-4100-a402-6ad6acb6e3af method=GET path=/swagger-ui/index.html status=200 durationMs=2
+business-svc-1   | 
+business-svc-1   |   .   ____          _            __ _ _
+business-svc-1   |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+business-svc-1   | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+business-svc-1   |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+business-svc-1   |   '  |____| .__|_| |_|_| |_\__, | / / / /
+business-svc-1   |  =========|_|==============|___/=/_/_/_/
+business-svc-1   | 
+business-svc-1   |  :: Spring Boot ::                (v3.4.5)
+business-svc-1   | 
+business-svc-1   | 2026-09-23T15:47:55.163Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : Starting BusinessApplication v0.1.0-SNAPSHOT using Java 17.0.20 with PID 1 (/app/app.jar started by root in /app)
+business-svc-1   | 2026-09-23T15:47:55.164Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : No active profile set, falling back to 1 default profile: "default"
+business-svc-1   | 2026-09-23T15:47:56.273Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8082 (http)
+business-svc-1   | 2026-09-23T15:47:56.279Z  INFO 1 --- [paktay-business-svc] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+business-svc-1   | 2026-09-23T15:47:56.280Z  INFO 1 --- [paktay-business-svc] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+business-svc-1   | 2026-09-23T15:47:56.298Z  INFO 1 --- [paktay-business-svc] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+business-svc-1   | 2026-09-23T15:47:56.298Z  INFO 1 --- [paktay-business-svc] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1095 ms
+business-svc-1   | 2026-09-23T15:47:57.015Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+business-svc-1   | 2026-09-23T15:47:57.408Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8082 (http) with context path '/'
+business-svc-1   | 2026-09-23T15:47:57.429Z  INFO 1 --- [paktay-business-svc] [           main] ec.paktay.business.BusinessApplication   : Started BusinessApplication in 2.547 seconds (process running for 2.911)
+business-svc-1   | 2026-09-23T15:47:57.457Z DEBUG 1 --- [paktay-business-svc] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+business-svc-1   | 2026-09-23T15:47:57.458Z DEBUG 1 --- [paktay-business-svc] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [select current_database() as database_name, current_user as database_user]
+business-svc-1   | 2026-09-23T15:47:57.461Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+business-svc-1   | 2026-09-23T15:47:57.569Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@2a6c751f
+business-svc-1   | 2026-09-23T15:47:57.571Z  INFO 1 --- [paktay-business-svc] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+business-svc-1   | 2026-09-23T15:47:57.579Z  INFO 1 --- [paktay-business-svc] [           main] e.p.b.config.DatabaseConnectionLogger    : business_database_connected database=paktay user=paktay
+business-svc-1   | 2026-09-23T15:48:05.950Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+business-svc-1   | 2026-09-23T15:48:05.951Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+business-svc-1   | 2026-09-23T15:48:05.951Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+business-svc-1   | 2026-09-23T15:48:15.606Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-7] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 304 ms
+business-svc-1   | 2026-09-23T15:48:15.615Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-7] e.p.b.config.RequestLoggingFilter        : http_request requestId=d1dc10c3-2a62-40b5-9efe-d568a0ca2b61 method=GET path=/v3/api-docs status=200 durationMs=316
+business-svc-1   | 2026-09-23T15:48:15.636Z  INFO 1 --- [paktay-business-svc] [nio-8082-exec-9] e.p.b.config.RequestLoggingFilter        : http_request requestId=d4455d6d-bb6c-40db-88ec-fde34de4ca13 method=GET path=/swagger-ui/index.html status=200 durationMs=2
+business-svc-1   | 2026-09-23T15:48:16.536Z  INFO 1 --- [paktay-business-svc] [io-8082-exec-10] e.p.b.config.RequestLoggingFilter        : http_request requestId=61098320-39ac-4823-8867-98a05959d901 method=GET path=/v3/api-docs status=200 durationMs=12
+exit=0

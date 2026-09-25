@@ -1,0 +1,204 @@
+$ docker compose -p paktay-local --env-file .env --env-file .env.local.example -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml logs --no-color --tail=80 auth-svc business-svc business-db
+business-db-1  | 
+business-db-1  | PostgreSQL Database directory appears to contain a database; Skipping initialization
+business-db-1  | 
+business-db-1  | 2026-09-23 15:02:41.147 UTC [1] LOG:  starting PostgreSQL 16.14 on aarch64-unknown-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+business-db-1  | 2026-09-23 15:02:41.147 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+business-db-1  | 2026-09-23 15:02:41.147 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+business-db-1  | 2026-09-23 15:02:41.151 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+business-db-1  | 2026-09-23 15:02:41.154 UTC [29] LOG:  database system was shut down at 2026-09-10 18:45:50 UTC
+business-db-1  | 2026-09-23 15:02:41.159 UTC [1] LOG:  database system is ready to accept connections
+business-db-1  | 2026-09-23 15:03:02.243 UTC [62] FATAL:  password authentication failed for user "paktay"
+business-db-1  | 2026-09-23 15:03:02.243 UTC [62] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1  | 2026-09-23 15:03:02.621 UTC [63] FATAL:  password authentication failed for user "paktay"
+auth-svc-1     | 	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:439) ~[spring-boot-3.4.5.jar!/:3.4.5]
+auth-svc-1      | 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:318) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-db-1  | 2026-09-23 15:03:02.621 UTC [63] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:05.455 UTC [64] FATAL:  password authentication failed for user "paktay"
+business-svc-1  | 	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-db-1   | 2026-09-23 15:03:05.455 UTC [64] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+auth-svc-1      | 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1362) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-db-1   | 2026-09-23 15:03:06.264 UTC [65] FATAL:  password authentication failed for user "paktay"
+auth-svc-1      | 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1351) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.postgresql.Driver.makeConnection(Driver.java:446) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at ec.paktay.auth.AuthApplication.main(AuthApplication.java:9) ~[!/:0.1.0-SNAPSHOT]
+auth-svc-1      | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+auth-svc-1      | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+business-db-1   | 2026-09-23 15:03:06.264 UTC [65] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:08.508 UTC [73] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:08.508 UTC [73] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:09.674 UTC [74] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:09.674 UTC [74] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:11.650 UTC [82] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:11.650 UTC [82] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:13.123 UTC [83] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:13.123 UTC [83] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:15.074 UTC [84] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:15.074 UTC [84] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:17.007 UTC [92] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:17.007 UTC [92] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:19.294 UTC [93] FATAL:  password authentication failed for user "paktay"
+auth-svc-1      | 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+auth-svc-1      | 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+auth-svc-1      | 	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:102) ~[app.jar:0.1.0-SNAPSHOT]
+auth-svc-1      | 	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64) ~[app.jar:0.1.0-SNAPSHOT]
+auth-svc-1      | 	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40) ~[app.jar:0.1.0-SNAPSHOT]
+auth-svc-1      | Caused by: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'passwordPinService' defined in URL [jar:nested:/app/app.jar/!BOOT-INF/classes/!/ec/paktay/auth/service/PasswordPinService.class]: Unsatisfied dependency expressed through constructor parameter 0: Error creating bean with name 'dataSourceScriptDatabaseInitializer' defined in class path resource [org/springframework/boot/autoconfigure/sql/init/DataSourceInitializationConfiguration.class]: Failed to execute database script
+auth-svc-1      | 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:804) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:240) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1387) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1224) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:569) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1739) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	... 28 common frames omitted
+auth-svc-1      | Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSourceScriptDatabaseInitializer' defined in class path resource [org/springframework/boot/autoconfigure/sql/init/DataSourceInitializationConfiguration.class]: Failed to execute database script
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1818) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:607) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:529) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:339) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:371) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:337) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:315) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:202) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1739) ~[spring-beans-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1627) ~[spring-beans-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.postgresql.Driver.connect(Driver.java:298) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-db-1   | 2026-09-23 15:03:19.294 UTC [93] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:21.695 UTC [102] FATAL:  password authentication failed for user "paktay"
+auth-svc-1      | 	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:913) ~[spring-beans-6.2.6.jar!/:6.2.6]
+business-db-1   | 2026-09-23 15:03:21.695 UTC [102] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+auth-svc-1      | 	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:791) ~[spring-beans-6.2.6.jar!/:6.2.6]
+business-db-1   | 2026-09-23 15:03:25.072 UTC [103] FATAL:  password authentication failed for user "paktay"
+auth-svc-1      | 	... 42 common frames omitted
+business-db-1   | 2026-09-23 15:03:25.072 UTC [103] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+auth-svc-1      | Caused by: org.springframework.jdbc.datasource.init.UncategorizedScriptException: Failed to execute database script
+business-db-1   | 2026-09-23 15:03:28.048 UTC [111] FATAL:  password authentication failed for user "paktay"
+business-db-1   | 2026-09-23 15:03:28.048 UTC [111] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+business-db-1   | 2026-09-23 15:03:34.167 UTC [119] FATAL:  password authentication failed for user "paktay"
+auth-svc-1      | 	at org.springframework.jdbc.datasource.init.DatabasePopulatorUtils.execute(DatabasePopulatorUtils.java:67) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-db-1   | 2026-09-23 15:03:34.167 UTC [119] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+auth-svc-1      | 	at org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer.runScripts(DataSourceScriptDatabaseInitializer.java:87) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-db-1   | 2026-09-23 15:03:37.553 UTC [127] FATAL:  password authentication failed for user "paktay"
+auth-svc-1      | 	at org.springframework.boot.sql.init.AbstractScriptDatabaseInitializer.runScripts(AbstractScriptDatabaseInitializer.java:146) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-db-1   | 2026-09-23 15:03:37.553 UTC [127] DETAIL:  Connection matched file "/var/lib/postgresql/data/pg_hba.conf" line 128: "host all all all scram-sha-256"
+auth-svc-1      | 	at org.springframework.boot.sql.init.AbstractScriptDatabaseInitializer.applyScripts(AbstractScriptDatabaseInitializer.java:108) ~[spring-boot-3.4.5.jar!/:3.4.5]
+auth-svc-1      | 	at org.springframework.boot.sql.init.AbstractScriptDatabaseInitializer.applySchemaScripts(AbstractScriptDatabaseInitializer.java:98) ~[spring-boot-3.4.5.jar!/:3.4.5]
+auth-svc-1      | 	at org.springframework.boot.sql.init.AbstractScriptDatabaseInitializer.initializeDatabase(AbstractScriptDatabaseInitializer.java:76) ~[spring-boot-3.4.5.jar!/:3.4.5]
+auth-svc-1      | 	at org.springframework.boot.sql.init.AbstractScriptDatabaseInitializer.afterPropertiesSet(AbstractScriptDatabaseInitializer.java:66) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:137) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1865) ~[spring-beans-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:360) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1814) ~[spring-beans-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:202) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	... 55 common frames omitted
+business-svc-1  | 	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:461) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | Caused by: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+business-svc-1  | 	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:550) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:84) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:98) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:111) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.fetchConnection(DataSourceUtils.java:160) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.doGetConnection(DataSourceUtils.java:118) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:81) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	... 35 common frames omitted
+business-svc-1  | 
+business-svc-1  | 2026-09-23T15:03:38.569Z  INFO 1 --- [paktay-business-svc] [           main] .s.b.a.l.ConditionEvaluationReportLogger : 
+business-svc-1  | 
+business-svc-1  | Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+business-svc-1  | 2026-09-23T15:03:38.580Z ERROR 1 --- [paktay-business-svc] [           main] o.s.boot.SpringApplication               : Application run failed
+business-svc-1  | 
+business-svc-1  | org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:84) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.jdbc.datasource.init.DatabasePopulatorUtils.execute(DatabasePopulatorUtils.java:52) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	... 63 common frames omitted
+auth-svc-1      | Caused by: org.postgresql.util.PSQLException: FATAL: password authentication failed for user "paktay"
+auth-svc-1      | 	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:704) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:213) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:268) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at org.postgresql.Driver.makeConnection(Driver.java:446) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at org.postgresql.Driver.connect(Driver.java:298) ~[postgresql-42.7.5.jar!/:42.7.5]
+auth-svc-1      | 	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:137) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:360) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:202) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:461) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:550) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:98) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:111) ~[HikariCP-5.1.0.jar!/:na]
+auth-svc-1      | 	at org.springframework.jdbc.datasource.DataSourceUtils.fetchConnection(DataSourceUtils.java:160) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.jdbc.datasource.DataSourceUtils.doGetConnection(DataSourceUtils.java:118) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:81) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+auth-svc-1      | 	... 64 common frames omitted
+auth-svc-1      | 
+business-svc-1  | 	at org.springframework.jdbc.core.JdbcTemplate.execute(JdbcTemplate.java:653) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:723) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:754) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:767) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.core.JdbcTemplate.query(JdbcTemplate.java:825) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.core.simple.DefaultJdbcClient$DefaultStatementSpec$IndexedParamMappedQuerySpec.list(DefaultJdbcClient.java:346) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.core.simple.JdbcClient$MappedQuerySpec.single(JdbcClient.java:410) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at ec.paktay.business.config.DatabaseConnectionLogger.lambda$verifyBusinessDatabase$0(DatabaseConnectionLogger.java:23) ~[!/:0.1.0-SNAPSHOT]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.lambda$callRunner$4(SpringApplication.java:785) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.springframework.util.function.ThrowingConsumer$1.acceptWithException(ThrowingConsumer.java:82) ~[spring-core-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.util.function.ThrowingConsumer.accept(ThrowingConsumer.java:60) ~[spring-core-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.util.function.ThrowingConsumer$1.accept(ThrowingConsumer.java:86) ~[spring-core-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:797) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.callRunner(SpringApplication.java:785) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.lambda$callRunners$3(SpringApplication.java:773) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.SortedOps$SizedRefSortingSink.end(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.AbstractPipeline.copyInto(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.AbstractPipeline.evaluate(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.util.stream.ReferencePipeline.forEach(Unknown Source) ~[na:na]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.callRunners(SpringApplication.java:773) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:325) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1362) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1351) ~[spring-boot-3.4.5.jar!/:3.4.5]
+business-svc-1  | 	at ec.paktay.business.BusinessApplication.main(BusinessApplication.java:9) ~[!/:0.1.0-SNAPSHOT]
+business-svc-1  | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+business-svc-1  | 	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source) ~[na:na]
+business-svc-1  | 	at java.base/java.lang.reflect.Method.invoke(Unknown Source) ~[na:na]
+business-svc-1  | 	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:102) ~[app.jar:0.1.0-SNAPSHOT]
+business-svc-1  | 	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:64) ~[app.jar:0.1.0-SNAPSHOT]
+business-svc-1  | 	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:40) ~[app.jar:0.1.0-SNAPSHOT]
+business-svc-1  | Caused by: org.postgresql.util.PSQLException: FATAL: password authentication failed for user "paktay"
+business-svc-1  | 	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:704) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:213) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:268) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at org.postgresql.Driver.makeConnection(Driver.java:446) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at org.postgresql.Driver.connect(Driver.java:298) ~[postgresql-42.7.5.jar!/:42.7.5]
+business-svc-1  | 	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:137) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:360) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:202) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:461) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:550) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:98) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:111) ~[HikariCP-5.1.0.jar!/:na]
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.fetchConnection(DataSourceUtils.java:160) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.doGetConnection(DataSourceUtils.java:118) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	at org.springframework.jdbc.datasource.DataSourceUtils.getConnection(DataSourceUtils.java:81) ~[spring-jdbc-6.2.6.jar!/:6.2.6]
+business-svc-1  | 	... 35 common frames omitted
+business-svc-1  | 
+business-svc-1  | 2026-09-23T15:03:38.582Z  INFO 1 --- [paktay-business-svc] [           main] o.s.b.w.e.tomcat.GracefulShutdown        : Commencing graceful shutdown. Waiting for active requests to complete
+business-svc-1  | 2026-09-23T15:03:38.584Z  INFO 1 --- [paktay-business-svc] [tomcat-shutdown] o.s.b.w.e.tomcat.GracefulShutdown        : Graceful shutdown complete
+
+exit=0

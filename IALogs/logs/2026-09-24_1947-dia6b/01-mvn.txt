@@ -1,0 +1,11 @@
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in ec.paktay.auth.service.KeycloakIdentityServiceTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.549 s -- in ec.paktay.auth.service.PasswordPinServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.069 s -- in ec.paktay.auth.service.PasswordMailServiceTest
+[INFO] Tests run: 19, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in ec.paktay.business.service.MerchantKeyTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.026 s -- in ec.paktay.business.service.SummaryMathTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in ec.paktay.business.service.ExpenseCursorTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in ec.paktay.business.service.ManualDateWindowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in ec.paktay.business.exception.ApiExceptionHandlerTest
+[INFO] Tests run: 57, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS

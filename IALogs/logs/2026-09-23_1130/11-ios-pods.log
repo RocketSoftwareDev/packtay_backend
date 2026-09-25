@@ -1,0 +1,135 @@
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:272:in 'Bundler::SharedHelpers#search_up': undefined method 'untaint' for an instance of String (NoMethodError)
+
+      current  = File.expand_path(SharedHelpers.pwd).untaint
+                                                    ^^^^^^^^
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:259:in 'Bundler::SharedHelpers#find_file'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:251:in 'Bundler::SharedHelpers#find_gemfile'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/shared_helpers.rb:27:in 'Bundler::SharedHelpers#root'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:234:in 'Bundler.root'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:246:in 'Bundler.app_config_path'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler.rb:273:in 'Bundler.settings'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/feature_flag.rb:21:in 'block in Bundler::FeatureFlag#settings_method'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:97:in '<class:CLI>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:7:in '<module:Bundler>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/cli.rb:6:in '<top (required)>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:23:in 'Kernel#require'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:23:in 'block in <top (required)>'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/lib/bundler/friendly_errors.rb:124:in 'Bundler.with_friendly_errors'
+	from /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/vendor/bundle/ruby/4.0.0/gems/bundler-1.17.2/exe/bundle:22:in '<top (required)>'
+	from /opt/homebrew/Cellar/ruby/4.0.6_1/lib/ruby/4.0.0/rubygems.rb:305:in 'Kernel#load'
+	from /opt/homebrew/Cellar/ruby/4.0.6_1/lib/ruby/4.0.0/rubygems.rb:305:in 'Gem.activate_and_load_bin_path'
+	from /opt/homebrew/bin/bundle:25:in '<main>'
+--- bundler falló, se usa pod directo
+Found 7 modules for target `FinanceApp`
+link_native_modules! {ios_packages: [{configurations: [], name: "@react-native-async-storage/async-storage", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-async-storage/async-storage", path: "../node_modules/@react-native-async-storage/async-storage", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-async-storage/async-storage/AsyncStorage.podspec", script_phases: []}, {configurations: [], name: "@react-native-clipboard/clipboard", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-clipboard/clipboard", path: "../node_modules/@react-native-clipboard/clipboard", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/@react-native-clipboard/clipboard/RNCClipboard.podspec", script_phases: []}, {configurations: [], name: "react-native-bootsplash", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-bootsplash", path: "../node_modules/react-native-bootsplash", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-bootsplash/RNBootSplash.podspec", script_phases: []}, {configurations: [], name: "react-native-keychain", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-keychain", path: "../node_modules/react-native-keychain", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-keychain/RNKeychain.podspec", script_phases: []}, {configurations: [], name: "react-native-permissions", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-permissions", path: "../node_modules/react-native-permissions", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-permissions/RNPermissions.podspec", script_phases: []}, {configurations: [], name: "react-native-safe-area-context", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-safe-area-context", path: "../node_modules/react-native-safe-area-context", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-safe-area-context/react-native-safe-area-context.podspec", script_phases: []}, {configurations: [], name: "react-native-svg", root: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-svg", path: "../node_modules/react-native-svg", podspec_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/node_modules/react-native-svg/RNSVG.podspec", script_phases: []}], ios_project_root_path: "/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios", react_native_path: "../node_modules/react-native"}
+Auto-linking React Native modules for target `FinanceApp`: AsyncStorage, RNBootSplash, RNCClipboard, RNKeychain, RNPermissions, RNSVG, and react-native-safe-area-context
+Framework build type is static library
+[ReactNativeDependencies] Setting up ReactNativeDependencies...
+[ReactNativeDependencies] Building from source: false
+[ReactNativeDependencies] Using tarball from URL: https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/0.86.2/react-native-artifacts-0.86.2-reactnative-dependencies-debug.tar.gz
+[ReactNativeDependencies] Tarball reactnative-dependencies-0.86.2-debug.tar.gz already exists in Pods. Skipping download.
+[ReactNativeDependencies] Tarball reactnative-dependencies-0.86.2-release.tar.gz already exists in Pods. Skipping download.
+[ReactNativeDependencies] Source: {http: "https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/0.86.2/react-native-artifacts-0.86.2-reactnative-dependencies-debug.tar.gz"}
+[ReactNativeCore] Setting up ReactNativeCore...
+[ReactNativeCore] Building from source: false
+Configuring the target with the New Architecture
+[ReactNativeCore] Using React Native Core and React Native Dependencies prebuilt versions.
+[36m[1m[Codegen][0m Analyzing /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/package.json[0m
+[36m[1m[Codegen][0m [33mSearching for codegen-enabled libraries in the app.[0m
+[36m[1m[Codegen][0m [33mThe "codegenConfig" field is not defined in package.json. Assuming there is nothing to generate at the app level.[0m
+[36m[1m[Codegen][0m [33mSearching for codegen-enabled libraries in react-native.config.js[0m
+[36m[1m[Codegen][0m Found @react-native-async-storage/async-storage[0m
+[36m[1m[Codegen][0m Found @react-native-clipboard/clipboard[0m
+[36m[1m[Codegen][0m Found react-native-bootsplash[0m
+[36m[1m[Codegen][0m Found react-native-keychain[0m
+[36m[1m[Codegen][0m Found react-native-permissions[0m
+[36m[1m[Codegen][0m Found react-native-safe-area-context[0m
+[36m[1m[Codegen][0m Found react-native-svg[0m
+[36m[1m[Codegen][0m Processing AsyncStorageSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, visionos for AsyncStorageSpec[0m
+[36m[1m[Codegen][0m Processing rnclipboard[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for rnclipboard[0m
+[36m[1m[Codegen][0m Processing RNBootSplashSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, tvos for RNBootSplashSpec[0m
+[36m[1m[Codegen][0m Processing RNKeychainSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for RNKeychainSpec[0m
+[36m[1m[Codegen][0m Processing RNPermissionsSpec[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, tvos for RNPermissionsSpec[0m
+[36m[1m[Codegen][0m Processing safeareacontext[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for safeareacontext[0m
+[36m[1m[Codegen][0m Processing rnsvg[0m
+[36m[1m[Codegen][0m [33mSearching for podspec in the project dependencies.[0m
+[36m[1m[Codegen][0m Supported Apple platforms: ios, macos, tvos, visionos for rnsvg[0m
+[36m[1m[Codegen][0m Generating Native Code for AsyncStorageSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for rnclipboard - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for RNBootSplashSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for RNKeychainSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for RNPermissionsSpec - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for safeareacontext - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating Native Code for rnsvg - ios[0m
+[36m[1m[Codegen][0m Generated artifacts: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen[0m
+[36m[1m[Codegen][0m Generating RCTThirdPartyComponentsProvider.h[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTThirdPartyComponentsProvider.h[0m
+[36m[1m[Codegen][0m Generating RCTThirdPartyComponentsProvider.mm[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTThirdPartyComponentsProvider.mm[0m
+[36m[1m[Codegen][0m Generating RCTModulesProvider.h[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTModuleProviders.h[0m
+[36m[1m[Codegen][0m Generating RCTModuleProviders.mm[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/RCTModuleProviders.mm[0m
+[36m[1m[Codegen][0m Generating RCTAppDependencyProvider[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactAppDependencyProvider/RCTAppDependencyProvider.h[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactAppDependencyProvider/RCTAppDependencyProvider.mm[0m
+[36m[1m[Codegen][0m Generated podspec: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactAppDependencyProvider/ReactAppDependencyProvider.podspec[0m
+[36m[1m[Codegen][0m Generated podspec: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/ReactCodegen/ReactCodegen.podspec[0m
+[36m[1m[Codegen][0m Generating Package.swift[0m
+[36m[1m[Codegen][0m Generated artifact: /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/build/generated/ios/Package.swift[0m
+[36m[1m[Codegen][0m [33mDone.[0m
+No modules to process in combine-js-to-schema-cli. If this is unexpected, please check if you set up your NativeComponent correctly. See combine-js-to-schema.js for how codegen finds modules.
+[ReactNativeDependencies] Using tarball from URL: https://repo1.maven.org/maven2/com/facebook/react/react-native-artifacts/0.86.2/react-native-artifacts-0.86.2-reactnative-dependencies-debug.tar.gz
+[ReactNativeDependencies] Tarball reactnative-dependencies-0.86.2-debug.tar.gz already exists in Pods. Skipping download.
+[ReactNativeDependencies] Tarball reactnative-dependencies-0.86.2-release.tar.gz already exists in Pods. Skipping download.
+Analyzing dependencies
+Downloading dependencies
+Generating Pods project
+Setting USE_HERMES build settings
+Setting REACT_NATIVE_PATH build settings
+Setting SWIFT_ACTIVE_COMPILATION_CONDITIONS build settings
+[Ccache]: Removing Ccache from CC, LD, CXX & LDPLUSPLUS build settings
+Setting SWIFT_ENABLE_EXPLICIT_MODULES build settings
+[ReactNativeCore] Processing VFS overlay file...
+[ReactNativeCore]   Created VFS overlay at /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/Pods/React-Core-prebuilt/React-VFS.yaml
+[ReactNativeCore] VFS overlay setup complete
+[ReactNativeCore] Configuring xcconfig for prebuilt React Native Core...
+[ReactNativeCore] Prebuilt xcconfig configuration complete
+[SPM] Cleaning old SPM dependencies from Pods project
+[SPM] Adding SPM dependencies to Pods project
+[Privacy Manifest Aggregation] Appending aggregated reasons to existing PrivacyInfo.xcprivacy file.
+[Privacy Manifest Aggregation] Reading .xcprivacy files to aggregate all used Required Reason APIs.
+Setting CLANG_CXX_LANGUAGE_STANDARD to c++20 on /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/ios/FinanceApp.xcodeproj
+
+==================== DEPRECATION NOTICE =====================
+Calling `pod install` directly is deprecated in React Native
+because we are moving away from Cocoapods toward alternative
+solutions to build the project.
+* If you are using Expo, please run:
+`npx expo run:ios`
+* If you are using the Community CLI, please run:
+`yarn ios`
+=============================================================
+
+Pod install took 9 [s] to run
+Integrating client project
+Pod installation complete! There are 83 dependencies from the Podfile and 82 total pods installed.
+exit=0

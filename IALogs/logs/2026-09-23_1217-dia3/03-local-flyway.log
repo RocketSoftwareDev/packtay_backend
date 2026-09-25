@@ -1,0 +1,4 @@
+business-svc-1  | 2026-09-23T17:17:56.618Z  INFO 1 --- [paktay-business-svc] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://business-db:5432/paktay (PostgreSQL 16.14)
+business-svc-1  | 2026-09-23T17:17:56.649Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 5 migrations (execution time 00:00.017s)
+business-svc-1  | 2026-09-23T17:17:56.661Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 4
+business-svc-1  | 2026-09-23T17:17:56.662Z  INFO 1 --- [paktay-business-svc] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.

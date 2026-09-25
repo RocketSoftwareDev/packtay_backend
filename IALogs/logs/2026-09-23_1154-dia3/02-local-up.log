@@ -1,0 +1,216 @@
+ Image paktay-local-auth-svc Building 
+ Image paktay-local-business-svc Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.14kB done
+#1 DONE 0.0s
+
+#2 [auth-svc internal] load build definition from Dockerfile
+#2 transferring dockerfile: 557B done
+#2 DONE 0.0s
+
+#3 [business-svc internal] load build definition from Dockerfile
+#3 transferring dockerfile: 575B done
+#3 DONE 0.0s
+
+#4 [business-svc internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-17
+#4 ...
+
+#5 [auth] library/eclipse-temurin:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [auth] library/maven:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#7 [business-svc internal] load metadata for docker.io/library/eclipse-temurin:17-jre
+#7 DONE 1.1s
+
+#4 [business-svc internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-17
+#4 DONE 1.1s
+
+#8 [business-svc internal] load .dockerignore
+#8 transferring context: 2B done
+#8 DONE 0.0s
+
+#9 [business-svc build 1/7] FROM docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc
+#9 resolve docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc done
+#9 DONE 0.0s
+
+#10 [auth-svc stage-1 1/3] FROM docker.io/library/eclipse-temurin:17-jre@sha256:bd25c61779663bc2df8ced059f1cc114fafc073afe16125c13fcc3a37fecd845
+#10 resolve docker.io/library/eclipse-temurin:17-jre@sha256:bd25c61779663bc2df8ced059f1cc114fafc073afe16125c13fcc3a37fecd845 done
+#10 DONE 0.0s
+
+#11 [auth-svc internal] load build context
+#11 transferring context: 64.33kB done
+#11 DONE 0.0s
+
+#12 [business-svc internal] load build context
+#12 transferring context: 300.69kB done
+#12 DONE 0.0s
+
+#13 [auth-svc build 6/7] COPY auth-svc/src ./auth-svc/src
+#13 CACHED
+
+#14 [auth-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests
+#14 CACHED
+
+#15 [auth-svc build 3/7] COPY pom.xml ./pom.xml
+#15 CACHED
+
+#16 [auth-svc stage-1 2/3] WORKDIR /app
+#16 CACHED
+
+#17 [auth-svc build 4/7] COPY auth-svc/pom.xml ./auth-svc/pom.xml
+#17 CACHED
+
+#18 [auth-svc stage-1 3/3] COPY --from=build /workspace/auth-svc/target/auth-svc-0.1.0-SNAPSHOT.jar app.jar
+#18 CACHED
+
+#19 [auth-svc build 5/7] COPY business-svc/pom.xml ./business-svc/pom.xml
+#19 CACHED
+
+#20 [business-svc build 5/7] COPY business-svc/pom.xml ./business-svc/pom.xml
+#20 CACHED
+
+#21 [business-svc build 4/7] COPY auth-svc/pom.xml ./auth-svc/pom.xml
+#21 CACHED
+
+#22 [business-svc build 2/7] WORKDIR /workspace
+#22 CACHED
+
+#23 [business-svc build 3/7] COPY pom.xml ./pom.xml
+#23 CACHED
+
+#24 [business-svc build 6/7] COPY business-svc/src ./business-svc/src
+#24 DONE 0.0s
+
+#25 [auth-svc] exporting to image
+#25 exporting layers done
+#25 exporting manifest sha256:34dd415204fbe839057e572d75e94c5947d05166d0a032b0090667a044150c20 done
+#25 exporting config sha256:ac4109a186260d0919a5cf92d9de209c8b8ae1c014d6408a7e6e022edf2ed018 done
+#25 exporting attestation manifest sha256:bfcb5d21b3d6a63d5b022229ef51ef9d0bd8a20255e3b96c97025e19078f4a67 done
+#25 exporting manifest list sha256:4e98e770a535b93a4d41f5634982c5f21cdbff83e1ad1a923c2c8fee638bddd4 0.0s done
+#25 naming to docker.io/library/paktay-local-auth-svc:latest done
+#25 unpacking to docker.io/library/paktay-local-auth-svc:latest done
+#25 DONE 0.0s
+
+#26 [auth-svc] resolving provenance for metadata file
+#26 DONE 0.0s
+
+#27 [business-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl business-svc -am package -DskipTests
+#27 0.533 [INFO] Scanning for projects...
+#27 7.201 [INFO] ------------------------------------------------------------------------
+#27 7.201 [INFO] Reactor Build Order:
+#27 7.201 [INFO] 
+#27 7.202 [INFO] Paktay Backend                                                     [pom]
+#27 7.202 [INFO] Paktay Business Service                                            [jar]
+#27 7.205 [INFO] 
+#27 7.205 [INFO] ----------------------< ec.paktay:paktay-backend >----------------------
+#27 7.205 [INFO] Building Paktay Backend 0.1.0-SNAPSHOT                             [1/2]
+#27 7.205 [INFO]   from pom.xml
+#27 7.205 [INFO] --------------------------------[ pom ]---------------------------------
+#27 7.206 [INFO] 
+#27 7.206 [INFO] -----------------------< ec.paktay:business-svc >-----------------------
+#27 7.206 [INFO] Building Paktay Business Service 0.1.0-SNAPSHOT                    [2/2]
+#27 7.206 [INFO]   from business-svc/pom.xml
+#27 7.206 [INFO] --------------------------------[ jar ]---------------------------------
+#27 34.77 [INFO] 
+#27 34.77 [INFO] --- resources:3.3.1:resources (default-resources) @ business-svc ---
+#27 37.52 [INFO] Copying 1 resource from src/main/resources to target/classes
+#27 37.53 [INFO] Copying 4 resources from src/main/resources to target/classes
+#27 37.53 [INFO] 
+#27 37.53 [INFO] --- compiler:3.13.0:compile (default-compile) @ business-svc ---
+#27 40.31 [INFO] Recompiling the module because of changed source code.
+#27 40.31 [INFO] Compiling 50 source files with javac [debug parameters release 17] to target/classes
+#27 41.00 [INFO] 
+#27 41.00 [INFO] --- resources:3.3.1:testResources (default-testResources) @ business-svc ---
+#27 41.00 [INFO] skip non existing resourceDirectory /workspace/business-svc/src/test/resources
+#27 41.00 [INFO] 
+#27 41.00 [INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ business-svc ---
+#27 41.00 [INFO] No sources to compile
+#27 41.00 [INFO] 
+#27 41.00 [INFO] --- surefire:3.5.3:test (default-test) @ business-svc ---
+#27 43.67 [INFO] Tests are skipped.
+#27 43.67 [INFO] 
+#27 43.67 [INFO] --- jar:3.4.2:jar (default-jar) @ business-svc ---
+#27 46.85 [INFO] Building jar: /workspace/business-svc/target/business-svc-0.1.0-SNAPSHOT.jar
+#27 46.87 [INFO] 
+#27 46.87 [INFO] --- spring-boot:3.4.5:repackage (repackage) @ business-svc ---
+#27 51.81 [INFO] Replacing main artifact /workspace/business-svc/target/business-svc-0.1.0-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+#27 51.81 [INFO] The original artifact has been renamed to /workspace/business-svc/target/business-svc-0.1.0-SNAPSHOT.jar.original
+#27 51.81 [INFO] ------------------------------------------------------------------------
+#27 51.81 [INFO] Reactor Summary for Paktay Backend 0.1.0-SNAPSHOT:
+#27 51.81 [INFO] 
+#27 51.81 [INFO] Paktay Backend ..................................... SUCCESS [  0.001 s]
+#27 51.81 [INFO] Paktay Business Service ............................ SUCCESS [ 44.605 s]
+#27 51.81 [INFO] ------------------------------------------------------------------------
+#27 51.81 [INFO] BUILD SUCCESS
+#27 51.81 [INFO] ------------------------------------------------------------------------
+#27 51.81 [INFO] Total time:  51.288 s
+#27 51.81 [INFO] Finished at: 2026-09-23T16:55:58Z
+#27 51.81 [INFO] ------------------------------------------------------------------------
+#27 DONE 51.9s
+
+#16 [business-svc stage-1 2/3] WORKDIR /app
+#16 CACHED
+
+#28 [business-svc stage-1 3/3] COPY --from=build /workspace/business-svc/target/business-svc-0.1.0-SNAPSHOT.jar app.jar
+#28 DONE 0.0s
+
+#29 [business-svc] exporting to image
+#29 exporting layers
+#29 exporting layers 0.5s done
+#29 exporting manifest sha256:27811da5c639224401c998828bbf678d05d419ac540fd370e375cf48f633e6de done
+#29 exporting config sha256:eb754b6d96c073d14f82316cfd958dac9c3c4605986492ef984dcc717139fdb8 done
+#29 exporting attestation manifest sha256:b2fe2cd506195b721c6b9b77c5eb1605f9e9fce43a991304ba2dd686e4a1511d done
+#29 exporting manifest list sha256:8b2ade84349fbd221a52bbc1f84bf25f8d3b5717f554c1f8207873b6ff0c43af done
+#29 naming to docker.io/library/paktay-local-business-svc:latest done
+#29 unpacking to docker.io/library/paktay-local-business-svc:latest 0.1s done
+#29 DONE 0.7s
+
+#30 [business-svc] resolving provenance for metadata file
+#30 DONE 0.0s
+ Image paktay-local-auth-svc Built 
+ Image paktay-local-business-svc Built 
+ Network paktay-local_default Creating 
+ Network paktay-local_default Created 
+ Container paktay-local-business-db-1 Creating 
+ Container paktay-local-keycloak-db-1 Creating 
+ Container paktay-local-mailpit-1 Creating 
+ Container paktay-local-mailpit-1 Created 
+ Container paktay-local-keycloak-db-1 Created 
+ Container paktay-local-keycloak-1 Creating 
+ Container paktay-local-business-db-1 Created 
+ Container paktay-local-keycloak-1 Created 
+ Container paktay-local-keycloak-init-1 Creating 
+ Container paktay-local-keycloak-init-1 Created 
+ Container paktay-local-business-svc-1 Creating 
+ Container paktay-local-auth-svc-1 Creating 
+ Container paktay-local-auth-svc-1 Created 
+ Container paktay-local-business-svc-1 Created 
+ Container paktay-local-keycloak-db-1 Starting 
+ Container paktay-local-business-db-1 Starting 
+ Container paktay-local-mailpit-1 Starting 
+ Container paktay-local-keycloak-db-1 Started 
+ Container paktay-local-keycloak-db-1 Waiting 
+ Container paktay-local-mailpit-1 Started 
+ Container paktay-local-business-db-1 Started 
+ Container paktay-local-keycloak-db-1 Healthy 
+ Container paktay-local-keycloak-1 Starting 
+ Container paktay-local-keycloak-1 Started 
+ Container paktay-local-keycloak-1 Waiting 
+ Container paktay-local-keycloak-1 Healthy 
+ Container paktay-local-keycloak-init-1 Starting 
+ Container paktay-local-keycloak-init-1 Started 
+ Container paktay-local-business-db-1 Waiting 
+ Container paktay-local-keycloak-init-1 Waiting 
+ Container paktay-local-keycloak-init-1 Waiting 
+ Container paktay-local-business-db-1 Waiting 
+ Container paktay-local-business-db-1 Healthy 
+ Container paktay-local-business-db-1 Healthy 
+ Container paktay-local-keycloak-init-1 Exited 
+ Container paktay-local-auth-svc-1 Starting 
+ Container paktay-local-keycloak-init-1 Exited 
+ Container paktay-local-business-svc-1 Starting 
+ Container paktay-local-auth-svc-1 Started 
+ Container paktay-local-business-svc-1 Started 
+up=0
