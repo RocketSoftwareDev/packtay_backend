@@ -28,10 +28,21 @@ Los 20 archivos `paktay_mvp_v0_*.sql` que había aquí se borraron el 2026-09-23
 levantaban una base desde cero y el esquema real se había desviado de ellos. Siguen en
 el historial de git. `SUPABASE.txt` queda como referencia de diseño funcional.
 
-Para recrear la base local aislada desde cero (nunca sobre producción):
+## Despliegue y comprobación
 
-```bash
-docker compose -p paktay-local --env-file .env --env-file .env.local.example \
-  -f docker-compose.yml -f docker-compose.local.yml -f docker-compose.local-keycloak.yml \
-  down -v
+Usa el mismo `docker-compose.yml` en todos los entornos y configura `.env`.
+`docker compose up -d --build` inicia los servicios y aplica las migraciones
+pendientes automáticamente. V6 incorpora reglas/países/cuenta, V7 restaura la
+protección de gastos y V8 incorpora monedas, avisos y plan.
+
+Para consultar el resultado:
+
+```sh
+docker compose exec -T business-db psql -U paktay -d paktay -c \
+  'SELECT version, description, success FROM flyway_schema_history ORDER BY installed_rank;'
 ```
+
+Conserva `BUSINESS_DATA_VOLUME` para actualizar una base existente. Para iniciar
+una base vacía, configura un nombre de volumen nuevo antes de levantar los
+servicios; conserva el anterior como respaldo. Esto no modifica la base de
+Keycloak Services.

@@ -1,4 +1,0 @@
-98794e7 Merge pull request #17 from RocketSoftwareDev/fix/verificacion-mac
-02f47f3 build(ios): iOS 16 como mínimo en la app, el widget y los Pods
-48a5563 test(revisar): alinear las pruebas de Por revisar con los tres formularios
-exit=0

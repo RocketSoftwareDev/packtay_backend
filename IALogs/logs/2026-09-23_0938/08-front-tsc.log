@@ -1,5 +1,0 @@
-$ npx tsc --noEmit
-src/features/wallet/screens/ReviewQueueScreen.tsx(203,24): error TS2448: Block-scoped variable 'isUnknownCard' used before its declaration.
-src/features/wallet/screens/ReviewQueueScreen.tsx(203,24): error TS2454: Variable 'isUnknownCard' is used before being assigned.
-
-exit=2

@@ -1,2 +1,0 @@
-business-svc-1  | 2026-09-24T15:32:28.879Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-5] e.p.b.exception.ApiExceptionHandler      : request_conflict requestId=5628b8bf-0ebb-4673-851c-2894df048a83 reason=Un registro de anulación no se puede anular
-business-svc-1  | 2026-09-24T15:32:28.883Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-6] e.p.b.exception.ApiExceptionHandler      : request_conflict requestId=cdebd3cc-762d-4b1d-b520-41c4c94ff73a reason=Un gasto anulado no se puede editar

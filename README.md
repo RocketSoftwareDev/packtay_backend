@@ -1,55 +1,77 @@
 # Paktay Backend
 
-Primera entrega del backend: OAuth 2.0/OIDC, registro, inicio de sesión, cambio de contraseña, acceso protegido y operaciones de administrador. Las contraseñas solo existen en Keycloak; no se guardan en los servicios Java ni en Supabase.
+Servicios Java 17: `auth-svc` gestiona autenticación y cuentas; `business-svc`
+gestiona las operaciones financieras y las migraciones de PostgreSQL.
+Las identidades pertenecen al Keycloak Services externo, compartido con otros
+proyectos. Este repositorio no levanta otra instancia ni otra base de Keycloak.
 
-## Servicios
+## Configuración y arranque
 
-- `auth-svc` (8081): registro, configuración OIDC, cambio de contraseña y administración de identidades.
-- `business-svc` (8082): puerta de entrada protegida para la futura lógica financiera.
-- `keycloak` (8180): emisor de tokens y roles `USER`/`ADMIN`.
-- `keycloak-db`: PostgreSQL exclusivo de Keycloak. Supabase se conectará después únicamente a `business-svc`.
+1. Copia `.env.example` a `.env` y completa las credenciales.
+2. Configura `SHARED_KEYCLOAK_INTERNAL_URL` con la dirección de Keycloak Services
+   accesible desde Docker. `KEYCLOAK_PUBLIC_URL` y `KEYCLOAK_ISSUER_URI` deben
+   coincidir con la URL pública y el emisor del realm `paktay`.
+3. Configura proyecto, puertos y volumen en el mismo `.env`.
+4. Ejecuta `docker compose up -d --build`.
 
-## Desarrollo local
+El único archivo Compose sirve para desarrollo y producción. Los secretos viven
+en `.env`, excluido de Git y del contexto de construcción Docker. La imagen se
+compila con Maven dentro de Docker. Para ejecutar las pruebas: `./mvnw test`.
 
-1. Instala Docker Desktop y Java 17.
-2. Copia `.env.example` a `.env` y cambia sus secretos antes de levantar los servicios.
-3. Compila los JAR: `./mvnw.cmd clean package`.
-4. Arranca el entorno: `docker compose up --build`.
-5. Importa `postman/Paktay-Auth.postman_environment.json` y `postman/Paktay-Auth.postman_collection.json` en Postman y selecciona el ambiente **Paktay - Local**.
+Valores locales habituales: Auth `8081`, Business `8082`, PostgreSQL `5433` y
+Keycloak externo `8180`. Para convivir con otro entorno, configura otro
+`COMPOSE_PROJECT_NAME`, otros puertos y otro `BUSINESS_DATA_VOLUME`. En Linux,
+la URL interna debe resolver al servicio de Keycloak desde los contenedores.
 
-El contenedor `keycloak-init` asigna al cliente técnico solo los permisos de Keycloak necesarios para administrar usuarios. No utiliza la contraseña del administrador de Keycloak desde los servicios Java.
+## Keycloak Services
 
-El esquema lo crea Flyway al arrancar `business-svc` (`business-svc/src/main/resources/db/migration`); ver `database/README.md`. Para empezar desde cero en el entorno aislado usa `down -v` sólo sobre el proyecto `paktay-local`.
+El realm `paktay` debe existir en Keycloak Services con los clientes
+`paktay-mobile` y `paktay-auth-service`, el usuario administrador de Paktay y
+los roles correspondientes. `infra/keycloak/paktay-realm.json` contiene la
+plantilla para aprovisionarlo en una instalación nueva.
 
-## Healthchecks y activación de los servicios
+Si necesitas sincronizar el secreto técnico, la contraseña del administrador de
+Paktay, los tiempos de sesión y los permisos del cliente técnico, ejecuta:
 
-Las rutas públicas que debe consultar el frontend son:
+```sh
+docker compose --profile identity-setup run --rm keycloak-init
+```
 
-- `GET https://<auth-url>/actuator/health`
-- `GET https://<business-url>/actuator/health`
+Este paso modifica el realm compartido y se ejecuta expresamente cuando cambian
+esas credenciales; no se repite al arrancar los servicios. Los servicios Java
+solo reciben el secreto de su cliente, no las credenciales de administración.
 
-Ambos healthchecks consultan también el documento OIDC de Keycloak, por lo que validan ese servicio a la vez. El healthcheck de `business-svc` valida además su conexión PostgreSQL.
+## Producción
 
-Durante un arranque, o si el túnel de Cloudflare se corta, pueden responder temporalmente `502` o `503`; el frontend debe reintentar con espera progresiva hasta recibir `200 OK`. No se deben usar las rutas de `liveness` para este flujo porque solo comprueban el proceso Java y no sus dependencias.
+Usa `.env` con las URLs HTTPS públicas, las credenciales del destino y el nombre
+del volumen de negocio existente. Configura `BUSINESS_DATA_VOLUME` explícitamente
+si el volumen proviene de un despliegue anterior. Los puertos se publican en
+loopback por defecto; `API_BIND_ADDRESS` permite cambiar la interfaz de las APIs.
 
-## Orden para probar en Postman
+Con Cloudflare Tunnel, completa `CLOUDFLARE_TUNNEL_TOKEN` y ejecuta:
 
-1. **Registrar usuario** guarda `userId`.
-2. **Iniciar sesión como usuario** guarda `accessToken`.
-3. **Ingresar a la aplicación** verifica el JWT contra `business-svc`.
-4. **Cambiar contraseña propia** requiere el token del usuario.
-5. **Iniciar sesión como admin**, **Reemplazar contraseña** y **Eliminar usuario** requieren el rol `ADMIN`.
+```sh
+docker compose --profile tunnel up -d --build
+```
 
-Las credenciales administrativas se definen exclusivamente en `.env` y no deben confirmarse en Git.
+Las rutas del túnel deben apuntar a `http://auth-svc:8081` y
+`http://business-svc:8082`. El acceso público a Keycloak lo administra Keycloak
+Services. Sin túnel, usa un proxy HTTPS del servidor hacia los puertos de las APIs.
 
-## Aplicación móvil
+Flyway aplica automáticamente las migraciones V1–V8 al arrancar `business-svc`.
+Una base nueva recibe esquema y catálogos. Una base existente conserva sus datos
+y aplica las migraciones pendientes; ver [database/README.md](database/README.md).
+Para empezar de cero, usa un volumen nuevo y conserva el anterior como respaldo.
 
-React Native debe iniciar sesión directamente con Keycloak mediante **Authorization Code + PKCE** usando el cliente público `paktay-mobile` y el redirect `paktay://oauth/callback`. Luego envía `Authorization: Bearer <access_token>` a ambos servicios. `POST /api/v1/auth/login` está incluido únicamente para pruebas automatizadas y Postman; no debe usarse desde la app publicada.
+## Verificación
 
-## Despliegue
+En los puertos configurados, ambos servicios deben responder HTTP 200 en:
 
-La guía para desplegar en un VPS (hoy: pruebas desde la Mac con Cloudflare Tunnel) está en
-[docs/vps-deployment.md](docs/vps-deployment.md).
+- `/actuator/health`
+- `/v3/api-docs`
+- `/swagger-ui/index.html`
 
-La operación completa del backend local, Cloudflare Tunnel, PostgreSQL y DBeaver está en
-[docs/backend-operations.md](docs/backend-operations.md).
+Los healthchecks comprueban Keycloak y, para Business, PostgreSQL. El correo no
+condiciona la salud de Auth. Los avisos push se habilitan configurando
+`FIREBASE_CREDENTIALS_HOST_FILE` con la ruta del JSON privado de Firebase en el
+servidor; el archivo se monta en modo lectura y no se incorpora a la imagen.

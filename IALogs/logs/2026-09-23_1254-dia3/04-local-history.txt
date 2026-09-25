@@ -1,4 +1,0 @@
-1|<< Flyway Baseline >>|t
-2|limpieza tablas muertas|t
-3|catalogos|t
-4|contexto estados duo|t

@@ -1,4 +1,0 @@
-http://localhost:28081/actuator/health 200
-http://localhost:28081/v3/api-docs 200
-http://localhost:28082/actuator/health 200
-http://localhost:28082/v3/api-docs 200

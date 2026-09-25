@@ -1,0 +1,12 @@
+.git
+**/target
+.env
+.env.*
+.claude
+doc
+docs
+IALogs
+IAlogs
+Postman
+postman
+**/*.log

@@ -1,1 +1,0 @@
-Entorno exclusivamente local. Credenciales nuevas generadas solo en .env ignorado. Sin credenciales de producción. Supabase y túnel deshabilitados; SMTP loopback. Puertos: 25433 (DB), 28180 (Keycloak), 28081 y 28082 (API). PATH temporal para Node/npm ya instalados; JAVA_HOME Java 17. No se ha corregido código.

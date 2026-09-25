@@ -1,7 +1,0 @@
-
-> FinanceApp@0.0.1 env
-> node scripts/generate-env.mjs
-
-Configuración generada desde .env en src/shared/config/env.generated.ts
-Versión 1.0 · beta - 2026091402
-exit=0

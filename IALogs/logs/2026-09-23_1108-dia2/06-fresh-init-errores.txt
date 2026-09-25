@@ -1,2 +1,0 @@
-134:business-db-1  | 2026-09-23 16:08:49.019 UTC [54] ERROR:  null value in column "alias" of relation "system_categories" violates not-null constraint
-164:business-db-1  | psql:/docker-entrypoint-initdb.d/001-paktay-schema.sql:820: ERROR:  null value in column "alias" of relation "system_categories" violates not-null constraint

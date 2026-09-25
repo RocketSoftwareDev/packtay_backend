@@ -1,5 +1,0 @@
-$ osascript -e 'do shell script "/usr/bin/xcodebuild -runFirstLaunch" with administrator privileges'
-Install Started
-1%.........20.........40.........60.........80........Install Succeeded
-
-exit=0

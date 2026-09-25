@@ -1,1 +1,0 @@
-{'/api/v1/catalog/currencies': True, '/api/v1/user/entitlements': True, '/api/v1/security/devices/{deviceId}/push-token': True}

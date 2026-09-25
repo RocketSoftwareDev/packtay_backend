@@ -4,3 +4,15 @@ target/
 .idea/
 *.iml
 .DS_Store
+
+# Configuración privada y archivos de trabajo locales
+.env.local
+.env.*
+!.env.example
+.claude/
+doc/
+docs/
+IALogs/
+IAlogs/
+Postman/
+postman/

@@ -1,2 +1,0 @@
-#!/bin/sh
-"/Users/macmalona/Library/Application Support/com.raycast.macos/NodeJS/runtime/22.22.2/bin/node" "/opt/homebrew/lib/node_modules/npm/bin/npm-cli.js" "$@"

@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: paktay
       POSTGRES_PASSWORD: ${BUSINESS_DB_PASSWORD:?BUSINESS_DB_PASSWORD es obligatorio}
     ports:
-      - "127.0.0.1:5433:5432"
+      - "127.0.0.1:${BUSINESS_DB_PORT:-5433}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U paktay -d paktay"]
       interval: 5s
@@ -19,14 +19,16 @@ services:
       - business-data:/var/lib/postgresql/data
 
   keycloak-init:
+    profiles: ["identity-setup"]
     image: quay.io/keycloak/keycloak:26.2
     mem_limit: 128m
     mem_reservation: 64m
     entrypoint:
       - /bin/sh
-      - -c
+      - -ec
       - >-
-        until /opt/keycloak/bin/kcadm.sh config credentials --server "$$KEYCLOAK_INTERNAL_URL" --realm master --user "$$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$$KC_BOOTSTRAP_ADMIN_PASSWORD"; do sleep 3; done;
+        attempts=0;
+        until /opt/keycloak/bin/kcadm.sh config credentials --server "$$KEYCLOAK_INTERNAL_URL" --realm master --user "$$KC_BOOTSTRAP_ADMIN_USERNAME" --password "$$KC_BOOTSTRAP_ADMIN_PASSWORD"; do attempts=$$((attempts + 1)); test "$$attempts" -lt 20; sleep 3; done;
         CLIENT_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-auth-service --fields id --format csv --noquotes);
         test -n "$$CLIENT_UUID";
         /opt/keycloak/bin/kcadm.sh update realms/paktay -s "accessTokenLifespan=$$KEYCLOAK_ACCESS_TOKEN_LIFESPAN" -s "ssoSessionIdleTimeout=$$KEYCLOAK_SSO_SESSION_IDLE_TIMEOUT" -s "ssoSessionMaxLifespan=$$KEYCLOAK_SSO_SESSION_MAX_LIFESPAN";
@@ -68,13 +70,12 @@ services:
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8180/realms/paktay}
       KEYCLOAK_JWK_SET_URI: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay/protocol/openid-connect/certs
       KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:?Define KEYCLOAK_SERVICE_CLIENT_SECRET in .env}
+      PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
     ports:
-      - "127.0.0.1:8081:8081"
+      - "${API_BIND_ADDRESS:-127.0.0.1}:${AUTH_PORT:-8081}:8081"
     depends_on:
       business-db:
         condition: service_healthy
-      keycloak-init:
-        condition: service_completed_successfully
 
   business-svc:
     mem_limit: 768m
@@ -94,17 +95,15 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
-      # Avisos push (docs/firebase-notificaciones.md). Sin el archivo, no se envía nada.
+      # Avisos push opcionales. Sin credenciales, no se envía nada.
       FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase-admin.json
     volumes:
       # FIREBASE_CREDENTIALS_HOST_FILE = ruta en la máquina al .json de la cuenta de
       # servicio. Sin definir se monta /dev/null (archivo vacío = avisos apagados).
       - ${FIREBASE_CREDENTIALS_HOST_FILE:-/dev/null}:/run/secrets/firebase-admin.json:ro
     ports:
-      - "127.0.0.1:8082:8082"
+      - "${API_BIND_ADDRESS:-127.0.0.1}:${BUSINESS_PORT:-8082}:8082"
     depends_on:
-      keycloak-init:
-        condition: service_completed_successfully
       business-db:
         condition: service_healthy
 
@@ -123,3 +122,4 @@ services:
 
 volumes:
   business-data:
+    name: ${BUSINESS_DATA_VOLUME:-${COMPOSE_PROJECT_NAME:-packtay_backend}_business-data}

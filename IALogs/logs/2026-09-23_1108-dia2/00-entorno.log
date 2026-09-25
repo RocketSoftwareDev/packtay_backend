@@ -1,3 +1,0 @@
-RUN=2026-09-23_1108-dia2
-LOGS=/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/IALogs/logs/2026-09-23_1108-dia2
-backend: 225a38216705968a50221c8af70395392f4f5af6 (225a382 chore(ialogs): instrucción del día 2 (foto del esquema) y tope de 1 MB por log)

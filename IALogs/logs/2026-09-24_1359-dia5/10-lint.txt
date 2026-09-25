@@ -1,2 +1,0 @@
-✖ 100 problems (0 errors, 100 warnings)
-exit=0
