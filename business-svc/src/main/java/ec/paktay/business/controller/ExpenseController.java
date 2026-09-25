@@ -55,6 +55,7 @@ public class ExpenseController {
             + "guardan la compra como referencia. assignedByRule marca las capturas que el teléfono asignó solo.")
     @ApiResponse(responseCode = "201", description = "Gasto creado, recuperado por idempotencia o duplicado ya existente")
     @ApiResponse(responseCode = "400", description = "Tarjeta, categoría, moneda, monto, fecha (manual fuera de los 7 días o futura) o recurrencia inválidos")
+    @ApiResponse(responseCode = "409", description = "Plan Gratis: captura de Wallet número 21 del mes; se puede anotar a mano (MANUAL)")
     @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
     public ExpenseResponse create(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateExpenseRequest request) {
         return expenseWriter.create(UUID.fromString(jwt.getSubject()), request);

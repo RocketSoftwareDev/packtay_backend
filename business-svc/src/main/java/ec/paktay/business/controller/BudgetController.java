@@ -33,6 +33,7 @@ public class BudgetController {
     @Operation(summary = "Guardar plantilla global y presupuestos por categoría", description = "Ruta autenticada. globalAmount es una plantilla aplicada individualmente, nunca una bolsa ni una sumatoria. individualAmount nulo hereda la plantilla (o equivale a cero si está sin definir); un monto conserva el valor manual. recurrence acepta THIS_MONTH o MONTHLY.")
     @ApiResponse(responseCode = "200", description = "Presupuesto y selección guardados")
     @ApiResponse(responseCode = "400", description = "Categoría, moneda o monto inválido")
+    @ApiResponse(responseCode = "409", description = "Plan Gratis: más de 3 categorías con presupuesto")
     public BudgetResponse save(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody SaveBudgetRequest request) {
         return budgets.save(UUID.fromString(jwt.getSubject()), request);
     }
@@ -41,6 +42,7 @@ public class BudgetController {
     @Operation(summary = "Modificar o desactivar el presupuesto de una categoría", description = "Ruta autenticada. individualAmount nulo usa el global; active=false la quita de la selección sin borrar historial.")
     @ApiResponse(responseCode = "200", description = "Categoría presupuestaria actualizada")
     @ApiResponse(responseCode = "400", description = "Categoría ajena, inactiva o monto inválido")
+    @ApiResponse(responseCode = "409", description = "Plan Gratis: más de 3 categorías con presupuesto")
     public BudgetResponse updateCategory(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID categoryId,
                                          @Valid @RequestBody UpdateCategoryBudgetRequest request) {
         return budgets.updateCategory(UUID.fromString(jwt.getSubject()), categoryId, request);

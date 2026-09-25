@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import ec.paktay.business.dto.DeviceResponse;
+import ec.paktay.business.dto.PushTokenRequest;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import ec.paktay.business.dto.UpsertDeviceRequest;
 import ec.paktay.business.service.DeviceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,6 +44,19 @@ public class DeviceController {
     @Operation(summary = "Listar mis dispositivos")
     public List<DeviceResponse> list(@AuthenticationPrincipal Jwt jwt) {
         return devices.list(UUID.fromString(jwt.getSubject()));
+    }
+
+    @PutMapping("/{deviceId}/push-token")
+    @Operation(summary = "Registrar o quitar el token de avisos (Firebase)", description = "Ruta autenticada. El dispositivo debe existir (PUT /me antes). "
+            + "token null lo quita: al cerrar sesión o si el usuario apagó los avisos. Un token que tenía otra cuenta en el mismo teléfono se le quita a esa cuenta.")
+    @ApiResponse(responseCode = "204", description = "Token guardado o quitado")
+    @ApiResponse(responseCode = "400", description = "El dispositivo no existe o el token es demasiado largo")
+    @ApiResponse(responseCode = "401", description = "Token ausente o inválido")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void pushToken(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID deviceId, @Valid @RequestBody PushTokenRequest request) {
+        if (!devices.setPushToken(UUID.fromString(jwt.getSubject()), deviceId, request.token())) {
+            throw new IllegalArgumentException("El dispositivo no existe");
+        }
     }
 
     @DeleteMapping("/{deviceId}")

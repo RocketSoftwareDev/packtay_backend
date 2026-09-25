@@ -55,7 +55,11 @@ public class MerchantRuleService {
         users.ensureActiveUser(userId);
         StringBuilder sql = new StringBuilder("""
                 select s.id, s.merchant_normalized, s.consumption_name, s.category_id, uc.name as category_name,
-                       s.selection_count, s.last_selected_at, s.updated_at
+                       s.selection_count, s.last_selected_at, s.updated_at,
+                       (select max(e.amount) from expenses e
+                         where e.user_id = s.user_id and e.origin = 'AUTOMATIC' and e.kind = 'EXPENSE'
+                           and e.status = 'ACTIVE'
+                           and merchant_rule_key(e.merchant_normalized) = s.merchant_normalized) as max_amount
                   from user_consumption_selections s
                   join user_categories uc on uc.id = s.category_id
                  where s.user_id = :userId and s.active and s.normalization_version = :version and uc.active
@@ -69,7 +73,7 @@ public class MerchantRuleService {
                 rs.getString("merchant_normalized"), rs.getString("consumption_name"),
                 rs.getObject("category_id", UUID.class), rs.getString("category_name"),
                 rs.getInt("selection_count"), rs.getObject("last_selected_at", OffsetDateTime.class),
-                rs.getObject("updated_at", OffsetDateTime.class))).list();
+                rs.getObject("updated_at", OffsetDateTime.class), rs.getBigDecimal("max_amount"))).list();
     }
 
     /** Mueve la regla a otra categoría del usuario. No cambia gastos ya guardados. */

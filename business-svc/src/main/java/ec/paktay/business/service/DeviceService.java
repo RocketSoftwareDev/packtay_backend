@@ -41,6 +41,37 @@ public class DeviceService {
                 .param("userId", userId).query(this::map).list();
     }
 
+    /**
+     * Guarda el token de Firebase del dispositivo, o lo quita con null. Si el mismo
+     * token lo tenía otra cuenta (se cambió de cuenta en el teléfono), se le quita a
+     * esa: los avisos de una cuenta no deben llegar a quien ya no está en ella.
+     */
+    @Transactional
+    public boolean setPushToken(UUID userId, UUID deviceId, String token) {
+        String clean = token == null || token.isBlank() ? null : token.trim();
+        if (clean != null) {
+            jdbc.sql("update user_devices set push_token = null, push_token_updated_at = now() where push_token = :token and user_id <> :userId")
+                    .param("token", clean).param("userId", userId).update();
+        }
+        return jdbc.sql("""
+                update user_devices set push_token = :token, push_token_updated_at = now(), updated_at = now()
+                 where user_id = :userId and device_id = :deviceId
+                """).param("token", clean, java.sql.Types.VARCHAR).param("userId", userId).param("deviceId", deviceId)
+                .update() > 0;
+    }
+
+    /** Tokens de avisos activos del usuario. */
+    public List<String> pushTokens(UUID userId) {
+        return jdbc.sql("select push_token from user_devices where user_id = :userId and push_token is not null")
+                .param("userId", userId).query(String.class).list();
+    }
+
+    /** Token rechazado por Firebase (desinstalada o caducado): se olvida. */
+    public void forgetPushToken(String token) {
+        jdbc.sql("update user_devices set push_token = null, push_token_updated_at = now() where push_token = :token")
+                .param("token", token).update();
+    }
+
     public boolean remove(UUID userId, UUID deviceId) {
         return jdbc.sql("delete from user_devices where user_id = :userId and device_id = :deviceId")
                 .param("userId", userId).param("deviceId", deviceId).update() > 0;
