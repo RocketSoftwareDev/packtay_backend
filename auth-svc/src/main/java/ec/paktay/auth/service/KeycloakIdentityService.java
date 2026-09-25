@@ -93,9 +93,14 @@ public class KeycloakIdentityService {
                 .retrieve().toBodilessEntity();
     }
 
+    /**
+     * El correo va como variable de plantilla y no pegado en la consulta: así se
+     * codifica entero y un "+" llega como %2B. Pegado, Keycloak lo leía como un
+     * espacio y "ana+pruebas@gmail.com" no encontraba a nadie (el PIN no salía).
+     */
     public Map<?, ?> findByEmail(String email) {
         List<?> users = client.get().uri(builder -> builder.path(adminPath("users"))
-                .queryParam("email", email).queryParam("exact", true).build())
+                .queryParam("email", "{email}").queryParam("exact", true).build(email))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
         if (users == null || users.size() != 1) return null;
         Map<?, ?> user = (Map<?, ?>) users.get(0);
