@@ -1,0 +1,12 @@
+Build probado: 2026092503, commit 0020541; simulador iPhone 16 Pro Max - PAKTAY, iOS 26.5.
+Identificador del producto para simulador: org.reactjs.native.example.FinanceApp.
+Resultado: se cierra durante el arranque.
+
+Evento previo: FirebaseCore avisa que la app Firebase por defecto no está configurada.
+Excepción fatal: NSInvalidArgumentException.
+Razón: AppDelegate recibió el selector window, pero no lo implementa.
+Primer frame de aplicación: RNFBMessagingNSNotificationCenter.application_onDidFinishLaunchingNotification.
+
+Conclusión: la inicialización Firebase ausente es un defecto real, pero el crash observado
+en esta reproducción es específicamente la propiedad AppDelegate.window faltante al
+notificar el inicio a RNFirebase Messaging. La migración a UIScene quitó esa propiedad.

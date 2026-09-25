@@ -1,0 +1,3 @@
+org.reactjs.native.example.FinanceApp: 88964
+simulator_bundle_id=org.reactjs.native.example.FinanceApp
+exit=0

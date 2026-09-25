@@ -1,0 +1,13 @@
+Build probado: 2026092503, commit e428658; simulador iPhone 16 Pro Max - PAKTAY, iOS 26.5.
+Compilación Release del simulador: exit=0.
+Arranque: la app se inicia con PID, pero no está corriendo a los 30 segundos.
+La captura local del simulador muestra la pantalla de inicio; no se sube al repositorio.
+
+FirebaseCore aún registra que la app Firebase por defecto no está configurada, aunque el
+código de este commit llama FirebaseApp.configure() y el plist sí está dentro del .app.
+Excepción fatal observada: NSInvalidArgumentException, selector AppDelegate.window no
+reconocido. El primer frame de aplicación vuelve a ser
+RNFBMessagingNSNotificationCenter.application_onDidFinishLaunchingNotification.
+
+Resultado de la puerta: FALLA (no sigue viva a los 30 s). No se ejecutan tsc/Jest ni se
+prepara/sube un nuevo build. La corrección de Firebase por sí sola no resuelve el cierre.

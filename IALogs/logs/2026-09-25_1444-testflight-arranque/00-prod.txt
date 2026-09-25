@@ -1,0 +1,13 @@
+dir=/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend
+1|t
+2|t
+3|t
+4|t
+5|t
+6|t
+7|t
+8|t
+https://paktayauth.rocketsoftwarecore.com 200
+https://paktay.rocketsoftwarecore.com 200
+source_branch=develop
+source_commit=35c188d
