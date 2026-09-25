@@ -107,6 +107,24 @@ Si pasó la puerta: sube `CURRENT_PROJECT_VERSION` a `2026092504` (o el siguient
 **fase 5, paso 4** de `IALogs/instrucciones/testflight.md` (mismo `ExportOptions.plist`).
 Anota el resultado de archivo y subida.
 
+### 3b · Antes de subir: el entorno de avisos debe ser producción
+
+El entitlements del repo dice `aps-environment = development`; al exportar para App Store
+Connect, Xcode lo cambia a `production` si el perfil de distribución tiene Push. Compruébalo
+**antes** de subir exportando una vez a disco con el mismo `ExportOptions.plist` pero
+`destination = export`:
+
+```bash
+sed 's/<string>upload<\/string>/<string>export<\/string>/' /tmp/ExportOptions.plist > /tmp/ExportOptions-local.plist
+xcodebuild -exportArchive -archivePath ~/paktay-builds/PAKTAY-$B.xcarchive -exportOptionsPlist /tmp/ExportOptions-local.plist \
+  -exportPath ~/paktay-builds/ipa-$B -allowProvisioningUpdates > /tmp/export-local.log 2>&1; echo "exit=$?" >> /tmp/export-local.log
+rm -rf /tmp/ipa && unzip -o -q ~/paktay-builds/ipa-$B/*.ipa -d /tmp/ipa
+codesign -d --entitlements - /tmp/ipa/Payload/*.app 2>/dev/null | grep -A1 aps-environment > "$LOGS/03-aps-environment.txt"
+```
+
+Debe decir `production`. Si dice `development`, **no subas**: anótalo (hay que revisar el perfil
+de distribución y la capacidad Push del identificador de la app).
+
 ## 4 · Si el cierre sigue en TestFlight
 
 Pídele al dueño el reporte: Xcode › Window › Organizer › Crashes (app PAKTAY, build nuevo), o en
