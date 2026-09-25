@@ -54,7 +54,7 @@ docker rm -f paktay-mailpit-test >/dev/null 2>&1
 docker run -d --name paktay-mailpit-test --network "$NET" --network-alias mailpit \
   -e MP_SMTP_AUTH_ACCEPT_ANY=1 -e MP_SMTP_AUTH_ALLOW_INSECURE=1 \
   -p 127.0.0.1:28025:8025 axllent/mailpit:latest > "$LOGS/02-mailpit.txt" 2>&1
-export SMTP_HOST=mailpit SMTP_PORT=1025 SMTP_SECURE=false SMTP_STARTTLS=false SMTP_USER=codex SMTP_PASS=codex
+export SMTP_HOST=mailpit SMTP_PORT=1025 SMTP_SECURE=false SMTP_STARTTLS=false SMTP_USER=codex SMTP_PASS=codex SMTP_FROM=no-reply@paktay.local
 $L up --build -d > "$LOGS/03-local-up.log" 2>&1; wait_up; echo "up=$?" >> "$LOGS/03-local-up.log"
 $L exec -T business-db psql -U paktay -d paktay -At -c "select version, description, success from flyway_schema_history order by installed_rank" > "$LOGS/04-local-history.txt" 2>&1
 export BANK_ROW=$($L exec -T business-db psql -U paktay -d paktay -At -F, -c "select o.bank_id, o.card_type, coalesce(o.brand,'') from bank_card_offerings o join banks b on b.id=o.bank_id where b.active limit 1")
@@ -248,7 +248,7 @@ for u in http://localhost:28081 http://localhost:28082; do for p in /actuator/he
 $L logs --no-color --tail=400 business-svc auth-svc | grep -iE "error|exception|wallet_duplicate|account_" | head -n 200 > "$LOGS/08-logs.txt"
 $L stop
 docker rm -f paktay-mailpit-test >/dev/null 2>&1
-unset SMTP_HOST SMTP_PORT SMTP_SECURE SMTP_STARTTLS SMTP_USER SMTP_PASS
+unset SMTP_HOST SMTP_PORT SMTP_SECURE SMTP_STARTTLS SMTP_USER SMTP_PASS SMTP_FROM
 ```
 
 ### Base desde cero
