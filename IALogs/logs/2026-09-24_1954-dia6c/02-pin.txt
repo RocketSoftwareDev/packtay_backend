@@ -1,0 +1,2 @@
+OK   PIN llega a correo con + 200
+OK   PIN llega a correo normal 200
