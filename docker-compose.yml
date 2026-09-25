@@ -59,6 +59,7 @@ services:
       SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
       SMTP_USER: ${SMTP_USER:?Define SMTP_USER in .env}
       SMTP_PASS: ${SMTP_PASS:?Define SMTP_PASS in .env}
+      SMTP_FROM: ${SMTP_FROM:-}
       BUSINESS_DB_URL: jdbc:postgresql://business-db:5432/paktay
       BUSINESS_DB_USERNAME: paktay
       BUSINESS_DB_PASSWORD: ${BUSINESS_DB_PASSWORD:?BUSINESS_DB_PASSWORD es obligatorio}
