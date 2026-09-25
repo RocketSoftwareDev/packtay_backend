@@ -21,16 +21,16 @@ El contenedor `keycloak-init` asigna al cliente técnico solo los permisos de Ke
 
 El esquema lo crea Flyway al arrancar `business-svc` (`business-svc/src/main/resources/db/migration`); ver `database/README.md`. Para empezar desde cero en el entorno aislado usa `down -v` sólo sobre el proyecto `paktay-local`.
 
-## Healthchecks y activación en Render
+## Healthchecks y activación de los servicios
 
 Las rutas públicas que debe consultar el frontend son:
 
 - `GET https://<auth-url>/actuator/health`
 - `GET https://<business-url>/actuator/health`
 
-Una llamada a cada URL activa los dos servicios web cuando Render los ha suspendido. Ambos healthchecks consultan también el documento OIDC de Keycloak, por lo que despiertan y validan ese servicio. El healthcheck de `business-svc` valida además su conexión PostgreSQL.
+Ambos healthchecks consultan también el documento OIDC de Keycloak, por lo que validan ese servicio a la vez. El healthcheck de `business-svc` valida además su conexión PostgreSQL.
 
-Durante el arranque puede responder temporalmente `503 Service Unavailable`; el frontend debe reintentar con espera progresiva hasta recibir `200 OK`. No se deben usar las rutas de `liveness` para este flujo porque solo comprueban el proceso Java y no sus dependencias.
+Durante un arranque, o si el túnel de Cloudflare se corta, pueden responder temporalmente `502` o `503`; el frontend debe reintentar con espera progresiva hasta recibir `200 OK`. No se deben usar las rutas de `liveness` para este flujo porque solo comprueban el proceso Java y no sus dependencias.
 
 ## Orden para probar en Postman
 
@@ -48,7 +48,8 @@ React Native debe iniciar sesión directamente con Keycloak mediante **Authoriza
 
 ## Despliegue
 
-La guía para Render, Keycloak y Supabase está en [docs/render-deployment.md](docs/render-deployment.md).
+La guía para desplegar en un VPS (hoy: pruebas desde la Mac con Cloudflare Tunnel) está en
+[docs/vps-deployment.md](docs/vps-deployment.md).
 
 La operación completa del backend local, Cloudflare Tunnel, PostgreSQL y DBeaver está en
 [docs/backend-operations.md](docs/backend-operations.md).
