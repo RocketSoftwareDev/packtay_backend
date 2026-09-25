@@ -1,0 +1,138 @@
+ Image paktay-fresh-auth-svc Building 
+ Image paktay-fresh-business-svc Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.14kB done
+#1 DONE 0.0s
+
+#2 [business-svc internal] load build definition from Dockerfile
+#2 transferring dockerfile: 575B done
+#2 DONE 0.0s
+
+#3 [auth-svc internal] load build definition from Dockerfile
+#3 transferring dockerfile: 557B done
+#3 DONE 0.0s
+
+#4 [auth-svc internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-17
+#4 DONE 0.6s
+
+#5 [business-svc internal] load metadata for docker.io/library/eclipse-temurin:17-jre
+#5 DONE 0.6s
+
+#6 [auth-svc internal] load .dockerignore
+#6 transferring context: 2B done
+#6 DONE 0.0s
+
+#7 [auth-svc build 1/7] FROM docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc
+#7 resolve docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc done
+#7 DONE 0.0s
+
+#8 [auth-svc stage-1 1/3] FROM docker.io/library/eclipse-temurin:17-jre@sha256:bd25c61779663bc2df8ced059f1cc114fafc073afe16125c13fcc3a37fecd845
+#8 resolve docker.io/library/eclipse-temurin:17-jre@sha256:bd25c61779663bc2df8ced059f1cc114fafc073afe16125c13fcc3a37fecd845 done
+#8 DONE 0.0s
+
+#9 [auth-svc internal] load build context
+#9 transferring context: 71.16kB done
+#9 DONE 0.0s
+
+#10 [auth-svc build 3/7] COPY pom.xml ./pom.xml
+#10 CACHED
+
+#11 [auth-svc build 4/7] COPY auth-svc/pom.xml ./auth-svc/pom.xml
+#11 CACHED
+
+#12 [auth-svc build 5/7] COPY business-svc/pom.xml ./business-svc/pom.xml
+#12 CACHED
+
+#13 [auth-svc build 6/7] COPY auth-svc/src ./auth-svc/src
+#13 CACHED
+
+#14 [auth-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests
+#14 CACHED
+
+#15 [auth-svc stage-1 3/3] COPY --from=build /workspace/auth-svc/target/auth-svc-0.1.0-SNAPSHOT.jar app.jar
+#15 CACHED
+
+#16 [business-svc internal] load build context
+#16 transferring context: 426.55kB 0.0s done
+#16 DONE 0.0s
+
+#17 [business-svc build 4/7] COPY auth-svc/pom.xml ./auth-svc/pom.xml
+#17 CACHED
+
+#18 [business-svc build 3/7] COPY pom.xml ./pom.xml
+#18 CACHED
+
+#19 [business-svc build 5/7] COPY business-svc/pom.xml ./business-svc/pom.xml
+#19 CACHED
+
+#20 [business-svc build 6/7] COPY business-svc/src ./business-svc/src
+#20 CACHED
+
+#21 [business-svc stage-1 2/3] WORKDIR /app
+#21 CACHED
+
+#22 [business-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl business-svc -am package -DskipTests
+#22 CACHED
+
+#23 [business-svc build 2/7] WORKDIR /workspace
+#23 CACHED
+
+#24 [business-svc stage-1 3/3] COPY --from=build /workspace/business-svc/target/business-svc-0.1.0-SNAPSHOT.jar app.jar
+#24 CACHED
+
+#25 [auth-svc] exporting to image
+#25 exporting layers done
+#25 exporting manifest sha256:89c155cd052956bfbb55eac5a7ed19d5f00d181d9a52a4892829fe593229fc6c done
+#25 exporting config sha256:c4a23035ac7593b19224de8b2e110c308dcdb0e40c9d571f253fe0d99cc8ccd0 done
+#25 exporting attestation manifest sha256:2d073c7fc0db4b5beaf772ca53af0fe26635c72e0f7271ed2d62401adac8f91f done
+#25 exporting manifest list sha256:25bc75357ea2ad2a086c3f68ccbdb0419acb6f1592bc2057696420f939aef321 done
+#25 naming to docker.io/library/paktay-fresh-auth-svc:latest done
+#25 unpacking to docker.io/library/paktay-fresh-auth-svc:latest done
+#25 DONE 0.0s
+
+#26 [business-svc] exporting to image
+#26 exporting layers done
+#26 exporting manifest sha256:ba1b274725c1ddd60336306283322812780e2eeb214c648ac96c9968c312cc1b done
+#26 exporting config sha256:364b68f63005c26330695f99406646ad6adf2abcd30d6a4222e77138c4d1d3de done
+#26 exporting attestation manifest sha256:bfcdd73ba118588c1d22dc92db277daa79feb303229adfd12ccf6bb7de9cd328 done
+#26 exporting manifest list sha256:d86605aa8cf819ed237a11663b8ecff1265d3764a17ef65076483e3d4bf4c63e done
+#26 naming to docker.io/library/paktay-fresh-business-svc:latest done
+#26 unpacking to docker.io/library/paktay-fresh-business-svc:latest done
+#26 DONE 0.0s
+
+#27 [auth-svc] resolving provenance for metadata file
+#27 DONE 0.0s
+
+#28 [business-svc] resolving provenance for metadata file
+#28 DONE 0.0s
+ Image paktay-fresh-auth-svc Built 
+ Image paktay-fresh-business-svc Built 
+ Network paktay-fresh_default Creating 
+ Network paktay-fresh_default Created 
+ Volume paktay-fresh_business-data Creating 
+ Volume paktay-fresh_business-data Created 
+ Container paktay-fresh-business-db-1 Creating 
+ Container paktay-fresh-keycloak-init-1 Creating 
+ Container paktay-fresh-keycloak-init-1 Created 
+ Container paktay-fresh-business-db-1 Created 
+ Container paktay-fresh-business-svc-1 Creating 
+ Container paktay-fresh-auth-svc-1 Creating 
+ Container paktay-fresh-auth-svc-1 Created 
+ Container paktay-fresh-business-svc-1 Created 
+ Container paktay-fresh-business-db-1 Starting 
+ Container paktay-fresh-keycloak-init-1 Starting 
+ Container paktay-fresh-business-db-1 Started 
+ Container paktay-fresh-keycloak-init-1 Started 
+ Container paktay-fresh-business-db-1 Waiting 
+ Container paktay-fresh-keycloak-init-1 Waiting 
+ Container paktay-fresh-keycloak-init-1 Waiting 
+ Container paktay-fresh-business-db-1 Waiting 
+ Container paktay-fresh-keycloak-init-1 Exited 
+ Container paktay-fresh-keycloak-init-1 Exited 
+ Container paktay-fresh-business-db-1 Healthy 
+ Container paktay-fresh-business-db-1 Healthy 
+ Container paktay-fresh-business-svc-1 Starting 
+ Container paktay-fresh-auth-svc-1 Starting 
+ Container paktay-fresh-business-svc-1 Started 
+ Container paktay-fresh-auth-svc-1 Started 
+fresh: auth=200 biz=200
