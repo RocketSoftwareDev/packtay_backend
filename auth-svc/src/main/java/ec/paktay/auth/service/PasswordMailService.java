@@ -12,7 +12,18 @@ public class PasswordMailService {
     private final JavaMailSender mail;
     private final String from;
     private final String template;
-    public PasswordMailService(JavaMailSender mail, @Value("${spring.mail.username}") String from) {
+    /**
+     * Remitente: SMTP_FROM si está definido; si no, el usuario SMTP. Hace falta
+     * separarlos porque el usuario de algunos servidores no es una dirección de
+     * correo (Mailpit rechaza el remitente "codex" con 553 5.1.3).
+     */
+    @org.springframework.beans.factory.annotation.Autowired
+    public PasswordMailService(JavaMailSender mail, @Value("${spring.mail.username}") String username,
+                               @Value("${paktay.mail.from:}") String configuredFrom) {
+        this(mail, configuredFrom == null || configuredFrom.isBlank() ? username : configuredFrom.trim());
+    }
+
+    PasswordMailService(JavaMailSender mail, String from) {
         this.mail = mail; this.from = from;
         try (var input = new ClassPathResource("templates/password-pin.html").getInputStream()) {
             this.template = new String(input.readAllBytes(), StandardCharsets.UTF_8);
