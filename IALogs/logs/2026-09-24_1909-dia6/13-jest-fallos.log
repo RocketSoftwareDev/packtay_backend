@@ -1,0 +1,600 @@
+  ● ReviewQueueScreen › propone la categoría de una regla que el usuario ya escribió
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected substring: "Ya sabemos dónde va"
+    Received string:    "Por revisar · 1 · -$11,99 · PAYPAL *SPOTIFYAB · Pichincha · 24 sep 06:00 · •••• 4821 · FALTA UNA COSA PARA GUARDARLO · Es la primera vez que ves este comercio · Al elegir su categoría, la app aprende para la próxima. · Comida y restaurantes · Transporte · Casa · Otra · Guardar gasto · Descartar · Dejarlo para luego · Llegó del atajo de Wallet · Visa Pichincha •••• 4821"
+
+      1085 |     // Sin tocar ninguna píldora: con la regla la cola ya sabe dónde va, y lo
+      1086 |     // que se guarda es lo que la pantalla enseñó.
+    > 1087 |     expect(textOf(tree)).toContain('Ya sabemos dónde va');
+           |                          ^
+      1088 |     expect(textOf(tree)).toContain(SUSCRIPCIONES());
+      1089 |     await press(tree, 'Agregar al historial');
+      1090 |
+
+      at Object.toContain (__tests__/MovementScreens.test.tsx:1087:26)
+      at asyncGeneratorStep (node_modules/@babel/runtime/helpers/asyncToGenerator.js:3:17)
+      at _next (node_modules/@babel/runtime/helpers/asyncToGenerator.js:17:9)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:45)
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+--
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+--
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+--
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+--
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+--
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)
+      at AnimatedValue._updateValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:240:9)
+      at TimingAnimation.animation.start._animation [as _onUpdate] (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:213:14)
+      at TimingAnimation.onUpdate (node_modules/react-native/Libraries/Animated/animations/TimingAnimation.js:99:12)
+      at Timeout._onTimeout (node_modules/@react-native/jest-preset/jest/setup.js:51:31)
+
+
+ReferenceError: You are trying to access a property or method of the Jest environment after it has been torn down. From __tests__/App.test.tsx.
+--
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "An update to Animated(View) inside a test was not wrapped in act(...).
+
+    When testing, code that causes React state updates should be wrapped into act(...):
+
+    act(() => {
+      /* fire events that update state */
+    });
+    /* assert on the output */
+
+    This ensures that you're testing the behavior the user would see in the browser. Learn more at https://react.dev/link/wrap-tests-with-act".
+
+      at console.error (node_modules/@jest/console/build/BufferedConsole.js:127:10)
+      at node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14402:19
+      at runWithFiberInDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+      at warnIfUpdatesNotWrappedWithActDEV (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:14401:9)
+      at scheduleUpdateOnFiber (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:12086:9)
+      at dispatchReducerAction (node_modules/react-test-renderer/cjs/react-test-renderer.development.js:6155:13)
+      at Object.onUpdateRef.current (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:48:18)
+      at AnimatedProps._callback (node_modules/react-native/src/private/animated/createAnimatedPropsHook.js:28:104)
+      at AnimatedProps.update (node_modules/react-native/Libraries/Animated/nodes/AnimatedProps.js:203:12)
+      at node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:31
+          at Set.forEach (<anonymous>)
+      at flushValue (node_modules/react-native/Libraries/Animated/nodes/AnimatedValue.js:30:10)

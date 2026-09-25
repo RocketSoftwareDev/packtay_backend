@@ -1,0 +1,22 @@
+auth-svc-1  | 2026-09-25T00:20:09.911Z  WARN 1 --- [paktay-auth-svc] [nio-8081-exec-8] e.p.a.service.KeycloakIdentityService    : keycloak_login_rejected status=401 errorCode=invalid_grant reason=Invalid user credentials
+auth-svc-1  | 2026-09-25T00:20:09.912Z  WARN 1 --- [paktay-auth-svc] [nio-8081-exec-8] e.p.auth.exception.ApiExceptionHandler   : request_rejected requestId=cd215381-1a7e-49ac-91ea-43574102984b reason=La contraseña no es correcta
+auth-svc-1  | 2026-09-25T00:20:09.980Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-9] e.p.auth.service.AccountDeletionService  : account_data_purged subject=bf6cfb3f-62e4-48ca-a2d2-8921916cbc9f
+auth-svc-1  | 2026-09-25T00:20:10.103Z  INFO 1 --- [paktay-auth-svc] [nio-8081-exec-9] e.p.auth.service.AccountDeletionService  : account_deleted subject=bf6cfb3f-62e4-48ca-a2d2-8921916cbc9f
+auth-svc-1  | 2026-09-25T00:20:10.759Z  WARN 1 --- [paktay-auth-svc] [io-8081-exec-10] e.p.a.service.KeycloakIdentityService    : keycloak_login_rejected status=401 errorCode=invalid_grant reason=Invalid user credentials
+auth-svc-1  | 2026-09-25T00:20:10.760Z  WARN 1 --- [paktay-auth-svc] [io-8081-exec-10] e.p.auth.exception.ApiExceptionHandler   : request_rejected requestId=c526cfd3-18ac-4b12-8c7e-b3514099c64c reason=Credenciales inválidas
+auth-svc-1  | 2026-09-25T00:21:30.470Z ERROR 1 --- [paktay-auth-svc] [nio-8081-exec-4] e.p.auth.exception.ApiExceptionHandler   : unexpected_request_failure requestId=a1cd0197-110d-4f87-b40c-08f60aaabd26
+auth-svc-1  | org.springframework.mail.MailSendException: Failed messages: org.eclipse.angus.mail.smtp.SMTPSendFailedException: 553 5.1.3 The address is not a valid RFC 5321 address
+auth-svc-1  |   nested exception is:
+auth-svc-1  | 	org.eclipse.angus.mail.smtp.SMTPSenderFailedException: 553 5.1.3 The address is not a valid RFC 5321 address
+auth-svc-1      | 	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1      | 	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1      | 	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.40.jar!/:na]
+auth-svc-1      | 2026-09-25T00:22:56.819Z ERROR 1 --- [paktay-auth-svc] [nio-8081-exec-6] e.p.auth.exception.ApiExceptionHandler   : unexpected_request_failure requestId=63944991-2142-4236-a782-a4b7694df782
+auth-svc-1      | org.springframework.mail.MailSendException: Failed messages: org.eclipse.angus.mail.smtp.SMTPSendFailedException: 553 5.1.3 The address is not a valid RFC 5321 address
+auth-svc-1      |   nested exception is:
+auth-svc-1      | 	org.eclipse.angus.mail.smtp.SMTPSenderFailedException: 553 5.1.3 The address is not a valid RFC 5321 address
+auth-svc-1      | 	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1      | 	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.4.5.jar!/:6.4.5]
+auth-svc-1      | 	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.40.jar!/:na]
+business-svc-1  | 2026-09-25T00:20:09.550Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-3] e.p.b.exception.ApiExceptionHandler      : request_conflict requestId=01cb30d7-4096-4e91-9fc3-ae3be16773a9 reason=Tienes 2 tarjetas registradas. Pasa al plan Pro o elimina una para agregar otra.
+business-svc-1  | 2026-09-25T00:20:10.765Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-8] e.p.b.exception.ApiExceptionHandler      : request_rejected requestId=a8e80531-a632-47a7-a20d-b97fb08fce15 reason=La cuenta fue eliminada

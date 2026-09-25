@@ -1,0 +1,60 @@
+== SQL
+OK   merchant_rule_key FYBECA 123 QUITO = FYBECA
+OK   merchant_rule_key PAYPAL SPOTIFYAB
+OK   no quedan capturas con regla guardadas como MANUAL
+OK   no quedan reglas v1
+== Países
+OK   catálogo de países: CO usa COP  | {'code': 'CO', 'name': 'Colombia', 'currencyCode': 'COP', 'currencyName': 'Peso colombiano', 'currencySymbol': 'COP$'}
+== Captura de Wallet y regla
+OK   captura AUTOMATIC 201 con origin AUTOMATIC  | {'id': '6dbda67a-64f4-40a1-b0c2-a5371bfc1be2', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+OK   se creó la regla FYBECA → c1 con 1 uso  | [{'id': '89ec8518-b8c4-49d7-9e72-e3426e0eedb4', 'merchantKey': 'FYBECA', 'merchantName': 'FYBECA 123 QUITO', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'uses': 1, 'lastUsedAt': '2026-09-25T00:20:08.920669Z', 'updatedAt': '2026-09-25T00:20:08.920669Z'}]
+== Duplicado
+OK   mismo pago 20 s después devuelve el mismo gasto  | {'id': '6dbda67a-64f4-40a1-b0c2-a5371bfc1be2', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+OK   quedó un solo gasto FYBECA
+OK   el duplicado quedó en la bitácora
+OK   mismo comercio y monto 3 min después sí es otro gasto  | {'id': '51df204d-875a-45ea-a97e-f6fc736850e1', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+OK   la regla FYBECA suma 2 usos  | [{'id': '89ec8518-b8c4-49d7-9e72-e3426e0eedb4', 'merchantKey': 'FYBECA', 'merchantName': 'FYBECA 123 QUITO', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'uses': 2, 'lastUsedAt': '2026-09-25T00:20:09.128034Z', 'updatedAt': '2026-09-25T00:20:09.128034Z'}]
+== Gasto manual: fecha y reglas
+OK   manual 8 días atrás -> 400  | {'requestId': '9f14b443-a528-4b14-b973-bb6196759f0d', 'message': 'Un gasto manual puede registrarse hasta 7 días atrás'}
+OK   manual 6 días atrás -> 201 MANUAL  | {'id': '093f31e4-a188-4dda-bbf4-ee944da4f025', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '3332efe1-b03b-4977-be14-1b234e25b747', 'categoryName': 'Dia6 2', 'origin': 'MANUAL', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId': N
+OK   manual en el futuro -> 400  | {'requestId': 'db82905f-e270-4ce3-b280-b7459528ec84', 'message': 'La fecha de un gasto manual no puede ser futura'}
+OK   un gasto manual no crea regla  | [{'id': '89ec8518-b8c4-49d7-9e72-e3426e0eedb4', 'merchantKey': 'FYBECA', 'merchantName': 'FYBECA 123 QUITO', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'uses': 2, 'lastUsedAt': '2026-09-25T00:20:09.128034Z', 'updatedAt': '2026-09-25T00:20:09.128034Z'}]
+OK   captura de Wallet con 20 días (revisada tarde) sí se guarda  | {'id': '5da1e7fb-3e6e-42c1-92bc-117f51861c9b', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+== Editar
+OK   cambiar la tarjeta de un gasto de Wallet -> 400  | {'requestId': 'b8d870ae-8d2d-4171-ba12-09b50f426432', 'message': 'La tarjeta de un gasto capturado por Wallet no se puede cambiar'}
+OK   cambiar la categoría de un gasto de Wallet -> 200  | {'id': '51df204d-875a-45ea-a97e-f6fc736850e1', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '3332efe1-b03b-4977-be14-1b234e25b747', 'categoryName': 'Dia6 2', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+OK   la regla FYBECA pasó a c2  | [{'id': '89ec8518-b8c4-49d7-9e72-e3426e0eedb4', 'merchantKey': 'FYBECA', 'merchantName': 'FYBECA 123 QUITO', 'categoryId': '3332efe1-b03b-4977-be14-1b234e25b747', 'categoryName': 'Dia6 2', 'uses': 3, 'lastUsedAt': '2026-09-25T00:20:09.196703Z', 'updatedAt': '2026-09-25T00:20:09.196703Z'}]
+OK   el gasto anterior de FYBECA sigue en c1  | {'id': '6dbda67a-64f4-40a1-b0c2-a5371bfc1be2', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+FAIL un manual sí cambia de tarjeta  | {'requestId': 'cda6b16b-bf21-48b5-b402-5e1301adcb1d', 'message': 'El usuario, la tarjeta y la fecha de un gasto son inmutables'}
+== Mover comercio desde Categorías
+OK   mover FYBECA a c1 -> 200  | {'id': '89ec8518-b8c4-49d7-9e72-e3426e0eedb4', 'merchantKey': 'FYBECA', 'merchantName': 'FYBECA 123 QUITO', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'uses': 3, 'lastUsedAt': '2026-09-25T00:20:09.196703Z', 'updatedAt': '2026-09-25T00:20:09.227829Z'}
+OK   filtro por categoría  | [{'id': '89ec8518-b8c4-49d7-9e72-e3426e0eedb4', 'merchantKey': 'FYBECA', 'merchantName': 'FYBECA 123 QUITO', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'uses': 3, 'lastUsedAt': '2026-09-25T00:20:09.196703Z', 'updatedAt': '2026-09-25T00:20:09.227829Z'}, {'id': '07
+OK   regla inexistente -> 404  | {'requestId': '3e340cbb-b365-463e-8d1c-94d67c91b0c9', 'message': 'La regla no existe o no pertenece al usuario'}
+== Otra moneda
+OK   pago en COP guardado con 3.10 USD y 12000 COP de referencia  | {'id': '2eecc746-8cf8-4004-92c8-a47ed32a0c73', 'cardId': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': '47d04871-5233-4bf9-b51a-5cd0f625b6c0', 'categoryName': 'Dia6 1', 'origin': 'AUTOMATIC', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExpenseId'
+OK   originalAmount sin moneda -> 400  | {'requestId': 'bd1221fc-2d69-4305-913c-da8b9da2726b', 'message': 'originalAmount y originalCurrencyCode van juntos'}
+== Límite propio
+OK   poner límite 300  | {'id': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'bankId': '816d9306-b914-49af-b8b6-13004d0407c7', 'bankName': 'Banco Diners Club del Ecuador S.A.', 'bankLogoUrl': 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128', 'cardType': 'CREDIT', 'creditBrand': 'DINERS', 'name': None, 'alias'
+OK   quitar límite  | {'id': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'bankId': '816d9306-b914-49af-b8b6-13004d0407c7', 'bankName': 'Banco Diners Club del Ecuador S.A.', 'bankLogoUrl': 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128', 'cardType': 'CREDIT', 'creditBrand': 'DINERS', 'name': None, 'alias'
+OK   mes nuevo: el límite quitado no vuelve  | {'id': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'bankId': '816d9306-b914-49af-b8b6-13004d0407c7', 'bankName': 'Banco Diners Club del Ecuador S.A.', 'bankLogoUrl': 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128', 'cardType': 'CREDIT', 'creditBrand': 'DINERS', 'name': None, 'alias'
+OK   volver a poner 150  | {'id': '60a1d84c-1984-4063-85d1-5087e2abdcfc', 'bankId': '816d9306-b914-49af-b8b6-13004d0407c7', 'bankName': 'Banco Diners Club del Ecuador S.A.', 'bankLogoUrl': 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128', 'cardType': 'CREDIT', 'creditBrand': 'DINERS', 'name': None, 'alias'
+== Plan Free: máximo 2 tarjetas
+OK   tercera tarjeta con plan Free -> 409  | {'requestId': '01cb30d7-4096-4e91-9fc3-ae3be16773a9', 'message': 'Tienes 2 tarjetas registradas. Pasa al plan Pro o elimina una para agregar otra.'}
+OK   sin fila de plan (Pro de tester) sí se crea  | {'id': 'fcac11a8-0081-4d13-8d2c-c8e3a41302f7', 'bankId': '816d9306-b914-49af-b8b6-13004d0407c7', 'bankName': 'Banco Diners Club del Ecuador S.A.', 'bankLogoUrl': 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128', 'cardType': 'CREDIT', 'creditBrand': 'DINERS', 'name': None, 'alias'
+== Eliminar cuenta
+OK   contraseña incorrecta -> 400  | {'status': 400, 'requestId': 'cd215381-1a7e-49ac-91ea-43574102984b', 'timestamp': '2026-09-25T00:20:09.912507625Z', 'message': 'La contraseña no es correcta'}
+OK   eliminar cuenta -> 200  | {'message': 'Cuenta eliminada'}
+OK   sin filas en expenses
+OK   sin filas en cards
+OK   sin filas en user_categories
+OK   sin filas en user_consumption_selections
+OK   sin filas en financial_periods
+OK   sin filas en app_users
+OK   sin filas en audit_log
+OK   queda en deleted_accounts
+OK   ya no puede iniciar sesión  | 400
+OK   token viejo no recrea la cuenta  | (400, {'requestId': 'a8e80531-a632-47a7-a20d-b97fb08fce15', 'message': 'La cuenta fue eliminada'})
+OK   el otro usuario sigue intacto
+== Correo del PIN (Mailpit)
+OK   pedir PIN -> 200  | {'message': 'Si el correo está registrado, recibirás un PIN. Revisa tu bandeja y spam.'}
+FAIL llegó un correo a la cuenta  | {'total': 0, 'subjects': []}
