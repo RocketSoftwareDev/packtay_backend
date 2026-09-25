@@ -29,7 +29,9 @@ class MerchantKeyTest {
     @Test
     void siEmpiezaConNumerosUsaSusLetras() {
         assertEquals("ELEVEN", MerchantKey.ruleKey("7ELEVEN 1234"));
-        assertEquals("123", MerchantKey.ruleKey("123 456"));
+        // Sin ninguna letra no hay de dónde cortar: la clave es el texto entero,
+        // igual que merchant_rule_key en SQL y ruleKeyOf en el teléfono.
+        assertEquals("123 456", MerchantKey.ruleKey("123 456"));
     }
 
     @Test
