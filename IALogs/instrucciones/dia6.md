@@ -24,6 +24,10 @@ git checkout feature/dia6 && git pull --ff-only
 grep -E "Tests run:|BUILD|FAIL|ERROR\]" /tmp/mvn.log | head -n 200 > "$LOGS/01-mvn.txt"
 ```
 
+Si el build falla **sólo por pruebas unitarias** (compila, pero hay `Tests run: … Failures`),
+anótalas en el resumen y **sigue** con el resto de la corrida empaquetando sin pruebas:
+`./mvnw -B -DskipTests package > /tmp/mvn-skip.log 2>&1`. Sólo detente si no compila.
+
 ### Reglas actuales antes de migrar (revisión del dueño)
 
 Antes de levantar la rama nueva, guarda las reglas que hay hoy en la base local (V5), para
