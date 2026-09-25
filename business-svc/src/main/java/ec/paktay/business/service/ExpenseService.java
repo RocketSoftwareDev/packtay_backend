@@ -2,6 +2,7 @@ package ec.paktay.business.service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,14 +36,18 @@ public class ExpenseService {
     private final AuditService audit;
     private final ExpenseQueryService query;
     private final MerchantRuleService rules;
+    private final PlanService plans;
+    private final BudgetAlertService alerts;
 
     public ExpenseService(JdbcClient jdbc, UserAccountService users, AuditService audit, ExpenseQueryService query,
-                          MerchantRuleService rules) {
+                          MerchantRuleService rules, PlanService plans, BudgetAlertService alerts) {
         this.jdbc = jdbc;
         this.users = users;
         this.audit = audit;
         this.query = query;
         this.rules = rules;
+        this.plans = plans;
+        this.alerts = alerts;
     }
 
     /**
@@ -86,6 +91,9 @@ public class ExpenseService {
             }
         }
 
+        // Plan Gratis: la captura 21 del mes se rechaza (409) y el teléfono la deja bloqueada.
+        if (automatic) plans.ensureCaptureRoom(userId);
+
         BigDecimal rate = request.exchangeRateToUsd() == null ? BigDecimal.ONE : request.exchangeRateToUsd();
         boolean assignedByRule = Boolean.TRUE.equals(request.assignedByRule());
         Optional<UUID> inserted = jdbc.sql("""
@@ -116,6 +124,7 @@ public class ExpenseService {
         }
         UUID expenseId = inserted.get();
         if (automatic) rules.remember(userId, merchant, request.categoryId());
+        alerts.afterExpense(userId, request.categoryId(), request.cardId(), request.occurredAt());
         audit.record(userId, "CREATE", "expense", expenseId,
                 Map.of("origin", origin, "assignedByRule", assignedByRule));
         return query.findOne(userId, expenseId);
@@ -232,6 +241,9 @@ public class ExpenseService {
             rules.remember(userId, current.merchantRaw(), request.categoryId());
             data.put("ruleUpdated", true);
         }
+        if (changed.contains("categoryId") || changed.contains("cardId") || changed.contains("amount")) {
+            alerts.afterExpense(userId, request.categoryId(), request.cardId(), current.occurredAt());
+        }
         data.put("fields", changed);
         data.put("origin", current.origin());
         audit.record(userId, "UPDATE", "expense", expenseId, data);
@@ -287,13 +299,13 @@ public class ExpenseService {
 
     /** Estado mínimo del gasto para decidir una edición o anulación, con la fila bloqueada. */
     private record Current(String origin, String kind, String status, UUID cardId, UUID categoryId,
-                           BigDecimal amount, String merchantRaw, UUID voidedByExpenseId) {
+                           BigDecimal amount, String merchantRaw, UUID voidedByExpenseId, OffsetDateTime occurredAt) {
     }
 
     private Current lockOwned(UUID userId, UUID expenseId) {
         return jdbc.sql("""
                 select origin::text as origin, kind, status, card_id, category_id, amount, merchant_raw,
-                       voided_by_expense_id
+                       voided_by_expense_id, occurred_at
                   from expenses
                  where id = :id and user_id = :userId
                    for update
@@ -301,7 +313,8 @@ public class ExpenseService {
                 .query((rs, rowNum) -> new Current(rs.getString("origin"), rs.getString("kind"),
                         rs.getString("status"), rs.getObject("card_id", UUID.class),
                         rs.getObject("category_id", UUID.class), rs.getBigDecimal("amount"),
-                        rs.getString("merchant_raw"), rs.getObject("voided_by_expense_id", UUID.class)))
+                        rs.getString("merchant_raw"), rs.getObject("voided_by_expense_id", UUID.class),
+                        rs.getObject("occurred_at", OffsetDateTime.class)))
                 .optional()
                 .orElseThrow(() -> new NotFoundException(ExpenseQueryService.NOT_FOUND));
     }

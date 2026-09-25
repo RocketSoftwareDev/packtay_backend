@@ -16,5 +16,8 @@ public record MerchantRuleResponse(
         @Schema(description = "Veces que se asignó este comercio")
         int uses,
         OffsetDateTime lastUsedAt,
-        OffsetDateTime updatedAt) {
+        OffsetDateTime updatedAt,
+        @Schema(description = "Gasto de Wallet más alto de este comercio (activo, en la moneda del gasto); null si no hay. "
+                + "El teléfono no guarda solo un pago que pase 3 veces este monto o 500 USD.", nullable = true)
+        java.math.BigDecimal maxAmount) {
 }

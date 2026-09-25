@@ -94,6 +94,12 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      # Avisos push (docs/firebase-notificaciones.md). Sin el archivo, no se envía nada.
+      FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase-admin.json
+    volumes:
+      # FIREBASE_CREDENTIALS_HOST_FILE = ruta en la máquina al .json de la cuenta de
+      # servicio. Sin definir se monta /dev/null (archivo vacío = avisos apagados).
+      - ${FIREBASE_CREDENTIALS_HOST_FILE:-/dev/null}:/run/secrets/firebase-admin.json:ro
     ports:
       - "127.0.0.1:8082:8082"
     depends_on:

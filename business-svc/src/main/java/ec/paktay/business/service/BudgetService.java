@@ -20,10 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class BudgetService {
     private final JdbcClient jdbc;
     private final UserAccountService users;
+    private final PlanService plans;
 
-    public BudgetService(JdbcClient jdbc, UserAccountService users) {
+    public BudgetService(JdbcClient jdbc, UserAccountService users, PlanService plans) {
         this.jdbc = jdbc;
         this.users = users;
+        this.plans = plans;
     }
 
     @Transactional
@@ -43,6 +45,7 @@ public class BudgetService {
             ensureCategory(userId, item.categoryId());
         }
         ensureCurrency(request.currencyCode());
+        plans.ensureBudgetCategoriesRoom(userId, categories.size());
         UUID periodId = currentPeriod(userId);
         jdbc.sql("""
                 insert into user_budget_settings (user_id, period_id, global_amount, currency_code, recurrence)
@@ -65,6 +68,15 @@ public class BudgetService {
         users.ensureActiveUser(userId);
         ensureCategory(userId, categoryId);
         UUID periodId = currentPeriod(userId);
+        if (request.active()) {
+            int others = jdbc.sql("""
+                    select count(*) from user_category_budgets b join user_categories uc on uc.id = b.category_id
+                     where b.user_id = :userId and b.period_id = :periodId and b.active and uc.active
+                       and b.category_id <> :categoryId
+                    """).param("userId", userId).param("periodId", periodId).param("categoryId", categoryId)
+                    .query(Integer.class).single();
+            plans.ensureBudgetCategoriesRoom(userId, others + 1);
+        }
         upsert(userId, periodId, categoryId, request.individualAmount(), request.active());
         return response(userId, periodId);
     }
