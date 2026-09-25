@@ -46,3 +46,26 @@ Conserva `BUSINESS_DATA_VOLUME` para actualizar una base existente. Para iniciar
 una base vacía, configura un nombre de volumen nuevo antes de levantar los
 servicios; conserva el anterior como respaldo. Esto no modifica la base de
 Keycloak Services.
+
+## Importación de una base heredada
+
+Antes de conectar las APIs, exporta la base original con `pg_dump -Fc` y
+restáurala en un volumen nuevo. Conserva la original para recuperación.
+Si los UUID de los bancos difieren del catálogo de V3, ejecuta en esa copia:
+
+```sh
+docker compose exec -T business-db psql -U paktay -d paktay -v ON_ERROR_STOP=1 \
+  < database/align-legacy-bank-catalog.sql
+```
+
+El script homologa los bancos por `normalized_name`, actualiza sus referencias
+en una transacción y comprueba que no quedan referencias huérfanas. Requiere
+privilegios para `session_replication_role` y debe ejecutarse sin tráfico en la
+copia, antes de V3. No cambia UUID de usuarios, tarjetas, categorías o gastos.
+Después arranca Business para aplicar Flyway y compara los registros originales
+con los migrados antes de cambiar `BUSINESS_DATA_VOLUME` en `.env`.
+
+V2 retira las credenciales antiguas del atajo, pagos no registrados, cuotas e
+ingresos. Sus datos quedan en el respaldo original; no son gastos de `expenses`.
+V6 transforma las reglas de comercio al formato actual. No edites los archivos
+de migración ya publicados para adaptar una base particular.
