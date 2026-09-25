@@ -1,5 +1,14 @@
 # TestFlight: la app se cierra al abrir (para Codex)
 
+> **Segunda vuelta (después de `2026-09-25_1444-testflight-arranque`):** la corrida mostró
+> que el cierre real es `NSInvalidArgumentException: AppDelegate no reconoce window`, desde
+> `RNFBMessagingNSNotificationCenter.application_onDidFinishLaunchingNotification`. Al
+> adoptar UIScene se quitó `window` del `AppDelegate`; ya volvió (el `SceneDelegate` la
+> asigna). Repite **sólo los pasos 0, 2, 3 y 4** con `develop` actualizado
+> (`RUN=...-testflight-arranque2`). El aviso de Firebase «default app not yet configured»
+> en el simulador no es fatal: el bundle del simulador es `org.reactjs.native.example…` y
+> el plist es del bundle real; en el iPhone coincide.
+
 El build subido a TestFlight (2026092503, commit `0020541` del front) se cierra al abrir. Causa
 probable: Firebase nunca se inicializa. No hay `FirebaseApp.configure()` en `AppDelegate`, y
 el módulo de Messaging (paso 7b) pide `Messaging.messaging()` al terminar el arranque; sin una
