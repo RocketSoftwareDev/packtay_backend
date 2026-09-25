@@ -8,6 +8,7 @@ import ec.paktay.business.dto.DeviceResponse;
 import ec.paktay.business.dto.PushTokenRequest;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import ec.paktay.business.dto.UpsertDeviceRequest;
+import ec.paktay.business.service.BudgetAlertService;
 import ec.paktay.business.service.DeviceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -31,8 +32,12 @@ import org.springframework.web.bind.annotation.RestController;
 @SecurityRequirement(name = "bearerAuth")
 public class DeviceController {
     private final DeviceService devices;
+    private final BudgetAlertService budgetAlerts;
 
-    public DeviceController(DeviceService devices) { this.devices = devices; }
+    public DeviceController(DeviceService devices, BudgetAlertService budgetAlerts) {
+        this.devices = devices;
+        this.budgetAlerts = budgetAlerts;
+    }
 
     @PutMapping("/me")
     @Operation(summary = "Registrar o actualizar mi dispositivo", description = "Registra la preferencia de desbloqueo local con Face ID, Touch ID o BiometricPrompt. Nunca envíes biometría al servidor.")
@@ -56,6 +61,9 @@ public class DeviceController {
     public void pushToken(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID deviceId, @Valid @RequestBody PushTokenRequest request) {
         if (!devices.setPushToken(UUID.fromString(jwt.getSubject()), deviceId, request.token())) {
             throw new IllegalArgumentException("El dispositivo no existe");
+        }
+        if (request.token() != null && !request.token().isBlank()) {
+            budgetAlerts.retryPending(UUID.fromString(jwt.getSubject()));
         }
     }
 

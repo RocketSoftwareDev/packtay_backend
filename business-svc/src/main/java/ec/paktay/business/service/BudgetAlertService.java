@@ -8,6 +8,8 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -33,8 +36,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * - Sólo cuenta el mes actual: un gasto manual de hace días del mes anterior no avisa.
  *
  * Se decide dentro de la transacción del gasto (la fila de notification_log se
- * escribe con él) y se envía después del commit: si el gasto se revierte, no sale
- * ningún aviso.
+ * escribe con él) y se envía después del commit. Los intentos pendientes se
+ * recuperan periódicamente cuando el usuario registra el token o Firebase vuelve.
  */
 @Service
 public class BudgetAlertService {
@@ -80,7 +83,7 @@ public class BudgetAlertService {
         if (card != null) {
             Integer threshold = threshold(card.spent(), card.limit());
             if (threshold != null && claim(userId, "CARD_LIMIT", cardId, month, threshold)) {
-                messages.add(cardMessage(card, threshold));
+                messages.add(cardMessage(card, cardId, month, threshold));
             }
         }
         if (messages.isEmpty()) return;
@@ -125,6 +128,8 @@ public class BudgetAlertService {
     }
 
     private record CardLimit(String name, BigDecimal limit, BigDecimal spent) { }
+    private record Pending(UUID id, UUID userId, String kind, UUID targetId, LocalDate month, int threshold) { }
+    private record Target(String kind, UUID id, LocalDate month) { }
 
     private CardLimit cardLimit(UUID userId, UUID cardId, LocalDate month) {
         return jdbc.sql("""
@@ -151,19 +156,31 @@ public class BudgetAlertService {
         Map<String, String> data = Map.of("type", "CATEGORY_BUDGET", "categoryId", category.categoryId().toString(),
                 "threshold", String.valueOf(threshold));
         if (threshold == 100) {
-            return new PushSender.Message(name + " pasó su presupuesto",
-                    money(spent) + " de " + money(limit) + " este mes (" + percent(spent, limit) + " %).", data);
+            return message(name + " pasó su presupuesto",
+                    money(spent) + " de " + money(limit) + " este mes (" + percent(spent, limit) + " %).",
+                    data, "CATEGORY_BUDGET", category.categoryId(), lastDay.withDayOfMonth(1), threshold);
         }
-        return new PushSender.Message(name + " llegó al 90 %",
+        return message(name + " llegó al 90 %",
                 "Llevas " + money(spent) + " de " + money(limit) + ". Te quedan " + money(limit.subtract(spent))
-                        + " hasta el " + lastDay.format(DAY_MONTH) + ".", data);
+                        + " hasta el " + lastDay.format(DAY_MONTH) + ".", data, "CATEGORY_BUDGET",
+                category.categoryId(), lastDay.withDayOfMonth(1), threshold);
     }
 
-    private PushSender.Message cardMessage(CardLimit card, int threshold) {
+    private PushSender.Message cardMessage(CardLimit card, UUID cardId, LocalDate month, int threshold) {
         Map<String, String> data = Map.of("type", "CARD_LIMIT", "threshold", String.valueOf(threshold));
         String body = money(card.spent()) + " de " + money(card.limit()) + " este mes (" + percent(card.spent(), card.limit()) + " %).";
-        return new PushSender.Message(threshold == 100 ? card.name() + " pasó Mi límite"
-                : card.name() + " llegó al 90 % de Mi límite", body, data);
+        return message(threshold == 100 ? card.name() + " pasó Mi límite"
+                : card.name() + " llegó al 90 % de Mi límite", body, data, "CARD_LIMIT", cardId, month, threshold);
+    }
+
+    private PushSender.Message message(String title, String body, Map<String, String> data, String kind,
+                                      UUID targetId, LocalDate month, int threshold) {
+        Map<String, String> details = new java.util.HashMap<>(data);
+        details.put("type", kind);
+        details.put("threshold", String.valueOf(threshold));
+        details.put("targetId", targetId.toString());
+        details.put("periodMonth", month.toString());
+        return new PushSender.Message(title, body, Map.copyOf(details));
     }
 
     private void deliver(UUID userId, List<PushSender.Message> messages) {
@@ -176,8 +193,129 @@ public class BudgetAlertService {
             for (String token : tokens) {
                 PushSender.Outcome outcome = push.send(token, message);
                 if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(token);
+                if (outcome == PushSender.Outcome.SENT) markDelivered(userId, message);
                 log.info("budget_alert userId={} type={} outcome={}", userId, message.data().get("type"), outcome);
             }
+        }
+    }
+
+    /** Reintenta filas no entregadas al disponer de token/servicio; sent_at actúa como lease. */
+    @Scheduled(fixedDelayString = "${paktay.push.retry-delay-ms:60000}")
+    public void retryPending() {
+        retryPending(null);
+    }
+
+    public void retryPending(UUID onlyUserId) {
+        if (!push.enabled()) return;
+        List<Pending> pending = claimPending(onlyUserId);
+
+        Map<Target, List<Pending>> targets = new LinkedHashMap<>();
+        for (Pending item : pending) {
+            targets.computeIfAbsent(new Target(item.kind(), item.targetId(), item.month()), ignored -> new ArrayList<>())
+                    .add(item);
+        }
+        Map<UUID, List<String>> tokensByUser = new java.util.HashMap<>();
+        Map<UUID, BudgetResponse> budgetsByUser = new java.util.HashMap<>();
+        for (Map.Entry<Target, List<Pending>> entry : targets.entrySet()) {
+            Target target = entry.getKey();
+            UUID userId = entry.getValue().get(0).userId();
+            List<String> tokens = tokensByUser.computeIfAbsent(userId, devices::pushTokens);
+            if (tokens.isEmpty()) continue;
+            LocalDate currentMonth = LocalDate.now(users.zoneOf(userId)).withDayOfMonth(1);
+            if (!currentMonth.equals(target.month())) {
+                deletePending(entry.getValue());
+                continue;
+            }
+
+            Integer currentThreshold;
+            PushSender.Message message;
+            if ("CATEGORY_BUDGET".equals(target.kind())) {
+                BudgetResponse budget = budgetsByUser.computeIfAbsent(userId, budgets::current);
+                CategoryBudgetResponse category = budget.categories().stream()
+                        .filter(item -> item.categoryId().equals(target.id())).findFirst().orElse(null);
+                if (category == null) {
+                    deletePending(entry.getValue());
+                    continue;
+                }
+                currentThreshold = threshold(category.spentAmount(), category.effectiveAmount());
+                message = currentThreshold == null ? null : categoryMessage(category, currentThreshold,
+                        target.month().plusMonths(1).minusDays(1));
+            } else {
+                CardLimit card = cardLimit(userId, target.id(), target.month());
+                currentThreshold = card == null ? null : threshold(card.spent(), card.limit());
+                message = currentThreshold == null ? null : cardMessage(card, target.id(), target.month(), currentThreshold);
+            }
+            Integer sendThreshold = retryThreshold(entry.getValue().stream().map(Pending::threshold).toList(), currentThreshold);
+            if (sendThreshold == null) {
+                deletePending(entry.getValue());
+                continue;
+            }
+            boolean sent = false;
+            for (String token : tokens) {
+                PushSender.Outcome outcome = push.send(token, message);
+                if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(token);
+                if (outcome == PushSender.Outcome.SENT) sent = true;
+                log.info("budget_alert_retry userId={} type={} outcome={}", userId, target.kind(), outcome);
+            }
+            if (sent) markDelivered(userId, target, sendThreshold);
+        }
+    }
+
+    private List<Pending> claimPending(UUID onlyUserId) {
+        String userFilter = onlyUserId == null ? "" : "and candidate.user_id = :userId";
+        var statement = jdbc.sql(("""
+                update notification_log n set sent_at = now()
+                 where n.id in (
+                     select candidate.id from notification_log candidate
+                      where not candidate.delivered
+                        and candidate.sent_at < now() - interval '1 minute'
+                        and exists (select 1 from user_devices d where d.user_id = candidate.user_id and d.push_token is not null)
+                        %s
+                      order by candidate.sent_at
+                      limit 100
+                      for update skip locked
+                 )
+                returning n.id, n.user_id, n.kind, n.target_id, n.period_month, n.threshold
+                """).formatted(userFilter));
+        if (onlyUserId != null) statement = statement.param("userId", onlyUserId);
+        return statement.query((rs, rowNum) -> new Pending(rs.getObject("id", UUID.class),
+                rs.getObject("user_id", UUID.class), rs.getString("kind"), rs.getObject("target_id", UUID.class),
+                rs.getObject("period_month", LocalDate.class), rs.getInt("threshold"))).list();
+    }
+
+    static Integer retryThreshold(List<Integer> pendingThresholds, Integer currentThreshold) {
+        if (currentThreshold == null || pendingThresholds.isEmpty()) return null;
+        int required = pendingThresholds.stream().max(Comparator.naturalOrder()).orElse(100);
+        return currentThreshold >= required ? currentThreshold : null;
+    }
+
+    private void markDelivered(UUID userId, PushSender.Message message) {
+        UUID targetId = UUID.fromString(message.data().get("targetId"));
+        LocalDate month = LocalDate.parse(message.data().get("periodMonth"));
+        int threshold = Integer.parseInt(message.data().get("threshold"));
+        markDelivered(userId, new Target(message.data().get("type"), targetId, month), threshold);
+    }
+
+    private void markDelivered(UUID userId, Target target, int threshold) {
+        jdbc.sql("""
+                insert into notification_log (user_id, kind, target_id, period_month, threshold, sent_at, delivered)
+                values (:userId, :kind, :targetId, :month, :threshold, now(), true)
+                on conflict (user_id, kind, target_id, period_month, threshold)
+                do update set sent_at = now(), delivered = true
+                """).param("userId", userId).param("kind", target.kind()).param("targetId", target.id())
+                .param("month", target.month()).param("threshold", threshold).update();
+        jdbc.sql("""
+                update notification_log set delivered = true, sent_at = now()
+                 where user_id = :userId and kind = :kind and target_id = :targetId
+                   and period_month = :month and threshold <= :threshold
+                """).param("userId", userId).param("kind", target.kind()).param("targetId", target.id())
+                .param("month", target.month()).param("threshold", threshold).update();
+    }
+
+    private void deletePending(List<Pending> pending) {
+        for (Pending item : pending) {
+            jdbc.sql("delete from notification_log where id = :id and not delivered")
+                    .param("id", item.id()).update();
         }
     }
 

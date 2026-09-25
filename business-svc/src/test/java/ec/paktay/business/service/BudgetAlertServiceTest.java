@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +28,14 @@ class BudgetAlertServiceTest {
         assertNull(BudgetAlertService.threshold(d("50"), null));
         assertNull(BudgetAlertService.threshold(d("50"), BigDecimal.ZERO));
         assertNull(BudgetAlertService.threshold(null, d("80")));
+    }
+
+    @Test
+    void retryPendienteUsaElUmbralActualYNoEnviaUnAvisoObsoleto() {
+        assertEquals(100, BudgetAlertService.retryThreshold(List.of(90), 100));
+        assertEquals(90, BudgetAlertService.retryThreshold(List.of(90), 90));
+        assertNull(BudgetAlertService.retryThreshold(List.of(100), 90));
+        assertNull(BudgetAlertService.retryThreshold(List.of(), 100));
     }
 
     @Test
