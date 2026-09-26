@@ -9,6 +9,7 @@ target/
 .env.local
 .env.*
 !.env.example
+!.env.production.example
 .claude/
 Postman/
 postman/
