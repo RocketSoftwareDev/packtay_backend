@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -43,7 +44,8 @@ class TemporaryPasswordServiceTest {
         db = mock(JdbcTemplate.class);
         JwtDecoder decoder = mock(JwtDecoder.class);
         when(decoder.decode("access")).thenReturn(Jwt.withTokenValue("access").header("alg", "RS256").subject(USER).build());
-        when(identities.findById(USER)).thenReturn(Map.of("id", USER, "email", "ana@paktay.app", "enabled", true));
+        // findById devuelve Map<?, ?>: con thenReturn(Map.of(...)) Java no infiere el tipo.
+        doReturn(Map.of("id", USER, "email", "ana@paktay.app", "enabled", true)).when(identities).findById(USER);
         service = new TemporaryPasswordService(identities, mail, mock(AdminAuditWriter.class), db, decoder);
     }
 
@@ -72,7 +74,7 @@ class TemporaryPasswordServiceTest {
     @Test
     void noSeEnviaALaCuentaPropiaNiAUnaBloqueada() {
         assertThrows(ConflictException.class, () -> service.issue(ADMIN.id(), ADMIN));
-        when(identities.findById(USER)).thenReturn(Map.of("id", USER, "email", "ana@paktay.app", "enabled", false));
+        doReturn(Map.of("id", USER, "email", "ana@paktay.app", "enabled", false)).when(identities).findById(USER);
         assertThrows(ConflictException.class, () -> service.issue(USER, ADMIN));
         verify(identities, never()).replacePassword(anyString(), anyString(), anyBoolean());
     }
