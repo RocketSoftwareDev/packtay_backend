@@ -16,7 +16,7 @@ public class PasswordMailService {
     /**
      * Remitente: SMTP_FROM si está definido; si no, el usuario SMTP. Hace falta
      * separarlos porque el usuario de algunos servidores no es una dirección de
-     * correo (Mailpit rechaza el remitente "codex" con 553 5.1.3).
+     * correo rechaza remitentes que no coinciden con la cuenta SMTP configurada.
      */
     @org.springframework.beans.factory.annotation.Autowired
     public PasswordMailService(JavaMailSender mail, @Value("${spring.mail.username}") String username,
