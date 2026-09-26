@@ -1,0 +1,1 @@
+KEYCLOAK_DB_PASSWORD (la instrucción histórica la solicita; develop actual no la usa en docker-compose)

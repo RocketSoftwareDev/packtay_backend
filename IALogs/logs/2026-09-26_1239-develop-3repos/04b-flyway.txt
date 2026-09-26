@@ -1,0 +1,2 @@
+zsh:6: command not found: docker compose -p paktay-local --env-file .env --env-file .env.local
+zsh:7: command not found: docker compose -p paktay-local --env-file .env --env-file .env.local

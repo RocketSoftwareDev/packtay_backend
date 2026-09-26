@@ -1,0 +1,106 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] Paktay Backend                                                     [pom]
+[INFO] Paktay Auth Service                                                [jar]
+[INFO] Paktay Business Service                                            [jar]
+[INFO] 
+[INFO] ----------------------< ec.paktay:paktay-backend >----------------------
+[INFO] Building Paktay Backend 0.1.0-SNAPSHOT                             [1/3]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ paktay-backend ---
+[INFO] 
+[INFO] --- dependency:3.8.1:properties (ruta-de-dependencias) @ paktay-backend ---
+[INFO] 
+[INFO] -------------------------< ec.paktay:auth-svc >-------------------------
+[INFO] Building Paktay Auth Service 0.1.0-SNAPSHOT                        [2/3]
+[INFO]   from auth-svc/pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ auth-svc ---
+[INFO] Deleting /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/target
+[INFO] 
+[INFO] --- dependency:3.8.1:properties (ruta-de-dependencias) @ auth-svc ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ auth-svc ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 3 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ auth-svc ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 48 source files with javac [debug parameters release 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ auth-svc ---
+[INFO] skip non existing resourceDirectory /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ auth-svc ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 6 source files with javac [debug parameters release 17] to target/test-classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[46,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+    method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>) is not applicable
+      (argument mismatch; inference variable K has incompatible bounds
+          equality constraints: capture#1 of ?
+          lower bounds: java.lang.String)
+    method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>,java.util.Map<capture#1 of ?,capture#2 of ?>...) is not applicable
+      (argument mismatch; inference variable K has incompatible bounds
+          equality constraints: capture#1 of ?
+          lower bounds: java.lang.String)
+[ERROR] /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[75,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+    method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>) is not applicable
+      (argument mismatch; inference variable K has incompatible bounds
+          equality constraints: capture#3 of ?
+          lower bounds: java.lang.String)
+    method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>,java.util.Map<capture#3 of ?,capture#4 of ?>...) is not applicable
+      (argument mismatch; inference variable K has incompatible bounds
+          equality constraints: capture#3 of ?
+          lower bounds: java.lang.String)
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for Paktay Backend 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] Paktay Backend ..................................... SUCCESS [  0.977 s]
+[INFO] Paktay Auth Service ................................ FAILURE [  3.565 s]
+[INFO] Paktay Business Service ............................ SKIPPED
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.856 s
+[INFO] Finished at: 2026-09-26T12:39:52-05:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project auth-svc: Compilation failure: Compilation failure: 
+[ERROR] /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[46,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+[ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>) is not applicable
+[ERROR]       (argument mismatch; inference variable K has incompatible bounds
+[ERROR]           equality constraints: capture#1 of ?
+[ERROR]           lower bounds: java.lang.String)
+[ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>,java.util.Map<capture#1 of ?,capture#2 of ?>...) is not applicable
+[ERROR]       (argument mismatch; inference variable K has incompatible bounds
+[ERROR]           equality constraints: capture#1 of ?
+[ERROR]           lower bounds: java.lang.String)
+[ERROR] /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[75,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+[ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>) is not applicable
+[ERROR]       (argument mismatch; inference variable K has incompatible bounds
+[ERROR]           equality constraints: capture#3 of ?
+[ERROR]           lower bounds: java.lang.String)
+[ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>,java.util.Map<capture#3 of ?,capture#4 of ?>...) is not applicable
+[ERROR]       (argument mismatch; inference variable K has incompatible bounds
+[ERROR]           equality constraints: capture#3 of ?
+[ERROR]           lower bounds: java.lang.String)
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :auth-svc
+exit=1
