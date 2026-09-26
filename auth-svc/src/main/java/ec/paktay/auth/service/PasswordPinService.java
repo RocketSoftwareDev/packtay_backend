@@ -19,6 +19,7 @@ public class PasswordPinService {
     private final SecureRandom random = new SecureRandom();
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final Clock clock;
+    private final AccountAccess access;
 
     @org.springframework.beans.factory.annotation.Autowired
     public PasswordPinService(JdbcTemplate db, org.springframework.transaction.PlatformTransactionManager manager,
@@ -28,23 +29,24 @@ public class PasswordPinService {
     PasswordPinService(JdbcTemplate db, TransactionTemplate tx, KeycloakIdentityService identities,
             PasswordMailService mail, Clock clock) {
         this.db = db; this.tx = tx; this.identities = identities; this.mail = mail; this.clock = clock;
+        this.access = new AccountAccess(db, identities);
     }
     private String normalize(String email) { return email.trim().toLowerCase(Locale.ROOT); }
 
     /**
-     * Una cuenta bloqueada por un administrador (identidad desactivada) no recibe PIN: se le dice que
-     * contacte con soporte. Es la única respuesta no genérica; el registro ya revela si un correo
-     * tiene cuenta, así que no abre una puerta nueva.
+     * Una cuenta bloqueada por un administrador no recibe PIN: se le dice que contacte con soporte.
+     * Es la única respuesta no genérica; el registro ya revela si un correo tiene cuenta, así que no
+     * abre una puerta nueva. Una cuenta solo pausada por intentos fallidos sí recibe PIN (y el PIN
+     * quita la pausa): ver {@link AccountAccess}.
      */
     public void requestReset(String email) {
         String address = normalize(email);
-        Map<?, ?> user = identities.findByEmail(address);
-        if (user != null && Boolean.FALSE.equals(user.get("enabled"))) throw CodedException.accountBlocked();
+        if (access.blockedByAdmin(identities.findByEmail(address))) throw CodedException.accountBlocked();
         request(address, "RESET", null);
     }
     public void requestChange(String subject) {
         Map<?, ?> user = identities.findById(subject);
-        if (user == null || !Boolean.TRUE.equals(user.get("enabled")) || !(user.get("email") instanceof String email) || email.isBlank())
+        if (!access.usable(user) || !(user.get("email") instanceof String email) || email.isBlank())
             throw new IllegalArgumentException("La cuenta no tiene un correo disponible");
         request(normalize(email), "CHANGE", subject);
     }
@@ -55,8 +57,7 @@ public class PasswordPinService {
             if (ids.size() == 1) user = identities.findById(ids.get(0));
         }
         // Un correo local antiguo nunca autoriza cambiar la cuenta de otro correo.
-        return user != null && Boolean.TRUE.equals(user.get("enabled"))
-                && email.equalsIgnoreCase(String.valueOf(user.get("email"))) ? user : null;
+        return access.usable(user) && email.equalsIgnoreCase(String.valueOf(user.get("email"))) ? user : null;
     }
     private void request(String email, String purpose, String subject) {
         tx.executeWithoutResult(status -> {
@@ -105,7 +106,10 @@ public class PasswordPinService {
     }
     private boolean currentIdentity(Map<String,Object> row, String email) {
         Map<?, ?> user = identities.findById((String)row.get("user_id"));
-        return user != null && Boolean.TRUE.equals(user.get("enabled")) && email.equalsIgnoreCase(String.valueOf(user.get("email")));
+        boolean current = access.usable(user) && email.equalsIgnoreCase(String.valueOf(user.get("email")));
+        if (!current) org.slf4j.LoggerFactory.getLogger(PasswordPinService.class)
+                .warn("pin_identity_rejected subject={} found={}", row.get("user_id"), user != null);
+        return current;
     }
     private String hash(String value) {
         try {
