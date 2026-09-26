@@ -3,12 +3,18 @@
 Único script para probar el panel; reemplaza a `admin-fase2.md` y `admin-seguridad1.md`.
 **No cambies código.** Todo va a `IALogs/logs/`.
 
-Rama: `BRANCH=feature/admin-login-propio` hasta que se integre; después, `develop`. Desde esa rama:
+Rama: `BRANCH=feature/password-temporal-bloqueo` (incluye `feature/admin-login-propio`) hasta que
+se integre; después, `develop`. Web: `feature/contrasenia-temporal` (incluye el BFF). Desde esas ramas:
+- **Contraseñas:** el admin envía una contraseña temporal por correo (`POST
+  /api/v1/admin/users/{id}/password/temporary`); el login del móvil con ella responde
+  `password_change_required`; se cambia con `PUT /api/v1/auth/password/temporary`; vence a las 24 h.
+- **Cuenta bloqueada:** login y recuperación responden `403 ACCOUNT_BLOCKED`.
+- **Fuerza bruta:** 3 fallos pausan la cuenta; recuperar con PIN la libera.
 - El panel tiene **login propio**: `POST /api/v1/admin/session/login|refresh|logout` en auth-svc,
   con el cliente confidencial `paktay-admin-panel`. Ya no existe el cliente `paktay-admin-web`.
 - `/api/v1/admin/**` solo acepta tokens de ese login (`azp`): un token del login del móvil
   (`/api/v1/auth/login`) recibe `403 ADMIN_TOKEN_REQUIRED` aunque la cuenta sea ADMIN.
-- El realm bloquea una cuenta 1 minuto tras 5 contraseñas malas (también en el móvil).
+- El realm pausa una cuenta 1 minuto tras 3 contraseñas malas (también en el móvil).
 
 Cubre:
 - Login propio del panel: rol ADMIN obligatorio, error genérico, renovación, cierre y auditoría.
@@ -30,7 +36,7 @@ Cubre:
 
 ```bash
 cd packtay_backend
-export BRANCH=${BRANCH:-feature/admin-login-propio}
+export BRANCH=${BRANCH:-feature/password-temporal-bloqueo}
 git fetch origin && git checkout "$BRANCH" && git pull --ff-only
 export RUN=$(date +%Y-%m-%d_%H%M)-admin-panel
 export LOGS=$PWD/IALogs/logs/$RUN; mkdir -p "$LOGS"
@@ -207,16 +213,96 @@ ids = {s["id"]: s["health"] for s in st["services"]} if code == 200 else {}
 check("estado con 6 servicios", code == 200 and len(ids) == 6, ids)
 check("auth-svc UP desde business-svc", ids.get("auth-svc") == "UP", ids)
 check("Keycloak y la base UP", ids.get("keycloak") == "UP" and ids.get("postgres") == "UP", ids)
-check("versión del esquema V9", any(v["value"].endswith("V9") for v in st.get("versions", [])), st.get("versions"))
+check("versión del esquema V10", any(v["value"].endswith("V10") for v in st.get("versions", [])), st.get("versions"))
 
 print("== Auditoría")
 for action in ["Subcategoría creada", "Categoría desactivada", "Banco creado", "Oferta de tarjeta agregada", "Banco desactivado", "Moneda creada", "País creado"]:
     check(f"auditado: {action}", sql(f"select count(*) from admin_audit where action = '{action}' and created_at > now() - interval '10 minutes'") != "0")
 
-print("== Fuerza bruta (usuario de prueba, nunca el admin)")
-for _ in range(5):
-    login(email, "Clave-Mala-2026!")
-check("tras 5 fallos la cuenta queda bloqueada un rato", login(email, PWD) is None)
+print("== Contraseñas (usuario de prueba, nunca el admin)")
+import re, urllib.parse
+MP = "http://127.0.0.1:28025"
+def mail_text(to, marker, tries=15):
+    """Texto del correo más reciente para `to` que contenga `marker` (Mailpit)."""
+    for _ in range(tries):
+        try:
+            data = json.load(urllib.request.urlopen(f"{MP}/api/v1/messages?limit=50"))
+            for m in data.get("messages", []):
+                if any(a.get("Address", "").lower() == to.lower() for a in m.get("To", [])):
+                    text = json.load(urllib.request.urlopen(f"{MP}/api/v1/message/{m['ID']}")).get("Text", "")
+                    if marker in text: return text
+        except Exception as e:
+            print("mailpit:", e)
+        time.sleep(1)
+    return ""
+def mobile(email_, pwd_):
+    return call("POST", A + "/api/v1/auth/login", {"username": email_, "password": pwd_}, panel=False)
+code, page = call("GET", B + "/api/v1/admin/users?q=" + urllib.parse.quote(email), t=ADMIN)
+UID = page["items"][0]["id"] if code == 200 and page.get("items") else None
+check("id del usuario de prueba", UID is not None, code)
+
+import base64
+payload = ADMIN.split(".")[1]
+ADMIN_ID = json.loads(base64.urlsafe_b64decode(payload + "=" * (-len(payload) % 4))).get("sub")
+check("admin no se manda temporal a sí mismo -> 409", call("POST", A + f"/api/v1/admin/users/{ADMIN_ID}/password/temporary", t=ADMIN)[0] == 409)
+code, body = call("POST", A + f"/api/v1/admin/users/{UID}/password/temporary", t=ADMIN)
+check("admin envía contraseña temporal -> 200", code == 200, (code, body))
+text = mail_text(email, "contraseña temporal de PAKTAY es:")
+m = re.search(r"es: (\S+)", text)
+TEMP = m.group(1) if m else None
+check("llegó el correo con la contraseña temporal", TEMP is not None and len(TEMP) == 16, bool(text))
+check("la contraseña anterior ya no sirve", mobile(email, PWD)[0] == 400)
+code, body = mobile(email, TEMP)
+check("login con la temporal -> 200 y password_change_required", code == 200 and body.get("password_change_required") is True, (code, {k: v for k, v in body.items() if "token" not in k} if isinstance(body, dict) else body))
+TEMP_TOKEN = body.get("access_token") if code == 200 else None
+check("la temporal no deja entrar al panel -> 403 PASSWORD_CHANGE_REQUIRED",
+      call("PUT", A + f"/api/v1/admin/users/{UID}/roles/admin", t=ADMIN)[0] in (200, 204)
+      and panel_login(email, TEMP)[1].get("code") == "PASSWORD_CHANGE_REQUIRED")
+call("DELETE", A + f"/api/v1/admin/users/{UID}/roles/admin", t=ADMIN)
+NEW = "Nueva-Clave-2026!"
+code, body = call("PUT", A + "/api/v1/auth/password/temporary", {"newPassword": NEW}, t=TEMP_TOKEN, panel=False)
+check("cambiar la temporal sin PIN -> 200", code == 200, (code, body))
+code, body = mobile(email, NEW)
+check("login con la nueva, sin marca de cambio", code == 200 and "password_change_required" not in body, code)
+check("cambiar la temporal otra vez -> 400", call("PUT", A + "/api/v1/auth/password/temporary", {"newPassword": "Otra-Clave-2026!"}, t=body.get("access_token"), panel=False)[0] == 400)
+PWD = NEW
+
+call("POST", A + f"/api/v1/admin/users/{UID}/password/temporary", t=ADMIN)
+text = mail_text(email, "contraseña temporal de PAKTAY es:")
+TEMP2 = re.search(r"es: (\S+)", text).group(1) if text else None
+sql(f"update password_temporary set expires_at = now() - interval '1 minute' where user_id = '{UID}'")
+code, body = mobile(email, TEMP2)
+check("temporal vencida -> 400 TEMPORARY_PASSWORD_EXPIRED", code == 400 and isinstance(body, dict) and body.get("code") == "TEMPORARY_PASSWORD_EXPIRED", (code, body))
+
+print("== Cuenta bloqueada")
+check("bloquear usuario", call("POST", A + f"/api/v1/admin/users/{UID}/block", t=ADMIN)[0] == 200)
+check("admin no manda temporal a una cuenta bloqueada -> 409", call("POST", A + f"/api/v1/admin/users/{UID}/password/temporary", t=ADMIN)[0] == 409)
+code, body = mobile(email, "cualquier-cosa")
+check("login de cuenta bloqueada -> 403 ACCOUNT_BLOCKED", code == 403 and isinstance(body, dict) and body.get("code") == "ACCOUNT_BLOCKED", (code, body))
+code, body = call("POST", A + "/api/v1/auth/password-reset/request", {"email": email}, panel=False)
+check("pedir PIN con la cuenta bloqueada -> 403 ACCOUNT_BLOCKED (mensaje de soporte)", code == 403 and isinstance(body, dict)
+      and body.get("code") == "ACCOUNT_BLOCKED" and "soporte" in body.get("message", ""), (code, body))
+check("un correo sin cuenta sigue recibiendo respuesta genérica -> 200", call("POST", A + "/api/v1/auth/password-reset/request", {"email": f"nadie{stamp}@paktay.local"}, panel=False)[0] == 200)
+check("desbloquear usuario", call("POST", A + f"/api/v1/admin/users/{UID}/unblock", t=ADMIN)[0] == 200)
+
+print("== Fuerza bruta: 3 fallos pausan la cuenta y el PIN la libera")
+# La contraseña vigente es TEMP2 (vencida). Sin pausa respondería TEMPORARY_PASSWORD_EXPIRED; con
+# pausa, Keycloak la rechaza aunque sea correcta y la respuesta es INVALID_CREDENTIALS.
+for _ in range(3):
+    mobile(email, "Clave-Mala-2026!")
+code, body = mobile(email, TEMP2)
+check("tras 3 fallos la cuenta queda pausada (INVALID_CREDENTIALS con la contraseña correcta)", code == 400 and isinstance(body, dict) and body.get("code") == "INVALID_CREDENTIALS", (code, body))
+check("pedir PIN con la cuenta pausada -> 200", call("POST", A + "/api/v1/auth/password-reset/request", {"email": email}, panel=False)[0] == 200)
+text = mail_text(email, "Tu PIN de PAKTAY es:")
+pin = re.search(r"es: (\d{6})", text).group(1) if text else None
+code, body = call("POST", A + "/api/v1/auth/password-reset/verify", {"email": email, "pin": pin}, panel=False)
+token = body.get("resetToken") if code == 200 and isinstance(body, dict) else None
+check("PIN validado", token is not None, code)
+FINAL = "Final-Clave-2026!"
+check("recuperar con PIN -> 200", call("POST", A + "/api/v1/auth/password-reset/complete", {"email": email, "resetToken": token, "newPassword": FINAL}, panel=False)[0] == 200)
+code, body = mobile(email, FINAL)
+check("entra de inmediato: el PIN quitó la pausa y la temporal pendiente", code == 200 and "password_change_required" not in body, (code, body if code != 200 else "ok"))
+check("auditado: Contraseña temporal enviada", sql("select count(*) from admin_audit where action = 'Contraseña temporal enviada' and created_at > now() - interval '10 minutes'") != "0")
 ```
 
 ## 3. OpenAPI, salud y logs
@@ -234,7 +320,7 @@ Solo si existe `../packtay_web_admin` (si no, anótalo en el resumen y sigue). N
 
 ```bash
 cd ../packtay_web_admin
-git fetch origin && git checkout feature/login-propio-bff && git pull --ff-only
+git fetch origin && git checkout feature/contrasenia-temporal && git pull --ff-only
 pnpm install --frozen-lockfile > "$LOGS/10-web-install.log" 2>&1
 cat > .env.local <<EOF
 NEXT_PUBLIC_USE_MOCKS=false
@@ -301,6 +387,20 @@ check("cabeceras de seguridad", "frame-ancestors 'none'" in headers.get("Content
 Si algún check de usuarios falla por la forma de la respuesta (`items`), guarda los primeros 300
 caracteres del cuerpo en el log para comparar con los tipos de la web.
 
+## 4b. Pruebas del móvil (sin simulador)
+
+Solo si existe `../packtay_mobile_front` con su `.env` (si no, anótalo y sigue). No toques `.env`.
+
+```bash
+cd ../packtay_mobile_front
+git fetch origin && git checkout feature/contrasenia-temporal-bloqueo && git pull --ff-only
+npm ci > "$LOGS/12-movil-install.log" 2>&1
+npx tsc --noEmit > "$LOGS/12-movil-tsc.txt" 2>&1; echo "exit=$?" >> "$LOGS/12-movil-tsc.txt"
+npm test -- __tests__/authSession.test.ts __tests__/passwordApi.test.ts __tests__/AuthScreens.test.tsx > "$LOGS/12-movil-jest.txt" 2>&1; echo "exit=$?" >> "$LOGS/12-movil-jest.txt"
+npx eslint src __tests__ --quiet > "$LOGS/12-movil-eslint.txt" 2>&1; echo "exit=$?" >> "$LOGS/12-movil-eslint.txt"
+cd ../packtay_backend
+```
+
 ## 5. CORS con dominios de producción simulados
 
 ```bash
@@ -327,5 +427,5 @@ en `/public/...`.
 
 `RESUMEN.md` con la rama probada, Maven (pruebas por módulo), el OK/FAIL de cada bloque del
 escenario, los clientes y la fuerza bruta en Keycloak (`03c`), la web real (`11-web-bff.txt`, o por
-qué no se corrió) y la tabla de CORS. Copia los FAIL tal cual, sin resumirlos. Commit y push a `develop` solo de `IALogs/logs/$RUN` con el mensaje
+qué no se corrió), las pruebas del móvil (`12-*`) y la tabla de CORS. Copia los FAIL tal cual, sin resumirlos. Commit y push a `develop` solo de `IALogs/logs/$RUN` con el mensaje
 `chore(ialogs): $RUN`.
