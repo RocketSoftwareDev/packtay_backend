@@ -1,0 +1,16 @@
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in ec.paktay.auth.service.KeycloakIdentityServiceTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.352 s -- in ec.paktay.auth.service.PasswordPinServiceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.071 s -- in ec.paktay.auth.service.PasswordMailServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in ec.paktay.auth.service.IdentityRulesTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in ec.paktay.business.service.MerchantKeyTest
+[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.027 s -- in ec.paktay.business.service.SummaryMathTest
+[INFO] Tests run: 21, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in ec.paktay.business.service.ExpenseCursorTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.024 s -- in ec.paktay.business.service.SupportTicketRulesTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in ec.paktay.business.service.SupportEmailsTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in ec.paktay.business.service.SupportRateLimiterTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in ec.paktay.business.service.BudgetAlertServiceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in ec.paktay.business.service.ManualDateWindowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in ec.paktay.business.exception.ApiExceptionHandlerTest
+[INFO] Tests run: 70, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
