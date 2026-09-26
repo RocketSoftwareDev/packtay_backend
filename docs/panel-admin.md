@@ -63,8 +63,14 @@ La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
   `2026-09-26_1031-admin-fase1c` (Maven en verde, 23 + 70 pruebas).
 - **Fases 5 y 6** (`feature/admin-fase2-catalogos-indicadores`): catálogos (categorías agrupadas,
   bancos y ofertas, monedas y países), `metrics/summary`, notificaciones con push de prueba y
-  `system/status`. Sin migraciones. Se prueba con `IALogs/instrucciones/admin-fase2.md`.
-  El cliente `paktay-admin-web` pasa a `http://localhost:3000` (la web es Next, no Vite).
+  `system/status`. Sin migraciones. El cliente `paktay-admin-web` pasa a `http://localhost:3000`
+  (la web es Next, no Vite).
+- **Fases 5 y 6 + seguridad paso 1** cerradas e integradas en `develop` (PR #25): IALogs
+  `2026-09-26_1108-admin-fase2` (escenario completo en OK, oferta repetida 409, Flyway V1–V9) y
+  `2026-09-26_1112-admin-seguridad1` (matriz de cabecera y CORS en OK). Maven 23 + 73 pruebas.
+- **Regresión del panel:** un solo script, `IALogs/instrucciones/admin-panel.md`, contra `develop`
+  (catálogos, indicadores, auditoría, cabecera y CORS). Reemplaza a `admin-fase2.md` y
+  `admin-seguridad1.md`.
 
 ## Pendiente
 
