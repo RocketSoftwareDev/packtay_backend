@@ -45,15 +45,17 @@ public class TemporaryPasswordService {
     private final AdminAuditWriter audit;
     private final JdbcTemplate db;
     private final JwtDecoder decoder;
+    private final AccountAccess access;
     private final SecureRandom random = new SecureRandom();
 
     public TemporaryPasswordService(KeycloakIdentityService identities, PasswordMailService mail, AdminAuditWriter audit,
-                                    JdbcTemplate db, JwtDecoder decoder) {
+                                    JdbcTemplate db, JwtDecoder decoder, AccountAccess access) {
         this.identities = identities;
         this.mail = mail;
         this.audit = audit;
         this.db = db;
         this.decoder = decoder;
+        this.access = access;
     }
 
     public void issue(String userId, AdminActor actor) {
@@ -62,7 +64,8 @@ public class TemporaryPasswordService {
         }
         Map<?, ?> user = identities.findById(userId);
         if (user == null) throw new NotFoundException("El usuario no existe");
-        if (Boolean.FALSE.equals(user.get("enabled"))) {
+        // Pausada por intentos sí se puede: enviar la temporal quita la pausa.
+        if (access.blockedByAdmin(user)) {
             throw new ConflictException("La cuenta está bloqueada: desbloquéala antes de enviar una contraseña temporal.");
         }
         if (!(user.get("email") instanceof String email) || email.isBlank()) {

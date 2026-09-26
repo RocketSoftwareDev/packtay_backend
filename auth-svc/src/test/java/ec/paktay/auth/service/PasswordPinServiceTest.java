@@ -56,6 +56,22 @@ class PasswordPinServiceTest {
         assertEquals("ACCOUNT_BLOCKED", error.code());
         verifyNoInteractions(mail);
     }
+    @Test void accountPausedByFailedAttemptsCanStillRecoverWithPin() {
+        String pin = request();
+        // Keycloak informa enabled = false al consultar por id mientras dura la pausa.
+        when(identities.findById(id)).thenAnswer(call -> Map.of("id", id, "email", "user@example.com", "enabled", false));
+        when(identities.isTemporarilyLocked(id)).thenReturn(true);
+        service.completeReset("user@example.com", service.verifyReset("user@example.com", pin), "NewPassword123!");
+        verify(identities).replacePassword(id, "NewPassword123!", false);
+        verify(identities).clearBruteForce(id);
+    }
+    @Test void accountBlockedByAdminCannotUseAPinSentBefore() {
+        String pin = request();
+        db.update("insert into app_users values (?,?,?)", UUID.fromString(id), "user@example.com", "INACTIVE");
+        when(identities.findById(id)).thenAnswer(call -> Map.of("id", id, "email", "user@example.com", "enabled", false));
+        when(identities.isTemporarilyLocked(id)).thenReturn(true);
+        assertThrows(IllegalArgumentException.class, () -> service.verifyReset("user@example.com", pin));
+    }
     @Test void completedResetReplacesTemporaryPasswordAndClearsLockout() {
         db.update("insert into password_temporary(user_id, expires_at) values (?, current_timestamp)", UUID.fromString(id));
         service.completeReset("user@example.com", service.verifyReset("user@example.com", request()), "NewPassword123!");

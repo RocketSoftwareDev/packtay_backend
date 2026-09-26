@@ -210,6 +210,19 @@ public class KeycloakIdentityService {
         }
     }
 
+    /** Si la cuenta está pausada por intentos fallidos (fuerza bruta del realm). */
+    public boolean isTemporarilyLocked(String userId) {
+        try {
+            Map<?, ?> status = client.get().uri(adminPath("attack-detection/brute-force/users/" + userId))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                    .retrieve().body(Map.class);
+            return status != null && Boolean.TRUE.equals(status.get("disabled"));
+        } catch (RuntimeException ex) {
+            log.warn("keycloak_brute_force_status_failed subject={} reason={}", userId, ex.getMessage());
+            return false;
+        }
+    }
+
     public void grantRealmRole(String userId, String roleName) {
         String token = adminToken();
         client.post().uri(adminPath("users/" + userId + "/role-mappings/realm"))

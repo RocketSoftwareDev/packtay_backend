@@ -46,7 +46,7 @@ class TemporaryPasswordServiceTest {
         when(decoder.decode("access")).thenReturn(Jwt.withTokenValue("access").header("alg", "RS256").subject(USER).build());
         // findById devuelve Map<?, ?>: con thenReturn(Map.of(...)) Java no infiere el tipo.
         doReturn(Map.of("id", USER, "email", "ana@paktay.app", "enabled", true)).when(identities).findById(USER);
-        service = new TemporaryPasswordService(identities, mail, mock(AdminAuditWriter.class), db, decoder);
+        service = new TemporaryPasswordService(identities, mail, mock(AdminAuditWriter.class), db, decoder, new AccountAccess(db, identities));
     }
 
     private void pending(Boolean vigente) {
