@@ -49,7 +49,7 @@ services:
       KEYCLOAK_SSO_SESSION_MAX_LIFESPAN: ${KEYCLOAK_SSO_SESSION_MAX_LIFESPAN:-2592000}
       PAKTAY_ADMIN_EMAIL: ${PAKTAY_ADMIN_EMAIL:?Define PAKTAY_ADMIN_EMAIL in .env}
       PAKTAY_ADMIN_PASSWORD: ${PAKTAY_ADMIN_PASSWORD:?Define PAKTAY_ADMIN_PASSWORD in .env}
-      PAKTAY_ADMIN_WEB_URL: ${PAKTAY_ADMIN_WEB_URL:-http://localhost:5173}
+      PAKTAY_ADMIN_WEB_URL: ${PAKTAY_ADMIN_WEB_URL:-http://localhost:3000}
       PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN: ${PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN:-900}
 
   auth-svc:
@@ -109,6 +109,7 @@ services:
       SMTP_PASS: ${SMTP_PASS:?Define SMTP_PASS in .env}
       SMTP_FROM: ${SMTP_FROM:-}
       SUPPORT_VERIFY_LINK: ${SUPPORT_VERIFY_LINK:-http://localhost:8082/api/v1/public/support/verify?token={token}}
+      AUTH_HEALTH_URL: http://auth-svc:8081/actuator/health
       # Avisos push opcionales. Sin credenciales, no se envía nada.
       FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase-admin.json
     volumes:

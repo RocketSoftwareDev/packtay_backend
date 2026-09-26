@@ -58,6 +58,13 @@ La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
   - Se dejaron de escribir acciones del usuario en `audit_log`; la tabla se vacía sola en 90
     días y se borra en una migración posterior.
 
+- **Fase 1** cerrada: IALogs `2026-09-26_1005-admin-fase1b` (escenario 57/57) y
+  `2026-09-26_1031-admin-fase1c` (Maven en verde, 23 + 70 pruebas).
+- **Fases 5 y 6** (`feature/admin-fase2-catalogos-indicadores`): catálogos (categorías agrupadas,
+  bancos y ofertas, monedas y países), `metrics/summary`, notificaciones con push de prueba y
+  `system/status`. Sin migraciones. Se prueba con `IALogs/instrucciones/admin-fase2.md`.
+  El cliente `paktay-admin-web` pasa a `http://localhost:3000` (la web es Next, no Vite).
+
 ## Pendiente
 
 - **Móvil:** con `403` y `code = ACCOUNT_BLOCKED` (business-svc) o un login rechazado por
@@ -65,6 +72,5 @@ La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
 - **Web del formulario (otro desarrollador):** `POST /api/v1/public/support/tickets`
   con `{email, reason, website: ""}` → `202 {ticketId, status, message}`; `429` si pasa el
   límite. El enlace del correo apunta a `SUPPORT_VERIFY_LINK` (`{token}` se reemplaza).
-- Catálogos, indicadores, notificaciones y estado del sistema (fases 5 y 6).
 - Keycloak podría además negar el login del cliente `paktay-admin-web` a quien no tenga ADMIN
   (flujo de autenticación con condición de rol). Hoy lo impiden el backend (403) y el panel.
