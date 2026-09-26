@@ -1,16 +1,23 @@
-# Panel admin: regresión completa en develop (para Codex)
+# Panel admin: regresión completa (para Codex)
 
-Reemplaza a `admin-fase2.md` y `admin-seguridad1.md` (runs `2026-09-26_1108-admin-fase2` y
-`2026-09-26_1112-admin-seguridad1`, los dos en verde). Desde el PR #25, `develop` exige la cabecera
-`X-Paktay-Client` en `/api/v1/admin/**`, así que el escenario de la fase 2 ya no corre sin ella. Este
-archivo es el único que se usa para probar el panel. **No cambies código.** Todo va a `IALogs/logs/`.
+Único script para probar el panel; reemplaza a `admin-fase2.md` y `admin-seguridad1.md`.
+**No cambies código.** Todo va a `IALogs/logs/`.
+
+Rama: `BRANCH=feature/admin-login-propio` hasta que se integre; después, `develop`. Desde esa rama:
+- El panel tiene **login propio**: `POST /api/v1/admin/session/login|refresh|logout` en auth-svc,
+  con el cliente confidencial `paktay-admin-panel`. Ya no existe el cliente `paktay-admin-web`.
+- `/api/v1/admin/**` solo acepta tokens de ese login (`azp`): un token del login del móvil
+  (`/api/v1/auth/login`) recibe `403 ADMIN_TOKEN_REQUIRED` aunque la cuenta sea ADMIN.
+- El realm bloquea una cuenta 1 minuto tras 5 contraseñas malas (también en el móvil).
 
 Cubre:
+- Login propio del panel: rol ADMIN obligatorio, error genérico, renovación, cierre y auditoría.
+- Solo tokens del panel en rutas de admin; la app móvil y las rutas públicas no cambian.
 - Catálogos: categorías, bancos y ofertas, monedas y países.
 - Resumen, notificaciones y estado del sistema.
 - Auditoría de las acciones del administrador.
-- Cabecera obligatoria solo en rutas de admin (la app móvil y las rutas públicas no cambian).
-- CORS por dominio: panel y formulario público por separado.
+- Cabecera obligatoria y CORS por dominio (panel y formulario público por separado).
+- La web real (BFF) contra este backend, si el repo `packtay_web_admin` está en la Mac.
 
 ## Reglas
 
@@ -23,9 +30,12 @@ Cubre:
 
 ```bash
 cd packtay_backend
-git fetch origin && git checkout develop && git pull --ff-only
+export BRANCH=${BRANCH:-feature/admin-login-propio}
+git fetch origin && git checkout "$BRANCH" && git pull --ff-only
 export RUN=$(date +%Y-%m-%d_%H%M)-admin-panel
 export LOGS=$PWD/IALogs/logs/$RUN; mkdir -p "$LOGS"
+# Secreto nuevo del cliente del panel (solo en .env, nunca en logs).
+grep -q '^KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET=.\+' .env || echo "KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET=$(openssl rand -hex 32)" >> .env
 ./mvnw -B clean package > "$LOGS/01-mvn-full.log" 2>&1; echo "exit=$?" >> "$LOGS/01-mvn-full.log"
 grep -E "Tests run:|BUILD|FAIL|ERROR\]" "$LOGS/01-mvn-full.log" | head -n 300 > "$LOGS/01-mvn.txt"
 $L up --build -d > "$LOGS/02-up.log" 2>&1; wait_up; echo "up=$?" >> "$LOGS/02-up.log"
@@ -34,6 +44,11 @@ $L exec -T business-db psql -U paktay -d paktay -At -c "select version, success 
 set -a; . ./.env; set +a      # PAKTAY_ADMIN_EMAIL / PAKTAY_ADMIN_PASSWORD, sin imprimirlos
 export L
 ```
+
+Guarda en `$LOGS/03c-keycloak.txt` (sin secretos): si existen los clientes `paktay-admin-panel`
+(con `publicClient`, `standardFlowEnabled`, `directAccessGrantsEnabled` y los atributos
+`access.token.lifespan`, `client.session.idle.timeout`, `client.session.max.lifespan`) y
+`paktay-admin-web` (tiene que **no** existir), y `bruteForceProtected` y `failureFactor` del realm.
 
 ## 2. Escenario
 
@@ -62,16 +77,45 @@ def sql(q):
 def check(label, cond, detail=""):
     print(("OK   " if cond else "FAIL ") + label + ("  | " + str(detail)[:300] if detail != "" else ""))
 def login(email, pwd):
+    """Login de la app móvil."""
     code, body = call("POST", A + "/api/v1/auth/login", {"username": email, "password": pwd}, panel=False)
     return body.get("access_token") if code == 200 and isinstance(body, dict) else None
+def panel_login(email, pwd, panel=True):
+    """Login propio del panel (lo llama el servidor de la web)."""
+    return call("POST", A + "/api/v1/admin/session/login", {"email": email, "password": pwd}, panel=panel)
 
 stamp = int(time.time()); PWD = "Prueba-Paktay-2026!"
-ADMIN = login(os.environ["PAKTAY_ADMIN_EMAIL"], os.environ["PAKTAY_ADMIN_PASSWORD"])
-check("login del admin", ADMIN is not None)
+AE, AP = os.environ["PAKTAY_ADMIN_EMAIL"], os.environ["PAKTAY_ADMIN_PASSWORD"]
+code, body = panel_login(AE, AP)
+ADMIN = body.get("access_token") if code == 200 and isinstance(body, dict) else None
+REFRESH = body.get("refresh_token") if ADMIN else None
+check("login del panel (admin)", ADMIN is not None, code)
 email = f"codexpanel{stamp}@paktay.local"
 call("POST", A + "/api/v1/auth/register", {"email": email, "displayName": "Codex Panel", "password": PWD}, panel=False)
 USER = login(email, PWD)
 check("usuario sin ADMIN -> 403 en catálogos", call("GET", B + "/api/v1/admin/catalog/banks", t=USER)[0] == 403)
+
+print("== Login propio del panel")
+code, body = panel_login(AE, "Clave-Mala-2026!")
+check("contraseña mala -> 401 INVALID_CREDENTIALS", code == 401 and body.get("code") == "INVALID_CREDENTIALS", (code, body))
+bad_message = body.get("message") if isinstance(body, dict) else None
+code, body = panel_login(email, PWD)
+check("usuario sin ADMIN -> el mismo 401 que una contraseña mala", code == 401 and isinstance(body, dict)
+      and body.get("code") == "INVALID_CREDENTIALS" and body.get("message") == bad_message, (code, body))
+check("login del panel sin cabecera -> 403", panel_login(AE, AP, panel=False)[0] == 403)
+MOBILE_ADMIN = login(AE, AP)
+code, body = call("GET", B + "/api/v1/admin/users", t=MOBILE_ADMIN)
+check("token del móvil (cuenta ADMIN) en business -> 403 ADMIN_TOKEN_REQUIRED", code == 403 and "ADMIN_TOKEN_REQUIRED" in json.dumps(body), (code, body))
+code, body = call("GET", A + "/api/v1/admin/admins", t=MOBILE_ADMIN)
+check("token del móvil (cuenta ADMIN) en auth -> 403 ADMIN_TOKEN_REQUIRED", code == 403 and "ADMIN_TOKEN_REQUIRED" in json.dumps(body), (code, body))
+code, body = call("POST", A + "/api/v1/admin/session/refresh", {"refreshToken": REFRESH})
+check("renovar -> 200 con token nuevo", code == 200 and isinstance(body, dict) and bool(body.get("access_token")), code)
+R2 = body.get("refresh_token") if code == 200 else None
+check("cerrar sesión -> 204", call("POST", A + "/api/v1/admin/session/logout", {"refreshToken": R2})[0] == 204)
+code, body = call("POST", A + "/api/v1/admin/session/refresh", {"refreshToken": R2})
+check("renovar después de cerrar -> 401 SESSION_EXPIRED", code == 401 and isinstance(body, dict) and body.get("code") == "SESSION_EXPIRED", (code, body))
+check("auditado: Inicio de sesión en el panel", sql("select count(*) from admin_audit where action = 'Inicio de sesión en el panel' and created_at > now() - interval '10 minutes'") != "0")
+# El access token del panel sigue valiendo hasta que vence (15 min): el resto del escenario lo usa.
 
 print("== Cabecera X-Paktay-Client")
 code, body = call("GET", B + "/api/v1/admin/users", t=ADMIN, panel=False)
@@ -168,17 +212,96 @@ check("versión del esquema V9", any(v["value"].endswith("V9") for v in st.get("
 print("== Auditoría")
 for action in ["Subcategoría creada", "Categoría desactivada", "Banco creado", "Oferta de tarjeta agregada", "Banco desactivado", "Moneda creada", "País creado"]:
     check(f"auditado: {action}", sql(f"select count(*) from admin_audit where action = '{action}' and created_at > now() - interval '10 minutes'") != "0")
+
+print("== Fuerza bruta (usuario de prueba, nunca el admin)")
+for _ in range(5):
+    login(email, "Clave-Mala-2026!")
+check("tras 5 fallos la cuenta queda bloqueada un rato", login(email, PWD) is None)
 ```
 
 ## 3. OpenAPI, salud y logs
 
 ```bash
 curl -s localhost:28082/v3/api-docs | python3 -c 'import sys,json;p=json.load(sys.stdin)["paths"];print({k: k in p for k in ["/api/v1/admin/catalog/categories","/api/v1/admin/catalog/categories/{code}","/api/v1/admin/catalog/banks","/api/v1/admin/catalog/banks/counts","/api/v1/admin/catalog/banks/{id}/offerings","/api/v1/admin/catalog/currencies/{code}","/api/v1/admin/catalog/countries","/api/v1/admin/metrics/summary","/api/v1/admin/notifications/test","/api/v1/admin/system/status"]})' > "$LOGS/05-openapi.txt"
+curl -s localhost:28081/v3/api-docs | python3 -c 'import sys,json;p=json.load(sys.stdin)["paths"];print({k: k in p for k in ["/api/v1/admin/session/login","/api/v1/admin/session/refresh","/api/v1/admin/session/logout"]})' >> "$LOGS/05-openapi.txt"
 for u in http://localhost:28081 http://localhost:28082; do for p in /actuator/health /v3/api-docs /swagger-ui/index.html; do echo "$u$p $(curl -s -o /dev/null -w '%{http_code}' $u$p)"; done; done > "$LOGS/06-health.txt"
 $L logs --no-color --tail=400 auth-svc business-svc | grep -iE "error|exception" | head -n 150 > "$LOGS/07-logs.txt"
 ```
 
-## 4. CORS con dominios de producción simulados
+## 4. La web real (BFF) contra este backend
+
+Solo si existe `../packtay_web_admin` (si no, anótalo en el resumen y sigue). Necesita Node 20+ y pnpm.
+
+```bash
+cd ../packtay_web_admin
+git fetch origin && git checkout feature/login-propio-bff && git pull --ff-only
+pnpm install --frozen-lockfile > "$LOGS/10-web-install.log" 2>&1
+cat > .env.local <<EOF
+NEXT_PUBLIC_USE_MOCKS=false
+AUTH_API_URL=http://localhost:28081
+BUSINESS_API_URL=http://localhost:28082
+ADMIN_SESSION_SECRET=$(openssl rand -hex 32)
+EOF
+pnpm build > "$LOGS/10-web-build.log" 2>&1; echo "exit=$?" >> "$LOGS/10-web-build.log"
+(pnpm exec next start -p 3000 > "$LOGS/10-web-start.log" 2>&1 &) ; sleep 8
+python3 /tmp/web.py > "$LOGS/11-web-bff.txt" 2>&1
+pkill -f "next start -p 3000" || true
+rm -f .env.local
+cd ../packtay_backend
+```
+
+`/tmp/web.py` (el navegador solo habla con la web; la web con el backend):
+
+```python
+import json, os, urllib.request, urllib.error
+W = "http://localhost:3000"
+# Cookies a mano: son Secure (producción) y urllib no las reenviaría por http://localhost.
+jar, raw_cookies = {}, []
+def call(m, path, body=None, headers=None):
+    h = {"Content-Type": "application/json", "X-Paktay-Client": "admin-web", **(headers or {})}
+    if jar: h["Cookie"] = "; ".join(f"{k}={v}" for k, v in jar.items())
+    req = urllib.request.Request(W + path, method=m, data=None if body is None else json.dumps(body).encode(), headers=h)
+    try:
+        r = urllib.request.urlopen(req); code = r.status
+    except urllib.error.HTTPError as e:
+        r = e; code = e.code
+    for c in r.headers.get_all("Set-Cookie") or []:
+        raw_cookies.append(c)
+        name, _, value = c.split(";")[0].partition("=")
+        if value: jar[name] = value
+        else: jar.pop(name, None)
+    return code, dict(r.headers), r.read().decode()
+def check(label, cond, detail=""):
+    print(("OK   " if cond else "FAIL ") + label + ("  | " + str(detail)[:250] if detail != "" else ""))
+
+check("sin sesión -> 401", call("GET", "/api/auth/session")[0] == 401)
+code, _, body = call("POST", "/api/auth/login", {"email": os.environ["PAKTAY_ADMIN_EMAIL"], "password": "Clave-Mala-2026!"})
+check("contraseña mala -> 401", code == 401, body)
+raw_cookies.clear()
+code, headers, body = call("POST", "/api/auth/login", {"email": os.environ["PAKTAY_ADMIN_EMAIL"], "password": os.environ["PAKTAY_ADMIN_PASSWORD"]})
+check("login por la web -> 200 con el admin y sin tokens", code == 200 and '"user"' in body and "access_token" not in body, (code, body[:120]))
+check("cookies pk_at y pk_rt HttpOnly, SameSite=Strict, Path=/api", set(jar) >= {"pk_at", "pk_rt"} and len(raw_cookies) == 2
+      and all("httponly" in c.lower() and "samesite=strict" in c.lower() and "path=/api" in c.lower() for c in raw_cookies), sorted(jar))
+code, _, body = call("GET", "/api/auth/session")
+check("sesión -> 200", code == 200, body[:120])
+code, _, body = call("GET", "/api/bff/business/api/v1/admin/users?size=5")
+check("usuarios por el proxy -> 200", code == 200 and "items" in body, (code, body[:120]))
+code, _, body = call("GET", "/api/bff/business/api/v1/admin/catalog/categories")
+check("categorías por el proxy -> 200", code == 200, code)
+code, _, body = call("GET", "/api/bff/auth/api/v1/admin/admins")
+check("admins (auth-svc) por el proxy -> 200", code == 200, code)
+check("el proxy no sale de /api/v1/admin", call("GET", "/api/bff/business/api/v1/user/cards")[0] == 404)
+check("otro origen -> 403", call("GET", "/api/auth/session", headers={"Origin": "https://malicioso.example"})[0] == 403)
+check("logout -> 204", call("POST", "/api/auth/logout")[0] == 204)
+check("después del logout -> 401", call("GET", "/api/auth/session")[0] == 401)
+code, headers, _ = call("GET", "/login", headers={"Content-Type": ""})
+check("cabeceras de seguridad", "frame-ancestors 'none'" in headers.get("Content-Security-Policy", ""), headers.get("Content-Security-Policy", "")[:80])
+```
+
+Si algún check de usuarios falla por la forma de la respuesta (`items`), guarda los primeros 300
+caracteres del cuerpo en el log para comparar con los tipos de la web.
+
+## 5. CORS con dominios de producción simulados
 
 ```bash
 export PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS=https://admin.paktay.test
@@ -202,6 +325,7 @@ en `/public/...`.
 
 ## Entrega
 
-`RESUMEN.md` con Maven (pruebas por módulo), el OK/FAIL de cada bloque del escenario, la tabla de CORS
-y el cliente del panel en Keycloak. Commit y push a `develop` solo de `IALogs/logs/$RUN` con el mensaje
+`RESUMEN.md` con la rama probada, Maven (pruebas por módulo), el OK/FAIL de cada bloque del
+escenario, los clientes y la fuerza bruta en Keycloak (`03c`), la web real (`11-web-bff.txt`, o por
+qué no se corrió) y la tabla de CORS. Copia los FAIL tal cual, sin resumirlos. Commit y push a `develop` solo de `IALogs/logs/$RUN` con el mensaje
 `chore(ialogs): $RUN`.
