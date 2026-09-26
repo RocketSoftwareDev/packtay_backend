@@ -100,6 +100,15 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      # Correo de soporte (confirmación y respuestas): el mismo SMTP que auth-svc.
+      SMTP_HOST: ${SMTP_HOST:?Define SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_USER: ${SMTP_USER:?Define SMTP_USER in .env}
+      SMTP_PASS: ${SMTP_PASS:?Define SMTP_PASS in .env}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SUPPORT_VERIFY_LINK: ${SUPPORT_VERIFY_LINK:-http://localhost:8082/api/v1/public/support/verify?token={token}}
       # Avisos push opcionales. Sin credenciales, no se envía nada.
       FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase-admin.json
     volumes:

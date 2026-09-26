@@ -42,3 +42,29 @@ Soporte (tickets, bloqueos y modal de bloqueo), Notificaciones, Auditoría y Est
 
 La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
 `IALogs/instrucciones/admin-faseN.md`.
+
+## Estado
+
+- **Fase 0** (`feature/admin-fase0-acceso`): cliente `paktay-admin-web`.
+- **Fase 1 + 2 + 3 backend** (`feature/admin-fase1-roles-soporte`, incluye la fase 0), sin
+  compilar todavía (se prueba con `IALogs/instrucciones/admin-fase1.md`):
+  - V9: `normalize_email`, `admin_audit`, `support_tickets`, `support_messages`,
+    `blocked_identities`; `purge_user` borra también tickets y eventos del usuario.
+  - Roles: el acceso al panel es el rol ADMIN de Keycloak. Se asigna y quita desde el panel
+    (`PUT/DELETE /api/v1/admin/users/{id}/roles/admin` en auth-svc). Nadie se lo quita a sí
+    mismo y no se puede quitar el último administrador activo. Quitar el rol no invalida el
+    token vigente: deja de servir cuando vence (15 minutos en el panel).
+  - Rutas: ver Swagger de cada servicio (tags "Admin · …" y "Soporte público").
+  - Se dejaron de escribir acciones del usuario en `audit_log`; la tabla se vacía sola en 90
+    días y se borra en una migración posterior.
+
+## Pendiente
+
+- **Móvil:** con `403` y `code = ACCOUNT_BLOCKED` (business-svc) o un login rechazado por
+  cuenta desactivada, cerrar sesión y mostrar "Tu cuenta fue bloqueada".
+- **Web del formulario (otro desarrollador):** `POST /api/v1/public/support/tickets`
+  con `{email, reason, website: ""}` → `202 {ticketId, status, message}`; `429` si pasa el
+  límite. El enlace del correo apunta a `SUPPORT_VERIFY_LINK` (`{token}` se reemplaza).
+- Catálogos, indicadores, notificaciones y estado del sistema (fases 5 y 6).
+- Keycloak podría además negar el login del cliente `paktay-admin-web` a quien no tenga ADMIN
+  (flujo de autenticación con condición de rol). Hoy lo impiden el backend (403) y el panel.

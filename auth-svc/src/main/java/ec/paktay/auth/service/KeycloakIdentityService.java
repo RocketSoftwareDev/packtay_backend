@@ -123,6 +123,54 @@ public class KeycloakIdentityService {
                 .retrieve().toBodilessEntity();
     }
 
+    /** Activa o desactiva la identidad. Desactivada no puede iniciar sesión ni renovar tokens. */
+    public void setEnabled(String userId, boolean enabled) {
+        client.put().uri(adminPath("users/" + userId))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                .contentType(MediaType.APPLICATION_JSON).body(Map.of("enabled", enabled))
+                .retrieve().toBodilessEntity();
+    }
+
+    /** Cierra todas las sesiones del usuario (sus refresh tokens dejan de servir). */
+    public void logout(String userId) {
+        client.post().uri(adminPath("users/" + userId + "/logout"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                .retrieve().toBodilessEntity();
+    }
+
+    public void grantRealmRole(String userId, String roleName) {
+        String token = adminToken();
+        client.post().uri(adminPath("users/" + userId + "/role-mappings/realm"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON).body(List.of(realmRole(token, roleName)))
+                .retrieve().toBodilessEntity();
+    }
+
+    public void revokeRealmRole(String userId, String roleName) {
+        String token = adminToken();
+        client.method(org.springframework.http.HttpMethod.DELETE).uri(adminPath("users/" + userId + "/role-mappings/realm"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON).body(List.of(realmRole(token, roleName)))
+                .retrieve().toBodilessEntity();
+    }
+
+    /** Usuarios con el rol de realm (asignación directa), hasta 500. */
+    public List<Map<?, ?>> usersWithRealmRole(String roleName) {
+        List<?> users = client.get().uri(builder -> builder.path(adminPath("roles/" + roleName + "/users"))
+                        .queryParam("first", 0).queryParam("max", 500).build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
+        if (users == null) return List.of();
+        return users.stream().filter(Map.class::isInstance).map(user -> (Map<?, ?>) user).toList();
+    }
+
+    private Map<?, ?> realmRole(String adminToken, String roleName) {
+        Map<?, ?> role = client.get().uri(adminPath("roles/" + roleName))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+                .retrieve().body(Map.class);
+        if (role == null) throw new IllegalStateException("No existe el rol " + roleName + " en Keycloak");
+        return role;
+    }
+
     private String adminToken() {
         try {
             Map<?, ?> response = client.post().uri(tokenPath())
