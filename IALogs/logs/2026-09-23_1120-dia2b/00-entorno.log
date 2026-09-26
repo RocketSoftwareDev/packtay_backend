@@ -1,6 +1,0 @@
-RUN=2026-09-23_1120-dia2b
-backend develop: 2b7b4894c358ef481387e57b9d8daf30a1941a47
-LOGS=/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/IALogs/logs/2026-09-23_1120-dia2b
-0652a8c feat(db): Flyway como único dueño del esquema; V1 baseline real y V2 sin tablas muertas
-34acfe9 chore(ialogs): esquema real para el día 2 (2026-09-23_1108-dia2)
-225a382 chore(ialogs): instrucción del día 2 (foto del esquema) y tope de 1 MB por log

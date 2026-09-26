@@ -1,2 +1,0 @@
-src/features/expenses/merchantRules.ts(77,11): error TS2367: This comparison appears to be unintentional because the types '0' and '2' have no overlap.
-exit=2

@@ -1,2 +1,0 @@
-No se generó un .crash/.ips en ~/Library/Logs/DiagnosticReports.
-Unified Log del simulador capturó la excepción fatal; detalle sanitizado en 02-cierre-nuevo.txt.

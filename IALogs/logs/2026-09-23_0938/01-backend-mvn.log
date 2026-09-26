@@ -1,4 +1,0 @@
-$ ./mvnw -B clean package
-[Errno 13] Permission denied: './mvnw'
-
-exit=126

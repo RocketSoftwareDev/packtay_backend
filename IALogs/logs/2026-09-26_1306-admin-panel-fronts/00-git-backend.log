@@ -1,5 +1,0 @@
-a5bc599 Merge pull request #29 from RocketSoftwareDev/fix/pin-con-pausa-por-intentos
-2ac7c4d docs(ialogs): admin-panel.md con el fix del PIN y web y móvil obligatorios
-30680bc fix(auth): el PIN funciona con la cuenta pausada por intentos fallidos
-mobile=ceff2b2 Merge pull request #29 from RocketSoftwareDev/feature/contrasenia-temporal-bloqueo
-web=c663515 Merge pull request #4 from RocketSoftwareDev/feature/contrasenia-temporal

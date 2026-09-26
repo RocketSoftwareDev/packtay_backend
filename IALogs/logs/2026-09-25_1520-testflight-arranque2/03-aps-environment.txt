@@ -1,2 +1,0 @@
-aps-environment: production
-application-identifier: V2N4DBD5CF.com.rocketsoftwarecore.paktay.mobile

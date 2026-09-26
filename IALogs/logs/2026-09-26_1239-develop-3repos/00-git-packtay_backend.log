@@ -1,3 +1,0 @@
-0a8bedb Merge pull request #27 from RocketSoftwareDev/feature/password-temporal-bloqueo
-a1463cb docs(ialogs): admin-panel.md con contraseñas, cuenta bloqueada, fuerza bruta y pruebas del móvil
-335431f feat(auth): contraseña temporal por correo, cuenta bloqueada y fuerza bruta a 3

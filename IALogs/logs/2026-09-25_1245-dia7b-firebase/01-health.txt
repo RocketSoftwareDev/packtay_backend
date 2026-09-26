@@ -1,2 +1,0 @@
-auth health:  200
-business health: 200

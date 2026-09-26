@@ -1,2 +1,0 @@
-** EXPORT SUCCEEDED **
-exit=0

@@ -1,3 +1,0 @@
-token_len=2155
-login ok=si
-access_rechazado_len=1391

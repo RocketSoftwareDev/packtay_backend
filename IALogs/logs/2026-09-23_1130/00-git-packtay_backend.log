@@ -1,3 +1,0 @@
-df61112 Merge pull request #10 from RocketSoftwareDev/feature/dia2-esquema-flyway
-26f86eb feat(db): V3 con los catálogos y fuera los 20 SQL manuales
-0bc43dd feat(db): Flyway como único dueño del esquema; V1 baseline real y V2 sin tablas muertas

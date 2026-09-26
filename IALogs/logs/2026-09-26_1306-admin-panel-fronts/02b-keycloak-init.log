@@ -1,4 +1,0 @@
- Container paktay-local-keycloak-init-run-ed836d5b65e3 Creating 
- Container paktay-local-keycloak-init-run-ed836d5b65e3 Created 
-Logging into http://host.docker.internal:28180 as user admin of realm master
-init_exit=0 restart_exit=0

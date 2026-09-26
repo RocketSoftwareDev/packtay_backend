@@ -1,8 +1,0 @@
-1|baseline|t
-2|limpieza tablas muertas|t
-3|catalogos|t
-4|contexto estados duo|t
-currencies|7
-banks|29
-offerings|38
-categories|22

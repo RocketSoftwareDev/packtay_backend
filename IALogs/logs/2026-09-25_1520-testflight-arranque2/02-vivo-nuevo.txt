@@ -1,2 +1,0 @@
-32907	0	UIKitApplication:org.reactjs.native.example.FinanceApp[d06a][rb-legacy]
-captura tomada (no se sube)

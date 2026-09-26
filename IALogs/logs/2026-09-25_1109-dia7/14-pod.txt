@@ -1,5 +1,0 @@
-
-Pod install took 9 [s] to run
-Integrating client project
-Pod installation complete! There are 83 dependencies from the Podfile and 82 total pods installed.
-exit=0

@@ -1,2 +1,0 @@
-No se generó un .crash/.ips en ~/Library/Logs/DiagnosticReports.
-La excepción del simulador quedó capturada en 01-cierre-viejo.txt y en Unified Log.

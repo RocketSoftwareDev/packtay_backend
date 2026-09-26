@@ -1,8 +1,0 @@
-OK   alta con límite 300  | 300.0
-OK   mes nuevo: la tarjeta conserva el límite 300  | 300.0
-periodos: 2026-08-01
-2026-09-01
-limites: 2026-08-01|300.00
-2026-09-01|300.00
-OK   resumen: ownLimit 300  | [{'cardId': '2a0bbcaa-ebeb-404b-b8d5-439881c01e24', 'alias': 'Limite', 'walletName': None, 'bankName': 'Banco Diners Club del Ecuador S.A.', 'bankLogoUrl': 'https://www.google.com/s2/favicons?domain=dinersclub.com.ec&sz=128', 'status': 'ACTIVE', 'spent': 0, 'ownLimit': 300.0}]
-OK   segunda lectura no duplica

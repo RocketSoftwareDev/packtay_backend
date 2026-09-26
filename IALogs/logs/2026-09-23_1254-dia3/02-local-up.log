@@ -1,7 +1,0 @@
-=== paso 2 adaptado: stack ya arriba contra Keycloak central (sin recrear) ===
-paktay-local-business-svc-1	Up 33 minutes
-paktay-local-auth-svc-1	Up 33 minutes
-paktay-local-business-db-1	Up 33 minutes (healthy)
-paktay-local-mailpit-1	Up 33 minutes (healthy)
-auth /actuator/health: 200
-biz /actuator/health: 200

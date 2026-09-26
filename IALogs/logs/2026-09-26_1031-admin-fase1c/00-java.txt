@@ -1,3 +1,0 @@
-openjdk version "17.0.20" 2026-07-21 LTS
-OpenJDK Runtime Environment Zulu17.68+17-CA (build 17.0.20+8-LTS)
-OpenJDK 64-Bit Server VM Zulu17.68+17-CA (build 17.0.20+8-LTS, mixed mode, sharing)

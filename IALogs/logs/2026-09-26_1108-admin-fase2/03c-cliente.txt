@@ -1,5 +1,0 @@
-[ {
-  "clientId" : "paktay-admin-web",
-  "redirectUris" : [ "http://localhost:3000/*" ],
-  "webOrigins" : [ "http://localhost:3000" ]
-} ]

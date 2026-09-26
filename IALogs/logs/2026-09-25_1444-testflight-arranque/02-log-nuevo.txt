@@ -1,3 +1,0 @@
-FirebaseCore: default Firebase app not yet configured (aviso aún presente en develop).
-Fatal NSInvalidArgumentException: AppDelegate no reconoce el selector window.
-Frame de app: RNFBMessagingNSNotificationCenter.application_onDidFinishLaunchingNotification.

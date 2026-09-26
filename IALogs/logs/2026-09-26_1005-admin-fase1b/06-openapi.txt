@@ -1,2 +1,0 @@
-{'/api/v1/admin/users': True, '/api/v1/admin/users/{id}': True, '/api/v1/admin/users/{id}/plan': True, '/api/v1/admin/audit': True, '/api/v1/admin/support/tickets': True, '/api/v1/admin/support/tickets/{id}/messages': True, '/api/v1/public/support/tickets': True, '/api/v1/public/support/verify': True}
-{'/api/v1/admin/admins': True, '/api/v1/admin/users/{id}/block': True, '/api/v1/admin/users/{id}/roles/admin': True, '/api/v1/admin/blocks': True, '/api/v1/admin/blocks/{id}': True}
