@@ -2,7 +2,6 @@ package ec.paktay.business.service;
 
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import ec.paktay.business.dto.MerchantRuleResponse;
@@ -25,12 +24,9 @@ public class MerchantRuleService {
 
     private final JdbcClient jdbc;
     private final UserAccountService users;
-    private final AuditService audit;
-
-    public MerchantRuleService(JdbcClient jdbc, UserAccountService users, AuditService audit) {
+    public MerchantRuleService(JdbcClient jdbc, UserAccountService users) {
         this.jdbc = jdbc;
         this.users = users;
-        this.audit = audit;
     }
 
     /** Crea la regla del comercio o la apunta a la categoría nueva, y suma un uso. */
@@ -89,7 +85,6 @@ public class MerchantRuleService {
                 """).param("categoryId", categoryId).param("id", ruleId).param("userId", userId)
                 .param("version", MerchantKey.RULE_VERSION).update();
         if (updated == 0) throw new NotFoundException(NOT_FOUND);
-        audit.record(userId, "UPDATE", "merchant_rule", ruleId, Map.of("categoryId", categoryId));
         return list(userId, null).stream().filter(rule -> rule.id().equals(ruleId)).findFirst()
                 .orElseThrow(() -> new NotFoundException(NOT_FOUND));
     }

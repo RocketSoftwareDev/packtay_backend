@@ -11,6 +11,7 @@ import ec.paktay.auth.dto.RegisterRequest;
 import ec.paktay.auth.dto.TokenResponse;
 import ec.paktay.auth.dto.UserResponse;
 import ec.paktay.auth.service.KeycloakIdentityService;
+import ec.paktay.auth.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -35,13 +36,15 @@ public class AuthController {
     private final KeycloakProperties properties;
     private final ec.paktay.auth.service.PasswordPinService pins;
     private final AccountDeletionService accounts;
+    private final RegistrationService registrations;
 
     public AuthController(KeycloakIdentityService identities, KeycloakProperties properties, ec.paktay.auth.service.PasswordPinService pins,
-                          AccountDeletionService accounts) {
+                          AccountDeletionService accounts, RegistrationService registrations) {
         this.pins = pins;
         this.accounts = accounts;
         this.identities = identities;
         this.properties = properties;
+        this.registrations = registrations;
     }
 
     @GetMapping("/oauth-config")
@@ -52,11 +55,12 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    @Operation(summary = "Registrar usuario", description = "Ruta pública; no requiere token.")
+    @Operation(summary = "Registrar usuario", description = "Ruta pública; no requiere token. Un correo o dominio bloqueado "
+            + "recibe el mismo error genérico que cualquier registro rechazado.")
     @ApiResponse(responseCode = "201", description = "Usuario registrado")
-    @ApiResponse(responseCode = "400", description = "Datos inválidos")
+    @ApiResponse(responseCode = "400", description = "Datos inválidos o registro rechazado")
     public UserResponse register(@Valid @RequestBody RegisterRequest request) {
-        return identities.register(request);
+        return registrations.register(request);
     }
 
     @PostMapping("/login")

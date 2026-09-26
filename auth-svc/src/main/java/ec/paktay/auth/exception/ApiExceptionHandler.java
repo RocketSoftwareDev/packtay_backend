@@ -30,6 +30,23 @@ public class ApiExceptionHandler {
         return response(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    ResponseEntity<Map<String, Object>> conflict(ConflictException exception) {
+        log.warn("request_conflict requestId={} reason={}", MDC.get("requestId"), exception.getMessage());
+        return response(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<Map<String, Object>> notFound(NotFoundException exception) {
+        log.warn("resource_not_found requestId={} reason={}", MDC.get("requestId"), exception.getMessage());
+        return response(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    ResponseEntity<Map<String, Object>> denied(org.springframework.security.access.AccessDeniedException exception) {
+        return response(HttpStatus.FORBIDDEN, "Se requiere el rol ADMIN");
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     ResponseEntity<Map<String, Object>> illegalState(IllegalStateException exception) {
         log.error("upstream_operation_failed requestId={}", MDC.get("requestId"));

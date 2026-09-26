@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -33,17 +31,15 @@ public class ExpenseService {
 
     private final JdbcClient jdbc;
     private final UserAccountService users;
-    private final AuditService audit;
     private final ExpenseQueryService query;
     private final MerchantRuleService rules;
     private final PlanService plans;
     private final BudgetAlertService alerts;
 
-    public ExpenseService(JdbcClient jdbc, UserAccountService users, AuditService audit, ExpenseQueryService query,
+    public ExpenseService(JdbcClient jdbc, UserAccountService users, ExpenseQueryService query,
                           MerchantRuleService rules, PlanService plans, BudgetAlertService alerts) {
         this.jdbc = jdbc;
         this.users = users;
-        this.audit = audit;
         this.query = query;
         this.rules = rules;
         this.plans = plans;
@@ -82,11 +78,9 @@ public class ExpenseService {
         if (automatic) {
             Optional<UUID> duplicate = findDuplicateCapture(userId, request, normalized);
             if (duplicate.isPresent()) {
-                // El mismo pago llegó dos veces: se guarda uno y el otro queda en la
-                // bitácora para que soporte vea por qué el atajo lo mandó repetido.
+                // El mismo pago llegó dos veces: se guarda uno y el otro queda en el log
+                // para que soporte vea por qué el atajo lo mandó repetido.
                 log.warn("wallet_duplicate_discarded userId={} duplicateOf={}", userId, duplicate.get());
-                audit.record(userId, "DUPLICATE", "expense", duplicate.get(),
-                        Map.of("idempotencyKey", request.idempotencyKey()));
                 return query.findOne(userId, duplicate.get());
             }
         }
@@ -125,8 +119,6 @@ public class ExpenseService {
         UUID expenseId = inserted.get();
         if (automatic) rules.remember(userId, merchant, request.categoryId());
         alerts.afterExpense(userId, request.categoryId(), request.cardId(), request.occurredAt());
-        audit.record(userId, "CREATE", "expense", expenseId,
-                Map.of("origin", origin, "assignedByRule", assignedByRule));
         return query.findOne(userId, expenseId);
     }
 
@@ -190,15 +182,12 @@ public class ExpenseService {
         boolean manual = "MANUAL".equals(current.origin());
 
         List<String> changed = new ArrayList<>();
-        Map<String, Object> data = new LinkedHashMap<>();
 
         BigDecimal amount = current.amount();
         if (request.amount() != null && request.amount().compareTo(current.amount()) != 0) {
             if (!manual) throw new IllegalArgumentException("El monto de un gasto capturado por Wallet no se puede cambiar");
             amount = request.amount();
             changed.add("amount");
-            data.put("amountBefore", current.amount());
-            data.put("amountAfter", amount);
         }
 
         String merchant = current.merchantRaw();
@@ -239,14 +228,10 @@ public class ExpenseService {
 
         if (!manual && changed.contains("categoryId")) {
             rules.remember(userId, current.merchantRaw(), request.categoryId());
-            data.put("ruleUpdated", true);
         }
         if (changed.contains("categoryId") || changed.contains("cardId") || changed.contains("amount")) {
             alerts.afterExpense(userId, request.categoryId(), request.cardId(), current.occurredAt());
         }
-        data.put("fields", changed);
-        data.put("origin", current.origin());
-        audit.record(userId, "UPDATE", "expense", expenseId, data);
         return query.findOne(userId, expenseId);
     }
 
@@ -292,8 +277,6 @@ public class ExpenseService {
                  where id = :id and user_id = :userId
                 """).param("refundId", refundId).param("id", expenseId).param("userId", userId).update();
 
-        audit.record(userId, "VOID", "expense", expenseId,
-                Map.of("refundExpenseId", refundId, "origin", current.origin()));
         return new VoidExpenseResponse(query.findOne(userId, expenseId), query.findOne(userId, refundId));
     }
 

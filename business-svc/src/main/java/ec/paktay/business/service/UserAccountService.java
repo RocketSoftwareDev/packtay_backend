@@ -4,6 +4,7 @@ import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import ec.paktay.business.exception.AccountBlockedException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +32,7 @@ public class UserAccountService {
         String status = jdbc.sql("select status from app_users where id = :id")
                 .param("id", userId).query(String.class).optional()
                 .orElseThrow(() -> new IllegalArgumentException("La cuenta fue eliminada"));
-        if (!"ACTIVE".equals(status)) throw new IllegalArgumentException("La cuenta se encuentra desactivada");
+        if (!"ACTIVE".equals(status)) throw new AccountBlockedException();
     }
 
     /**

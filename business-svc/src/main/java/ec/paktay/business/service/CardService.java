@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import ec.paktay.business.dto.CardResponse;
@@ -28,12 +27,9 @@ public class CardService {
 
     private final JdbcClient jdbc;
     private final UserAccountService users;
-    private final AuditService audit;
-
-    public CardService(JdbcClient jdbc, UserAccountService users, AuditService audit) {
+    public CardService(JdbcClient jdbc, UserAccountService users) {
         this.jdbc = jdbc;
         this.users = users;
-        this.audit = audit;
     }
 
     @Transactional
@@ -121,7 +117,6 @@ public class CardService {
                     """).param("userId", userId).param("periodId", periodId).param("cardId", cardId)
                     .param("amount", amount).update();
         }
-        audit.record(userId, "UPDATE", "card_limit", cardId, amount == null ? Map.of("removed", true) : Map.of("amount", amount));
         return findOne(userId, cardId, periodId);
     }
 
@@ -168,7 +163,6 @@ public class CardService {
                 update cards set status = 'INACTIVE', deactivated_at = now(), updated_at = now()
                  where id = :cardId and user_id = :userId
                 """).param("cardId", cardId).param("userId", userId).update();
-        audit.record(userId, "DEACTIVATE", "card", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
@@ -191,7 +185,6 @@ public class CardService {
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException("Otra tarjeta activa tiene asociado el mismo nombre de Wallet. Quítaselo o desactívala antes de activar esta.");
         }
-        audit.record(userId, "ACTIVATE", "card", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
@@ -224,8 +217,6 @@ public class CardService {
         } catch (DataIntegrityViolationException ex) {
             throw new IllegalArgumentException(DUPLICATE_NAME_MESSAGE);
         }
-        // Sin el nombre en sí: es texto que el usuario reconoce y no aporta a la auditoría.
-        audit.record(userId, "LINK", "card_wallet_name", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
@@ -243,7 +234,6 @@ public class CardService {
         rejectDeleted(statusOf(userId, cardId));
         jdbc.sql("update cards set name = null, updated_at = now() where id = :cardId and user_id = :userId")
                 .param("cardId", cardId).param("userId", userId).update();
-        audit.record(userId, "UNLINK", "card_wallet_name", cardId, null);
         return findOne(userId, cardId, currentPeriod(userId));
     }
 
@@ -271,7 +261,6 @@ public class CardService {
                 update cards set status = 'DELETED', deactivated_at = now(), name = null, updated_at = now()
                  where id = :cardId and user_id = :userId
                 """).param("cardId", cardId).param("userId", userId).update();
-        audit.record(userId, "DELETE", "card", cardId, Map.of("previousStatus", status));
     }
 
     /**
