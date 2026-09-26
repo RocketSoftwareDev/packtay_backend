@@ -39,6 +39,7 @@ Soporte (tickets, bloqueos y modal de bloqueo), Notificaciones, Auditoría y Est
 | 5 | Catálogos: categorías, bancos y ofertas, monedas y países | backend, web |
 | 6 | Indicadores, notificaciones, estado del sistema | backend, web |
 | 7 | Despliegue (pospuesto) | todos |
+| 3-seg | Seguridad del panel: BFF con cookie HttpOnly, audiencia del token, Keycloak niega el panel sin ADMIN, TOTP y fuerza bruta, cabeceras (ver abajo) | backend, web, Keycloak |
 
 La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
 `IALogs/instrucciones/admin-faseN.md`.
@@ -72,5 +73,30 @@ La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
 - **Web del formulario (otro desarrollador):** `POST /api/v1/public/support/tickets`
   con `{email, reason, website: ""}` → `202 {ticketId, status, message}`; `429` si pasa el
   límite. El enlace del correo apunta a `SUPPORT_VERIFY_LINK` (`{token}` se reemplaza).
-- Keycloak podría además negar el login del cliente `paktay-admin-web` a quien no tenga ADMIN
-  (flujo de autenticación con condición de rol). Hoy lo impiden el backend (403) y el panel.
+
+## Fase 3 · Seguridad del panel (pedida el 2026-09-26)
+
+Hoy ya hay JWT: Keycloak emite el token (OIDC + PKCE, RS256) y los dos servicios validan firma,
+emisor, vencimiento y el rol ADMIN; el token del panel dura 15 minutos. No se hace un JWT propio.
+Lo débil está en la web. Por orden de impacto:
+
+1. **BFF (backend for frontend) en la web.** El servidor de Next hace el login con Keycloak
+   (cliente confidencial) y guarda la sesión en una cookie `HttpOnly`, `Secure`,
+   `SameSite=Strict` y cifrada. El navegador nunca ve el token: todas las llamadas pasan por
+   rutas de Next (`/api/bff/...`) que agregan el `Bearer` y hablan con auth-svc y business-svc.
+   Un XSS ya no puede robar el token (hoy está en `sessionStorage`). Protección CSRF con
+   `SameSite=Strict` más una cabecera propia en las mutaciones. La renovación del token la hace
+   el servidor con el refresh token, que tampoco sale de la cookie.
+2. **Audiencia del token.** Las rutas `/api/v1/admin/**` aceptan solo tokens emitidos para el
+   panel (`azp = paktay-admin-web`, o `aud` con un mapper de audiencia). Un token sacado con
+   usuario y contraseña desde el cliente móvil deja de servir en el panel. Las pruebas de Codex
+   necesitarán obtener el token del cliente del panel (flujo de pruebas separado).
+3. **Keycloak niega el login del panel a quien no tiene ADMIN** (flujo del cliente con
+   "Condition - user role" + "Deny access"): sin rol, no hay token.
+4. **Segundo factor (TOTP) obligatorio para ADMIN** y **protección contra fuerza bruta** del realm
+   (bloqueo temporal tras varios intentos fallidos).
+5. **Cabeceras de seguridad en la web:** CSP estricta, `frame-ancestors 'none'`, HSTS,
+   `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
+6. **En producción:** CORS solo con el dominio del panel (con BFF el navegador ya no llama
+   directo a la API), sesión del panel con tiempo máximo corto (por ejemplo 8 h) y cierre de
+   sesión que también la cierre en Keycloak.
