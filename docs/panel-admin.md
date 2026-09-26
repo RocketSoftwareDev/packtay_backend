@@ -7,8 +7,9 @@ Soporte (tickets, bloqueos y modal de bloqueo), Notificaciones, Auditoría y Est
 ## Decisiones (2026-09-25)
 
 - **Sin despliegue por ahora.** Solo código. El dominio y Cloudflare se configuran después.
-- **Web:** React + Vite + TypeScript, entrada con OIDC + PKCE (`oidc-client-ts`) contra el
-  cliente `paktay-admin-web`. El token del panel dura 15 minutos (el del móvil, 8 horas).
+- **Web:** Next.js con login propio (2026-09-26): nadie ve que detrás está Keycloak. El servidor
+  de Next (BFF) manda correo y contraseña a auth-svc, que pide el token con el cliente confidencial
+  `paktay-admin-panel` y exige ADMIN. El token del panel dura 15 minutos (el del móvil, 8 horas).
 - **El administrador no ve datos financieros** (gastos, montos, categorías del usuario).
 - **Auditoría:** solo altas de usuario, acciones del administrador y cuentas eliminadas. Se
   dejan de registrar las acciones del usuario (gastos, tarjetas, reglas). Retención: 90 días
@@ -39,7 +40,7 @@ Soporte (tickets, bloqueos y modal de bloqueo), Notificaciones, Auditoría y Est
 | 5 | Catálogos: categorías, bancos y ofertas, monedas y países | backend, web |
 | 6 | Indicadores, notificaciones, estado del sistema | backend, web |
 | 7 | Despliegue (pospuesto) | todos |
-| 3-seg | Seguridad del panel: BFF con cookie HttpOnly, audiencia del token, Keycloak niega el panel sin ADMIN, TOTP y fuerza bruta, cabeceras (ver abajo) | backend, web, Keycloak |
+| 3-seg | Seguridad del panel: login propio + BFF con cookie HttpOnly, solo tokens del panel, fuerza bruta, cabeceras; TOTP pendiente (ver abajo) | backend, web, Keycloak |
 
 La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
 `IALogs/instrucciones/admin-faseN.md`.
@@ -82,33 +83,47 @@ La versión mínima son las fases 0 a 4. Cada fase se verifica en la Mac con
 
 ## Fase 3 · Seguridad del panel (pedida el 2026-09-26)
 
-Hoy ya hay JWT: Keycloak emite el token (OIDC + PKCE, RS256) y los dos servicios validan firma,
-emisor, vencimiento y el rol ADMIN; el token del panel dura 15 minutos. No se hace un JWT propio.
-Lo débil está en la web. Por orden de impacto:
+Keycloak sigue siendo el emisor del JWT (RS256) y los dos servicios validan firma, emisor,
+vencimiento y rol. No se hace un JWT propio. Lo que cambia es quién ve qué: la web es la parte
+más expuesta y el móvil no tiene nada de administración.
 
-0. **Paso 1, hecho en `feature/admin-seguridad-cors-cabecera`:** cabecera `X-Paktay-Client`
-   obligatoria en `/api/v1/admin/**` (no es un secreto: fuerza el preflight y corta el CSRF desde
-   otros sitios; la app móvil no usa esas rutas ni pasa por CORS) y CORS separado para el
-   formulario público (`PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS`). Producción:
-   `PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS=https://<dominio-del-panel>`. Se prueba con
-   `IALogs/instrucciones/admin-seguridad1.md`.
-1. **BFF (backend for frontend) en la web.** El servidor de Next hace el login con Keycloak
-   (cliente confidencial) y guarda la sesión en una cookie `HttpOnly`, `Secure`,
-   `SameSite=Strict` y cifrada. El navegador nunca ve el token: todas las llamadas pasan por
-   rutas de Next (`/api/bff/...`) que agregan el `Bearer` y hablan con auth-svc y business-svc.
-   Un XSS ya no puede robar el token (hoy está en `sessionStorage`). Protección CSRF con
-   `SameSite=Strict` más una cabecera propia en las mutaciones. La renovación del token la hace
-   el servidor con el refresh token, que tampoco sale de la cookie.
-2. **Audiencia del token.** Las rutas `/api/v1/admin/**` aceptan solo tokens emitidos para el
-   panel (`azp = paktay-admin-web`, o `aud` con un mapper de audiencia). Un token sacado con
-   usuario y contraseña desde el cliente móvil deja de servir en el panel. Las pruebas de Codex
-   necesitarán obtener el token del cliente del panel (flujo de pruebas separado).
-3. **Keycloak niega el login del panel a quien no tiene ADMIN** (flujo del cliente con
-   "Condition - user role" + "Deny access"): sin rol, no hay token.
-4. **Segundo factor (TOTP) obligatorio para ADMIN** y **protección contra fuerza bruta** del realm
-   (bloqueo temporal tras varios intentos fallidos).
-5. **Cabeceras de seguridad en la web:** CSP estricta, `frame-ancestors 'none'`, HSTS,
-   `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`.
-6. **En producción:** CORS solo con el dominio del panel (con BFF el navegador ya no llama
-   directo a la API), sesión del panel con tiempo máximo corto (por ejemplo 8 h) y cierre de
-   sesión que también la cierre en Keycloak.
+**Paso 1 · hecho (PR #25):** cabecera `X-Paktay-Client` obligatoria en `/api/v1/admin/**` y CORS
+separado para el formulario público (`PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS`).
+
+**Paso 2 · login propio + BFF** (`feature/admin-login-propio` en backend y
+`feature/login-propio-bff` en la web):
+
+```
+Navegador ──(cookie HttpOnly)──► Next /api/auth/*, /api/bff/*  ──(Bearer + X-Paktay-Client)──► auth-svc / business-svc
+                                                      auth-svc ──(cliente confidencial)──► Keycloak
+```
+
+- **Login propio.** `POST /api/v1/admin/session/login|refresh|logout` en auth-svc (públicas, con
+  la cabecera). Usa el cliente confidencial `paktay-admin-panel` (solo direct grant, secreto en
+  `KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET`). Sin rol ADMIN se cierra la sesión recién creada y se
+  responde `401 INVALID_CREDENTIALS`, igual que con contraseña mala: nadie averigua qué correos
+  son administradores. La renovación vuelve a exigir ADMIN. Cada inicio de sesión queda en la
+  auditoría. Se elimina el cliente público `paktay-admin-web` (keycloak-init lo borra).
+- **Solo tokens del panel.** `/api/v1/admin/**` exige `azp = paktay-admin-panel`
+  (`403 ADMIN_TOKEN_REQUIRED`): un token de la app móvil no sirve en el panel aunque la cuenta
+  tenga ADMIN. Interruptor: `PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN`.
+- **BFF.** El navegador solo habla con el servidor de Next. Tokens en cookies `HttpOnly`,
+  `SameSite=Strict`, `Path=/api`, cifradas (AES-256-GCM, `ADMIN_SESSION_SECRET`). El proxy solo
+  deja pasar `/api/v1/admin/**`. CSRF: SameSite + cabecera + mismo Origin.
+- **Sesión corta.** Access 15 min, sesión inactiva 30 min, máxima 8 h (atributos del cliente).
+- **Fuerza bruta.** Realm: bloqueo temporal tras 5 fallos (1 a 15 min). BFF: 10 intentos de
+  login cada 5 min por IP. Afecta también al login del móvil, que es lo deseable.
+- **Cabeceras en la web.** CSP con `connect-src 'self'` y `frame-ancestors 'none'`, HSTS en
+  producción, `nosniff`, `no-referrer`, `Permissions-Policy`.
+- **CORS.** Con BFF el panel ya no llama a la API desde el navegador: en producción
+  `PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS` solo necesita lo que sí llame desde un navegador.
+
+**Pendiente de seguridad:**
+- **TOTP para ADMIN.** Con login propio lo pide nuestro formulario (Keycloak acepta el código en
+  el direct grant con el flujo "Direct Grant - Conditional OTP").
+- **Contraseña temporal.** Con direct grant, una contraseña marcada temporal deja la cuenta sin
+  poder entrar ni al panel ni al móvil (Keycloak responde "Account is not fully set up"). El login
+  del panel lo informa como `403 PASSWORD_CHANGE_REQUIRED`, pero la opción "contraseña temporal"
+  del panel debería desaparecer o pasar por el PIN.
+- **CSP con nonce** para quitar `'unsafe-inline'` de `script-src`.
+- **Despliegue.** La web necesita servidor (Node o Cloudflare con OpenNext).

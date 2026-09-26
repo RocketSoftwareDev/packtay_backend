@@ -36,6 +36,14 @@ public class ApiExceptionHandler {
         return response(HttpStatus.CONFLICT, exception.getMessage());
     }
 
+    @ExceptionHandler(AdminSessionException.class)
+    ResponseEntity<Map<String, Object>> adminSession(AdminSessionException exception) {
+        log.warn("admin_session_rejected requestId={} code={}", MDC.get("requestId"), exception.code());
+        return ResponseEntity.status(exception.status()).body(Map.of("timestamp", Instant.now().toString(),
+                "status", exception.status().value(), "message", exception.getMessage(), "code", exception.code(),
+                "requestId", String.valueOf(MDC.get("requestId"))));
+    }
+
     @ExceptionHandler(NotFoundException.class)
     ResponseEntity<Map<String, Object>> notFound(NotFoundException exception) {
         log.warn("resource_not_found requestId={} reason={}", MDC.get("requestId"), exception.getMessage());

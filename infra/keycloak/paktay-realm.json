@@ -9,6 +9,12 @@
   "accessTokenLifespan": 28800,
   "ssoSessionIdleTimeout": 2592000,
   "ssoSessionMaxLifespan": 2592000,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "maxDeltaTimeSeconds": 43200,
   "passwordPolicy": "length(10) and digits(1) and upperCase(1) and lowerCase(1) and specialChars(1)",
   "roles": {
     "realm": [
@@ -32,20 +38,20 @@
       }
     },
     {
-      "clientId": "paktay-admin-web",
-      "name": "Paktay Admin Web",
+      "clientId": "paktay-admin-panel",
+      "name": "Paktay Admin Panel",
       "enabled": true,
-      "publicClient": true,
+      "publicClient": false,
       "protocol": "openid-connect",
-      "standardFlowEnabled": true,
-      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
       "implicitFlowEnabled": false,
-      "redirectUris": ["http://localhost:3000/*"],
-      "webOrigins": ["http://localhost:3000"],
+      "serviceAccountsEnabled": false,
+      "secret": "bootstrap-secret-replaced-by-keycloak-init",
       "attributes": {
-        "pkce.code.challenge.method": "S256",
-        "post.logout.redirect.uris": "http://localhost:3000/*",
-        "access.token.lifespan": "900"
+        "access.token.lifespan": "900",
+        "client.session.idle.timeout": "1800",
+        "client.session.max.lifespan": "28800"
       }
     },
     {

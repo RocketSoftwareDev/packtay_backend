@@ -11,16 +11,20 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * Cabecera obligatoria del panel en /api/v1/admin/**: X-Paktay-Client con el valor configurado.
- *
- * No es un secreto (está en el JavaScript de la web). Sirve porque una cabecera propia obliga
- * al navegador a pedir permiso (preflight de CORS), y ese permiso solo se da al dominio del
- * panel: así otra página no puede usar la sesión de un administrador (CSRF). La app móvil no
- * llama estas rutas y no se ve afectada. La autorización real sigue siendo el JWT con rol ADMIN.
+ * Candados de /api/v1/admin/**, además del rol ADMIN:
+ * 1. Cabecera X-Paktay-Client con el valor configurado. No es un secreto: la manda el servidor de
+ *    la web (BFF) y corta llamadas de otros sitios.
+ * 2. El token tiene que ser del cliente del panel (azp = paktay-admin-panel), que solo emite el
+ *    login propio del panel en auth-svc. Un token de la app móvil no sirve aquí aunque la cuenta
+ *    tenga ADMIN. La app móvil no llama estas rutas y no se ve afectada.
+ * Corre después de Spring Security, así que el token ya está validado cuando se lee azp.
  */
 @Component
 public class AdminClientHeaderFilter extends OncePerRequestFilter {
@@ -29,30 +33,45 @@ public class AdminClientHeaderFilter extends OncePerRequestFilter {
 
     private final boolean required;
     private final String expected;
+    private final boolean panelTokenRequired;
+    private final String panelClientId;
 
     public AdminClientHeaderFilter(@Value("${paktay.admin.require-client-header:true}") boolean required,
-                                   @Value("${paktay.admin.client-header-value:admin-web}") String expected) {
+                                   @Value("${paktay.admin.client-header-value:admin-web}") String expected,
+                                   @Value("${paktay.admin.require-panel-token:true}") boolean panelTokenRequired,
+                                   @Value("${paktay.admin.panel-client-id:paktay-admin-panel}") String panelClientId) {
         this.required = required;
         this.expected = expected;
+        this.panelTokenRequired = panelTokenRequired;
+        this.panelClientId = panelClientId;
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !required || "OPTIONS".equalsIgnoreCase(request.getMethod())
-                || !request.getRequestURI().startsWith("/api/v1/admin/");
+        return "OPTIONS".equalsIgnoreCase(request.getMethod()) || !request.getRequestURI().startsWith("/api/v1/admin/");
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
-        if (expected.equals(request.getHeader(HEADER))) {
-            chain.doFilter(request, response);
+        if (required && !expected.equals(request.getHeader(HEADER))) {
+            reject(request, response, "ADMIN_CLIENT_REQUIRED");
             return;
         }
-        log.warn("admin_client_header_missing requestId={} path={}", MDC.get("requestId"), request.getRequestURI());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (panelTokenRequired && authentication instanceof JwtAuthenticationToken token
+                && !panelClientId.equals(token.getToken().getClaimAsString("azp"))) {
+            reject(request, response, "ADMIN_TOKEN_REQUIRED");
+            return;
+        }
+        chain.doFilter(request, response);
+    }
+
+    private void reject(HttpServletRequest request, HttpServletResponse response, String code) throws IOException {
+        log.warn("admin_request_rejected requestId={} code={} path={}", MDC.get("requestId"), code, request.getRequestURI());
         response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding("UTF-8");
-        response.getWriter().write("{\"message\":\"Solicitud no permitida\",\"code\":\"ADMIN_CLIENT_REQUIRED\"}");
+        response.getWriter().write("{\"message\":\"Solicitud no permitida\",\"code\":\"" + code + "\"}");
     }
 }
