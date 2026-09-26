@@ -34,7 +34,10 @@ services:
         /opt/keycloak/bin/kcadm.sh update realms/paktay -s "accessTokenLifespan=$$KEYCLOAK_ACCESS_TOKEN_LIFESPAN" -s "ssoSessionIdleTimeout=$$KEYCLOAK_SSO_SESSION_IDLE_TIMEOUT" -s "ssoSessionMaxLifespan=$$KEYCLOAK_SSO_SESSION_MAX_LIFESPAN";
         /opt/keycloak/bin/kcadm.sh update "clients/$$CLIENT_UUID" -r paktay -s "secret=$$KEYCLOAK_SERVICE_CLIENT_SECRET";
         /opt/keycloak/bin/kcadm.sh set-password -r paktay --username "$$PAKTAY_ADMIN_EMAIL" --new-password "$$PAKTAY_ADMIN_PASSWORD";
-        /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm
+        /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm;
+        WEB_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-admin-web --fields id --format csv --noquotes);
+        if [ -z "$$WEB_UUID" ]; then /opt/keycloak/bin/kcadm.sh create clients -r paktay -s clientId=paktay-admin-web -s "name=Paktay Admin Web" -s enabled=true -s publicClient=true -s standardFlowEnabled=true -s directAccessGrantsEnabled=false -s implicitFlowEnabled=false; WEB_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-admin-web --fields id --format csv --noquotes); fi;
+        /opt/keycloak/bin/kcadm.sh update "clients/$$WEB_UUID" -r paktay -s 'redirectUris=["'"$$PAKTAY_ADMIN_WEB_URL"'/*"]' -s 'webOrigins=["'"$$PAKTAY_ADMIN_WEB_URL"'"]' -s 'attributes."post.logout.redirect.uris"='"$$PAKTAY_ADMIN_WEB_URL"'/*' -s 'attributes."pkce.code.challenge.method"=S256' -s 'attributes."access.token.lifespan"='"$$PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN"
     environment:
       KEYCLOAK_INTERNAL_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
@@ -46,6 +49,8 @@ services:
       KEYCLOAK_SSO_SESSION_MAX_LIFESPAN: ${KEYCLOAK_SSO_SESSION_MAX_LIFESPAN:-2592000}
       PAKTAY_ADMIN_EMAIL: ${PAKTAY_ADMIN_EMAIL:?Define PAKTAY_ADMIN_EMAIL in .env}
       PAKTAY_ADMIN_PASSWORD: ${PAKTAY_ADMIN_PASSWORD:?Define PAKTAY_ADMIN_PASSWORD in .env}
+      PAKTAY_ADMIN_WEB_URL: ${PAKTAY_ADMIN_WEB_URL:-http://localhost:5173}
+      PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN: ${PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN:-900}
 
   auth-svc:
     mem_limit: 640m

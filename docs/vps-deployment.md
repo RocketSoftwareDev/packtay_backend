@@ -102,6 +102,9 @@ Comprueba que existen:
 - Realm: `paktay`.
 - Cliente público móvil: `paktay-mobile`.
 - Cliente técnico: `paktay-auth-service`.
+- Cliente público del panel: `paktay-admin-web` (PKCE). Lo crea o actualiza el perfil
+  `identity-setup` con `PAKTAY_ADMIN_WEB_URL`; ese dominio también va en
+  `PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS`. Ver `docs/panel-admin.md`.
 - Roles de realm: `USER` y `ADMIN`.
 
 En `paktay-mobile`, conserva el redirect URI:

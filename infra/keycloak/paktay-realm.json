@@ -32,6 +32,23 @@
       }
     },
     {
+      "clientId": "paktay-admin-web",
+      "name": "Paktay Admin Web",
+      "enabled": true,
+      "publicClient": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "implicitFlowEnabled": false,
+      "redirectUris": ["http://localhost:5173/*"],
+      "webOrigins": ["http://localhost:5173"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:5173/*",
+        "access.token.lifespan": "900"
+      }
+    },
+    {
       "clientId": "paktay-auth-service",
       "name": "Paktay Auth Service",
       "enabled": true,
