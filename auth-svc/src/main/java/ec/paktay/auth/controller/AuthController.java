@@ -12,6 +12,8 @@ import ec.paktay.auth.dto.TokenResponse;
 import ec.paktay.auth.dto.UserResponse;
 import ec.paktay.auth.service.KeycloakIdentityService;
 import ec.paktay.auth.service.RegistrationService;
+import ec.paktay.auth.service.TemporaryPasswordService;
+import ec.paktay.auth.dto.TemporaryPasswordChangeRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -37,9 +39,11 @@ public class AuthController {
     private final ec.paktay.auth.service.PasswordPinService pins;
     private final AccountDeletionService accounts;
     private final RegistrationService registrations;
+    private final TemporaryPasswordService temporaryPasswords;
 
     public AuthController(KeycloakIdentityService identities, KeycloakProperties properties, ec.paktay.auth.service.PasswordPinService pins,
-                          AccountDeletionService accounts, RegistrationService registrations) {
+                          AccountDeletionService accounts, RegistrationService registrations, TemporaryPasswordService temporaryPasswords) {
+        this.temporaryPasswords = temporaryPasswords;
         this.pins = pins;
         this.accounts = accounts;
         this.identities = identities;
@@ -64,11 +68,26 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    @Operation(summary = "Iniciar sesión", description = "Ruta pública de apoyo para Postman y pruebas; no requiere token.")
+    @Operation(summary = "Iniciar sesión", description = "Ruta pública; no requiere token. Si la cuenta entró con una contraseña "
+            + "temporal del administrador, la respuesta trae password_change_required = true y la app debe pedir una nueva "
+            + "(PUT /api/v1/auth/password/temporary).")
     @ApiResponse(responseCode = "200", description = "Tokens emitidos")
-    @ApiResponse(responseCode = "401", description = "Credenciales inválidas")
+    @ApiResponse(responseCode = "400", description = "Credenciales inválidas, o TEMPORARY_PASSWORD_EXPIRED")
+    @ApiResponse(responseCode = "403", description = "ACCOUNT_BLOCKED: cuenta bloqueada por un administrador")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
-        return identities.login(request);
+        return temporaryPasswords.afterMobileLogin(identities.login(request));
+    }
+
+    @PutMapping("/password/temporary")
+    @Operation(summary = "Reemplazar la contraseña temporal", description = "Ruta autenticada. Solo sirve mientras la cuenta tenga "
+            + "una contraseña temporal vigente del administrador; no pide PIN porque la persona acaba de entrar con ella.")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponse(responseCode = "200", description = "Contraseña actualizada")
+    @ApiResponse(responseCode = "400", description = "Contraseña inválida o sin contraseña temporal pendiente")
+    @ApiResponse(responseCode = "401", description = "Token inválido")
+    public MessageResponse replaceTemporary(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody TemporaryPasswordChangeRequest request) {
+        temporaryPasswords.complete(jwt.getSubject(), request.newPassword());
+        return new MessageResponse("Contraseña actualizada");
     }
 
     @PutMapping("/password")
@@ -95,9 +114,13 @@ public class AuthController {
     }
 
     @PostMapping("/password-reset/request")
-    @Operation(summary = "Solicitar PIN de recuperación", description = "Ruta pública. Solo envía a una cuenta existente y habilitada. Respuesta genérica para cualquier correo. PIN de 6 dígitos, vigencia de 15 minutos, máximo 1 envío por minuto y 5 por hora.")
+    @Operation(summary = "Solicitar PIN de recuperación", description = "Ruta pública. Solo envía a una cuenta existente y habilitada; para cualquier otro correo la respuesta es genérica. "
+            + "Excepción: una cuenta bloqueada por un administrador recibe 403 ACCOUNT_BLOCKED para que la app ofrezca soporte. "
+            + "Al completar la recuperación se quita el bloqueo temporal por intentos fallidos. PIN de 6 dígitos, vigencia de 15 minutos, "
+            + "máximo 1 envío por minuto y 5 por hora.")
     @ApiResponse(responseCode = "200", description = "Solicitud procesada sin revelar si existe la cuenta")
     @ApiResponse(responseCode = "400", description = "Correo inválido")
+    @ApiResponse(responseCode = "403", description = "ACCOUNT_BLOCKED")
     @ApiResponse(responseCode = "500", description = "No fue posible procesar el envío")
     public MessageResponse resetPin(@Valid @RequestBody ec.paktay.auth.dto.PasswordPinRequest request) {
         pins.requestReset(request.email());

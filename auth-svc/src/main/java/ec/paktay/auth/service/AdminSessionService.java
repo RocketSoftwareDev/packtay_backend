@@ -31,18 +31,25 @@ public class AdminSessionService {
     private final JwtDecoder decoder;
     private final AdminAuditWriter audit;
     private final KeycloakProperties properties;
+    private final TemporaryPasswordService temporaryPasswords;
 
     public AdminSessionService(KeycloakIdentityService identities, JwtDecoder decoder, AdminAuditWriter audit,
-                               KeycloakProperties properties) {
+                               KeycloakProperties properties, TemporaryPasswordService temporaryPasswords) {
         this.identities = identities;
         this.decoder = decoder;
         this.audit = audit;
         this.properties = properties;
+        this.temporaryPasswords = temporaryPasswords;
     }
 
     public TokenResponse login(String email, String password) {
         TokenResponse tokens = identities.adminPanelLogin(email.trim().toLowerCase(), password);
         Jwt jwt = requireAdmin(tokens, false);
+        // Con una contraseña temporal pendiente se cambia primero en la app (el panel no tiene ese paso).
+        if (temporaryPasswords.status(jwt.getSubject()) != TemporaryPasswordService.Status.NONE) {
+            identities.adminPanelLogout(tokens.refreshToken());
+            throw AdminSessionException.passwordChangeRequired();
+        }
         AdminActor actor = AdminActor.from(jwt);
         audit.adminAction(actor, "Inicio de sesión en el panel", jwt.getSubject(), actor.label(), null, null);
         log.info("admin_panel_login subject={}", jwt.getSubject());

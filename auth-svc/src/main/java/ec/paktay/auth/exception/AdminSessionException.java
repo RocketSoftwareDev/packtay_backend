@@ -3,14 +3,10 @@ package ec.paktay.auth.exception;
 import org.springframework.http.HttpStatus;
 
 /** Rechazo del login o de la renovación del panel, con un código estable para la web. */
-public class AdminSessionException extends RuntimeException {
-    private final HttpStatus status;
-    private final String code;
+public class AdminSessionException extends CodedException {
 
     public AdminSessionException(HttpStatus status, String code, String message) {
-        super(message);
-        this.status = status;
-        this.code = code;
+        super(status, code, message);
     }
 
     /** Mismo mensaje para contraseña mala, cuenta sin ADMIN, bloqueada o con demasiados intentos. */
@@ -24,14 +20,6 @@ public class AdminSessionException extends RuntimeException {
 
     public static AdminSessionException passwordChangeRequired() {
         return new AdminSessionException(HttpStatus.FORBIDDEN, "PASSWORD_CHANGE_REQUIRED",
-                "Tu contraseña es temporal. Cámbiala con la recuperación por PIN y vuelve a entrar.");
-    }
-
-    public HttpStatus status() {
-        return status;
-    }
-
-    public String code() {
-        return code;
+                "Tu contraseña es temporal. Cámbiala en la app PAKTAY y vuelve a entrar.");
     }
 }

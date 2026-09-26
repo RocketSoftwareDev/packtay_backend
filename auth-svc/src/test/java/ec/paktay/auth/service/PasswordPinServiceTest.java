@@ -30,6 +30,7 @@ class PasswordPinServiceTest {
         new ResourceDatabasePopulator(new ClassPathResource("password-schema.sql")).execute(ds);
         db = new JdbcTemplate(ds);
         db.execute("create table app_users(id uuid, email varchar(320), status varchar(16))");
+        db.execute("create table password_temporary(user_id uuid primary key, expires_at timestamp, created_by uuid, created_at timestamp)");
         identities = mock(KeycloakIdentityService.class); mail = mock(PasswordMailService.class);
         clock = mock(Clock.class); now = Instant.parse("2026-09-10T00:00:00Z").toEpochMilli();
         when(clock.millis()).thenAnswer(call -> now);
@@ -48,11 +49,18 @@ class PasswordPinServiceTest {
         String pin = request(); assertTrue(pin.matches("[0-9]{6}"));
         assertNotEquals(pin, db.queryForObject("select pin_hash from password_pins", String.class));
     }
-    @Test void unknownOrDisabledAccountGetsNoEmail() {
+    @Test void unknownAccountGetsNoEmailAndBlockedAccountIsToldToContactSupport() {
         service.requestReset("nobody@example.com");
         when(identities.findByEmail("disabled@example.com")).thenAnswer(call -> Map.of("enabled", false));
-        service.requestReset("disabled@example.com");
+        var error = assertThrows(ec.paktay.auth.exception.CodedException.class, () -> service.requestReset("disabled@example.com"));
+        assertEquals("ACCOUNT_BLOCKED", error.code());
         verifyNoInteractions(mail);
+    }
+    @Test void completedResetReplacesTemporaryPasswordAndClearsLockout() {
+        db.update("insert into password_temporary(user_id, expires_at) values (?, current_timestamp)", UUID.fromString(id));
+        service.completeReset("user@example.com", service.verifyReset("user@example.com", request()), "NewPassword123!");
+        assertEquals(0, db.queryForObject("select count(*) from password_temporary", Integer.class));
+        verify(identities).clearBruteForce(id);
     }
     @Test void localProfileFallbackMustMatchCurrentKeycloakEmail() {
         when(identities.findByEmail(anyString())).thenReturn(null);

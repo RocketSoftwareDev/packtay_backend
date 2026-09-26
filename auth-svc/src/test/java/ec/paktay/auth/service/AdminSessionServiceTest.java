@@ -23,12 +23,13 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 
 class AdminSessionServiceTest {
-    private static final TokenResponse TOKENS = new TokenResponse("access", "refresh", 900, 1800, "Bearer");
+    private static final TokenResponse TOKENS = new TokenResponse("access", "refresh", 900, 1800, "Bearer", null);
 
     private KeycloakIdentityService identities;
     private JwtDecoder decoder;
     private AdminAuditWriter audit;
     private AdminSessionService sessions;
+    private TemporaryPasswordService temporaryPasswords;
 
     @BeforeEach
     void setUp() {
@@ -37,7 +38,9 @@ class AdminSessionServiceTest {
         audit = mock(AdminAuditWriter.class);
         var properties = new KeycloakProperties("http://kc", "http://kc", "paktay", "paktay-mobile",
                 "paktay-auth-service", "s", "paktay-admin-panel", "p");
-        sessions = new AdminSessionService(identities, decoder, audit, properties);
+        temporaryPasswords = mock(TemporaryPasswordService.class);
+        when(temporaryPasswords.status(anyString())).thenReturn(TemporaryPasswordService.Status.NONE);
+        sessions = new AdminSessionService(identities, decoder, audit, properties, temporaryPasswords);
     }
 
     @Test

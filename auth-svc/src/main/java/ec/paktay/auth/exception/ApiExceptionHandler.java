@@ -36,9 +36,9 @@ public class ApiExceptionHandler {
         return response(HttpStatus.CONFLICT, exception.getMessage());
     }
 
-    @ExceptionHandler(AdminSessionException.class)
-    ResponseEntity<Map<String, Object>> adminSession(AdminSessionException exception) {
-        log.warn("admin_session_rejected requestId={} code={}", MDC.get("requestId"), exception.code());
+    @ExceptionHandler(CodedException.class)
+    ResponseEntity<Map<String, Object>> coded(CodedException exception) {
+        log.warn("request_rejected_with_code requestId={} code={}", MDC.get("requestId"), exception.code());
         return ResponseEntity.status(exception.status()).body(Map.of("timestamp", Instant.now().toString(),
                 "status", exception.status().value(), "message", exception.getMessage(), "code", exception.code(),
                 "requestId", String.valueOf(MDC.get("requestId"))));
