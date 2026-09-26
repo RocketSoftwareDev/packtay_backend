@@ -1,0 +1,5 @@
+ Container paktay-local-keycloak-init-run-dec6bd5d3302 Creating 
+ Container paktay-local-keycloak-init-run-dec6bd5d3302 Created 
+Logging into http://host.docker.internal:28180 as user admin of realm master
+Created new client with id '3cc232e0-ef46-4889-96c3-e9348fbb629a'
+init_exit=0 restart_exit=0
