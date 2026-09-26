@@ -54,13 +54,6 @@ public class AdminAccountService {
         log.info("account_unblocked subject={} by={}", userId, actor.id());
     }
 
-    public void replacePassword(String userId, String password, boolean temporary, AdminActor actor) {
-        Map<?, ?> user = require(userId);
-        identities.replacePassword(userId, password, temporary);
-        audit.adminAction(actor, "Contraseña restablecida", userId, emailOf(user) + (temporary ? " · temporal" : ""),
-                null, Map.of("temporary", temporary));
-    }
-
     public List<AdminSummary> admins() {
         return identities.usersWithRealmRole(ADMIN_ROLE).stream()
                 .map(user -> new AdminSummary(String.valueOf(user.get("id")), stringOrNull(user.get("email")),

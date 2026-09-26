@@ -12,9 +12,11 @@ import ec.paktay.auth.dto.RegisterRequest;
 import ec.paktay.auth.dto.TokenResponse;
 import ec.paktay.auth.dto.UserResponse;
 import ec.paktay.auth.exception.AdminSessionException;
+import ec.paktay.auth.exception.CodedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -74,8 +76,13 @@ public class KeycloakIdentityService {
                     .retrieve().body(TokenResponse.class);
         } catch (RestClientResponseException ex) {
             if (ex.getStatusCode().is4xxClientError()) {
-                log.warn("keycloak_login_rejected status={} errorCode={} reason={}", ex.getStatusCode().value(), keycloakErrorCode(ex), keycloakErrorDescription(ex));
-                throw new IllegalArgumentException("Credenciales inválidas");
+                String reason = keycloakErrorDescription(ex);
+                log.warn("keycloak_login_rejected status={} errorCode={} reason={}", ex.getStatusCode().value(), keycloakErrorCode(ex), reason);
+                // Identidad desactivada = bloqueada por un administrador: la app ofrece soporte.
+                // El bloqueo temporal por intentos fallidos Keycloak lo informa como credenciales inválidas.
+                if ("Account disabled".equals(reason)) throw CodedException.accountBlocked();
+                // Código estable para que la app cuente los intentos fallidos (mismo mensaje de siempre).
+                throw new CodedException(HttpStatus.BAD_REQUEST, "INVALID_CREDENTIALS", "Credenciales inválidas");
             }
             log.error("keycloak_login_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
             throw new IllegalStateException("No fue posible iniciar sesión en Keycloak");
@@ -128,7 +135,11 @@ public class KeycloakIdentityService {
     }
 
     public void verifyCredentials(String username, String password) {
-        login(new LoginRequest(username, password));
+        try {
+            login(new LoginRequest(username, password));
+        } catch (CodedException ex) {
+            throw new IllegalArgumentException(ex.getMessage());
+        }
     }
 
     public void replacePassword(String userId, String password, boolean temporary) {
@@ -182,6 +193,21 @@ public class KeycloakIdentityService {
         client.post().uri(adminPath("users/" + userId + "/logout"))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
                 .retrieve().toBodilessEntity();
+    }
+
+    /**
+     * Quita el bloqueo temporal por intentos fallidos (fuerza bruta del realm). Se llama después de
+     * que la persona demostró ser dueña del correo (PIN) o recibió una contraseña nueva del admin.
+     * Si falla no rompe nada: el bloqueo vence solo en minutos.
+     */
+    public void clearBruteForce(String userId) {
+        try {
+            client.delete().uri(adminPath("attack-detection/brute-force/users/" + userId))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                    .retrieve().toBodilessEntity();
+        } catch (RuntimeException ex) {
+            log.warn("keycloak_brute_force_clear_failed subject={} reason={}", userId, ex.getMessage());
+        }
     }
 
     public void grantRealmRole(String userId, String roleName) {

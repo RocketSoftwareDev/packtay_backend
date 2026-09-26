@@ -11,7 +11,7 @@
   "ssoSessionMaxLifespan": 2592000,
   "bruteForceProtected": true,
   "permanentLockout": false,
-  "failureFactor": 5,
+  "failureFactor": 3,
   "waitIncrementSeconds": 60,
   "maxFailureWaitSeconds": 900,
   "maxDeltaTimeSeconds": 43200,

@@ -111,8 +111,26 @@ Navegador ──(cookie HttpOnly)──► Next /api/auth/*, /api/bff/*  ──(
   `SameSite=Strict`, `Path=/api`, cifradas (AES-256-GCM, `ADMIN_SESSION_SECRET`). El proxy solo
   deja pasar `/api/v1/admin/**`. CSRF: SameSite + cabecera + mismo Origin.
 - **Sesión corta.** Access 15 min, sesión inactiva 30 min, máxima 8 h (atributos del cliente).
-- **Fuerza bruta.** Realm: bloqueo temporal tras 5 fallos (1 a 15 min). BFF: 10 intentos de
-  login cada 5 min por IP. Afecta también al login del móvil, que es lo deseable.
+- **Fuerza bruta.** Realm: bloqueo temporal tras 3 fallos (1 a 15 min). BFF: 10 intentos de
+  login cada 5 min por IP. Afecta también al login del móvil: tras 3 fallos la app ofrece cambiar
+  la contraseña por PIN, y completar el PIN quita el bloqueo.
+
+**Paso 3 · contraseñas y cuentas bloqueadas** (`feature/password-temporal-bloqueo`, V10):
+
+- **El admin restablece:** `POST /api/v1/admin/users/{id}/password/temporary` genera una contraseña
+  de 16 caracteres, la manda al correo (24 h), cierra las sesiones y quita el bloqueo por intentos.
+  El admin no la ve. Reemplaza al `PUT .../password` con `temporary`, que dejaba la cuenta sin poder
+  entrar (la marca temporal de Keycloak no funciona con direct grant).
+- **La persona entra al móvil con ella:** el login responde `password_change_required = true` y
+  la app obliga a elegir una nueva (`PUT /api/v1/auth/password/temporary`, sin PIN porque acaba de
+  entrar con ella). Vencida: `400 TEMPORARY_PASSWORD_EXPIRED` y queda la recuperación por PIN.
+  Al panel no se entra con una temporal pendiente (`403 PASSWORD_CHANGE_REQUIRED`).
+- **La persona cambia o recupera la suya:** PIN al correo (sin cambios), y al completarlo se borra
+  cualquier temporal pendiente y el bloqueo por intentos.
+- **Cuenta bloqueada por el admin:** el login y la recuperación responden `403 ACCOUNT_BLOCKED`
+  ("Hemos detectado que tu cuenta está bloqueada. Contacta con soporte.") y la app muestra el botón
+  de soporte si `PAKTAY_URL_SUPPORT` tiene la URL del formulario. Es la única respuesta que revela
+  algo de una cuenta; el registro ya lo revelaba ("Ya existe una cuenta con ese correo").
 - **Cabeceras en la web.** CSP con `connect-src 'self'` y `frame-ancestors 'none'`, HSTS en
   producción, `nosniff`, `no-referrer`, `Permissions-Policy`.
 - **CORS.** Con BFF el panel ya no llama a la API desde el navegador: en producción
@@ -121,9 +139,5 @@ Navegador ──(cookie HttpOnly)──► Next /api/auth/*, /api/bff/*  ──(
 **Pendiente de seguridad:**
 - **TOTP para ADMIN.** Con login propio lo pide nuestro formulario (Keycloak acepta el código en
   el direct grant con el flujo "Direct Grant - Conditional OTP").
-- **Contraseña temporal.** Con direct grant, una contraseña marcada temporal deja la cuenta sin
-  poder entrar ni al panel ni al móvil (Keycloak responde "Account is not fully set up"). El login
-  del panel lo informa como `403 PASSWORD_CHANGE_REQUIRED`, pero la opción "contraseña temporal"
-  del panel debería desaparecer o pasar por el PIN.
 - **CSP con nonce** para quitar `'unsafe-inline'` de `script-src`.
 - **Despliegue.** La web necesita servidor (Node o Cloudflare con OpenNext).
