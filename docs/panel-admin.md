@@ -80,6 +80,12 @@ Hoy ya hay JWT: Keycloak emite el token (OIDC + PKCE, RS256) y los dos servicios
 emisor, vencimiento y el rol ADMIN; el token del panel dura 15 minutos. No se hace un JWT propio.
 Lo débil está en la web. Por orden de impacto:
 
+0. **Paso 1, hecho en `feature/admin-seguridad-cors-cabecera`:** cabecera `X-Paktay-Client`
+   obligatoria en `/api/v1/admin/**` (no es un secreto: fuerza el preflight y corta el CSRF desde
+   otros sitios; la app móvil no usa esas rutas ni pasa por CORS) y CORS separado para el
+   formulario público (`PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS`). Producción:
+   `PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS=https://<dominio-del-panel>`. Se prueba con
+   `IALogs/instrucciones/admin-seguridad1.md`.
 1. **BFF (backend for frontend) en la web.** El servidor de Next hace el login con Keycloak
    (cliente confidencial) y guarda la sesión en una cookie `HttpOnly`, `Secure`,
    `SameSite=Strict` y cifrada. El navegador nunca ve el token: todas las llamadas pasan por

@@ -76,6 +76,7 @@ services:
       KEYCLOAK_JWK_SET_URI: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay/protocol/openid-connect/certs
       KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:?Define KEYCLOAK_SERVICE_CLIENT_SECRET in .env}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
     ports:
       - "${API_BIND_ADDRESS:-127.0.0.1}:${AUTH_PORT:-8081}:8081"
     depends_on:
@@ -100,6 +101,9 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      # Web del formulario público de soporte (vacío = los mismos dominios del panel).
+      PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS: ${PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS:-}
+      PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
       # Correo de soporte (confirmación y respuestas): el mismo SMTP que auth-svc.
       SMTP_HOST: ${SMTP_HOST:?Define SMTP_HOST in .env}
       SMTP_PORT: ${SMTP_PORT:-465}
