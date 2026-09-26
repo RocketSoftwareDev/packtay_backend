@@ -49,7 +49,7 @@ services:
       KEYCLOAK_SSO_SESSION_MAX_LIFESPAN: ${KEYCLOAK_SSO_SESSION_MAX_LIFESPAN:-2592000}
       PAKTAY_ADMIN_EMAIL: ${PAKTAY_ADMIN_EMAIL:?Define PAKTAY_ADMIN_EMAIL in .env}
       PAKTAY_ADMIN_PASSWORD: ${PAKTAY_ADMIN_PASSWORD:?Define PAKTAY_ADMIN_PASSWORD in .env}
-      PAKTAY_ADMIN_WEB_URL: ${PAKTAY_ADMIN_WEB_URL:-http://localhost:5173}
+      PAKTAY_ADMIN_WEB_URL: ${PAKTAY_ADMIN_WEB_URL:-http://localhost:3000}
       PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN: ${PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN:-900}
 
   auth-svc:
@@ -76,6 +76,7 @@ services:
       KEYCLOAK_JWK_SET_URI: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay/protocol/openid-connect/certs
       KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:?Define KEYCLOAK_SERVICE_CLIENT_SECRET in .env}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
     ports:
       - "${API_BIND_ADDRESS:-127.0.0.1}:${AUTH_PORT:-8081}:8081"
     depends_on:
@@ -100,6 +101,9 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      # Web del formulario público de soporte (vacío = los mismos dominios del panel).
+      PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS: ${PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS:-}
+      PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
       # Correo de soporte (confirmación y respuestas): el mismo SMTP que auth-svc.
       SMTP_HOST: ${SMTP_HOST:?Define SMTP_HOST in .env}
       SMTP_PORT: ${SMTP_PORT:-465}
@@ -109,6 +113,7 @@ services:
       SMTP_PASS: ${SMTP_PASS:?Define SMTP_PASS in .env}
       SMTP_FROM: ${SMTP_FROM:-}
       SUPPORT_VERIFY_LINK: ${SUPPORT_VERIFY_LINK:-http://localhost:8082/api/v1/public/support/verify?token={token}}
+      AUTH_HEALTH_URL: http://auth-svc:8081/actuator/health
       # Avisos push opcionales. Sin credenciales, no se envía nada.
       FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase-admin.json
     volumes:
