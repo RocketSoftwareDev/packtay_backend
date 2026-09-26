@@ -4,8 +4,10 @@
 **No cambies código.** Todo va a `IALogs/logs/`.
 
 Ramas: `develop` en los tres repos (backend PR #26 y #27, web PR #4, móvil PR #29). Mientras
-`fix/test-contrasenia-temporal` no esté integrada en `develop`, usa `BRANCH=fix/test-contrasenia-temporal`
-(corrige `TemporaryPasswordServiceTest`, que no compilaba y rompía también el build de la imagen).
+`fix/pin-con-pausa-por-intentos` no esté integrada, usa `BRANCH=fix/pin-con-pausa-por-intentos` (el PIN
+fallaba con la cuenta pausada por intentos, run `1255-admin-panel`).
+**Los pasos 4 (web real) y 4b (móvil) son obligatorios** si los repos están en la Mac: en el run
+`1255` no se corrieron. Si no se pueden correr, di por qué en el resumen.
 **Obligatorio:** correr `keycloak-init` (paso 1) en cada run: crea el cliente `paktay-admin-panel`,
 sincroniza la contraseña del admin con `PAKTAY_ADMIN_PASSWORD` y aplica la fuerza bruta. Sin él, el
 login del panel responde 401 y todo el escenario falla en cascada (run `1239-develop-3repos`). En
