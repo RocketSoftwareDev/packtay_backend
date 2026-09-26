@@ -1,0 +1,4 @@
+dump_exit=0
+dump_bytes=153118
+restore_list_objects=353
+schema_exit=0

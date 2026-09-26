@@ -37,16 +37,18 @@ public class AdminInsightsService {
     private final JdbcClient jdbc;
     private final DeviceService devices;
     private final PushSender push;
+    private final PushDeliveryLogService deliveryLog;
     private final KeycloakHealthIndicator keycloak;
     private final RestClient authHealth;
     private final String corsOrigins;
 
-    public AdminInsightsService(JdbcClient jdbc, DeviceService devices, PushSender push, KeycloakHealthIndicator keycloak,
+    public AdminInsightsService(JdbcClient jdbc, DeviceService devices, PushSender push, PushDeliveryLogService deliveryLog, KeycloakHealthIndicator keycloak,
                                 @Value("${paktay.admin.auth-health-url:http://localhost:8081/actuator/health}") String authHealthUrl,
                                 @Value("${paktay.cors.allowed-origin-patterns:}") String corsOrigins) {
         this.jdbc = jdbc;
         this.devices = devices;
         this.push = push;
+        this.deliveryLog = deliveryLog;
         this.keycloak = keycloak;
         this.corsOrigins = corsOrigins;
         var factory = new SimpleClientHttpRequestFactory();
@@ -62,8 +64,9 @@ public class AdminInsightsService {
         long newUsers = count("select count(*) from app_users where created_at >= " + MONTH_START);
         long captures = count("select count(*) from expenses where origin = 'AUTOMATIC' and kind = 'EXPENSE' and occurred_at >= " + MONTH_START);
         long cards = count("select count(*) from cards where status::text = 'ACTIVE'");
-        long pushSent = count("select count(*) from notification_log where sent_at >= " + MONTH_START);
-        long pushDelivered = count("select count(*) from notification_log where delivered and sent_at >= " + MONTH_START);
+        var pushSummary = deliveryLog.summary();
+        long pushSent = pushSummary.sentThisMonth();
+        long pushDelivered = pushSummary.delivered();
         return new AdminInsights.Metrics(activeUsers, newUsers, captures, cards, pushDelivered, pushSent, plans(), signupsByWeek());
     }
 
@@ -126,42 +129,31 @@ public class AdminInsightsService {
     // ---------------------------------------------------------------- notificaciones
 
     public AdminInsights.NotificationSummary notificationSummary() {
-        long sent = count("select count(*) from notification_log where sent_at >= " + MONTH_START);
-        long delivered = count("select count(*) from notification_log where delivered and sent_at >= " + MONTH_START);
-        long withPush = count("select count(*) from user_devices where push_token is not null");
-        long total = count("select count(*) from user_devices");
-        return new AdminInsights.NotificationSummary(sent, delivered, sent - delivered, withPush, total);
+        return deliveryLog.summary();
     }
 
     /** result: DELIVERED, FAILED o vacío (todos). Últimos 200 envíos. */
     public List<AdminInsights.NotificationLog> notifications(String result) {
-        String filter = "DELIVERED".equals(result) ? " where n.delivered" : "FAILED".equals(result) ? " where not n.delivered" : "";
-        return jdbc.sql("""
-                select n.id, n.kind, coalesce(u.email, '—') as email, n.threshold, to_char(n.period_month, 'YYYY-MM') as period,
-                       n.delivered, n.sent_at
-                  from notification_log n left join app_users u on u.id = n.user_id
-                """ + filter + " order by n.sent_at desc limit 200")
-                .query((rs, row) -> new AdminInsights.NotificationLog(rs.getObject("id", java.util.UUID.class),
-                        rs.getString("kind"), rs.getString("email"), rs.getInt("threshold"), rs.getString("period"),
-                        rs.getBoolean("delivered"), rs.getObject("sent_at", OffsetDateTime.class))).list();
+        return deliveryLog.list(result);
     }
 
     /** Push de prueba a los dispositivos del propio administrador (con la app abierta con su cuenta). */
     public AdminInsights.TestPushResult testPush(AdminActor actor) {
         if (!push.enabled()) return new AdminInsights.TestPushResult(false, 0, "Firebase no está configurado en el servidor.");
-        List<String> tokens = devices.pushTokens(actor.id());
-        if (tokens.isEmpty()) {
+        List<DeviceService.PushTarget> targets = devices.pushTargets(actor.id());
+        if (targets.isEmpty()) {
             return new AdminInsights.TestPushResult(false, 0, "Tu cuenta no tiene dispositivos con avisos activados.");
         }
         int delivered = 0;
-        for (String token : tokens) {
-            PushSender.Outcome outcome = push.send(token, new PushSender.Message("PAKTAY",
+        for (DeviceService.PushTarget target : targets) {
+            PushSender.Outcome outcome = push.send(target.token(), new PushSender.Message("PAKTAY",
                     "Aviso de prueba desde el panel de administración.", Map.of("type", "ADMIN_TEST")));
+            deliveryLog.record(actor.id(), target.deviceId(), "ADMIN_TEST", outcome);
             if (outcome == PushSender.Outcome.SENT) delivered++;
-            if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(token);
+            if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(target.token());
         }
-        return new AdminInsights.TestPushResult(delivered > 0, tokens.size(),
-                delivered > 0 ? "Enviado a " + delivered + " de " + tokens.size() + " dispositivos." : "Firebase rechazó el envío.");
+        return new AdminInsights.TestPushResult(delivered > 0, targets.size(),
+                delivered > 0 ? "Enviado a " + delivered + " de " + targets.size() + " dispositivos." : "Firebase rechazó el envío.");
     }
 
     // ---------------------------------------------------------------- estado

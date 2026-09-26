@@ -50,14 +50,16 @@ public class BudgetAlertService {
     private final BudgetService budgets;
     private final DeviceService devices;
     private final PushSender push;
+    private final PushDeliveryLogService deliveryLog;
     private final UserAccountService users;
 
     public BudgetAlertService(JdbcClient jdbc, BudgetService budgets, DeviceService devices, PushSender push,
-                              UserAccountService users) {
+                              PushDeliveryLogService deliveryLog, UserAccountService users) {
         this.jdbc = jdbc;
         this.budgets = budgets;
         this.devices = devices;
         this.push = push;
+        this.deliveryLog = deliveryLog;
         this.users = users;
     }
 
@@ -184,15 +186,16 @@ public class BudgetAlertService {
     }
 
     private void deliver(UUID userId, List<PushSender.Message> messages) {
-        List<String> tokens = devices.pushTokens(userId);
-        if (tokens.isEmpty()) {
+        List<DeviceService.PushTarget> targets = devices.pushTargets(userId);
+        if (targets.isEmpty()) {
             log.info("budget_alert_no_device userId={} count={}", userId, messages.size());
             return;
         }
         for (PushSender.Message message : messages) {
-            for (String token : tokens) {
-                PushSender.Outcome outcome = push.send(token, message);
-                if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(token);
+            for (DeviceService.PushTarget target : targets) {
+                PushSender.Outcome outcome = push.send(target.token(), message);
+                deliveryLog.record(userId, target.deviceId(), message.data().get("type"), outcome);
+                if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(target.token());
                 if (outcome == PushSender.Outcome.SENT) markDelivered(userId, message);
                 log.info("budget_alert userId={} type={} outcome={}", userId, message.data().get("type"), outcome);
             }
@@ -214,13 +217,13 @@ public class BudgetAlertService {
             targets.computeIfAbsent(new Target(item.kind(), item.targetId(), item.month()), ignored -> new ArrayList<>())
                     .add(item);
         }
-        Map<UUID, List<String>> tokensByUser = new java.util.HashMap<>();
+        Map<UUID, List<DeviceService.PushTarget>> targetsByUser = new java.util.HashMap<>();
         Map<UUID, BudgetResponse> budgetsByUser = new java.util.HashMap<>();
         for (Map.Entry<Target, List<Pending>> entry : targets.entrySet()) {
             Target target = entry.getKey();
             UUID userId = entry.getValue().get(0).userId();
-            List<String> tokens = tokensByUser.computeIfAbsent(userId, devices::pushTokens);
-            if (tokens.isEmpty()) continue;
+            List<DeviceService.PushTarget> targetsForUser = targetsByUser.computeIfAbsent(userId, devices::pushTargets);
+            if (targetsForUser.isEmpty()) continue;
             LocalDate currentMonth = LocalDate.now(users.zoneOf(userId)).withDayOfMonth(1);
             if (!currentMonth.equals(target.month())) {
                 deletePending(entry.getValue());
@@ -251,9 +254,10 @@ public class BudgetAlertService {
                 continue;
             }
             boolean sent = false;
-            for (String token : tokens) {
-                PushSender.Outcome outcome = push.send(token, message);
-                if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(token);
+            for (DeviceService.PushTarget deviceTarget : targetsForUser) {
+                PushSender.Outcome outcome = push.send(deviceTarget.token(), message);
+                deliveryLog.record(userId, deviceTarget.deviceId(), message.data().get("type"), outcome);
+                if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(deviceTarget.token());
                 if (outcome == PushSender.Outcome.SENT) sent = true;
                 log.info("budget_alert_retry userId={} type={} outcome={}", userId, target.kind(), outcome);
             }

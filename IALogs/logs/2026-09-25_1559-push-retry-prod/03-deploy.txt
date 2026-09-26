@@ -1,0 +1,5 @@
+ Image paktay-prod-business-svc Building 
+ Image paktay-prod-business-svc Built 
+ Container paktay-prod-business-svc-1 Recreated 
+ Container paktay-prod-business-svc-1 Started 
+deploy_exit=0

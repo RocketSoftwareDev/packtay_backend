@@ -26,8 +26,8 @@ public final class AdminInsights {
     public record NotificationSummary(long sentThisMonth, long delivered, long failed, long devicesWithPush, long devicesTotal) {
     }
 
-    public record NotificationLog(UUID id, String kind, String email, int threshold, String periodMonth,
-                                  boolean delivered, OffsetDateTime createdAt) {
+    public record NotificationLog(UUID id, String kind, String email, String deviceName, String result,
+                                  OffsetDateTime createdAt) {
     }
 
     /** sent: tokens a los que se envió; delivered: los que Firebase aceptó. */

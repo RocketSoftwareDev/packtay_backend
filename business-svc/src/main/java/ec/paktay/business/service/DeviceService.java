@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DeviceService {
+    public record PushTarget(UUID deviceId, String token) { }
     private final JdbcClient jdbc;
     private final UserAccountService users;
 
@@ -64,6 +65,12 @@ public class DeviceService {
     public List<String> pushTokens(UUID userId) {
         return jdbc.sql("select push_token from user_devices where user_id = :userId and push_token is not null")
                 .param("userId", userId).query(String.class).list();
+    }
+
+    public List<PushTarget> pushTargets(UUID userId) {
+        return jdbc.sql("select id, push_token from user_devices where user_id = :userId and push_token is not null")
+                .param("userId", userId)
+                .query((rs, row) -> new PushTarget(rs.getObject("id", UUID.class), rs.getString("push_token"))).list();
     }
 
     /** Token rechazado por Firebase (desinstalada o caducado): se olvida. */
