@@ -1,0 +1,14 @@
+OK   business admin sin cabecera -> 403 ADMIN_CLIENT_REQUIRED  | (403, '{"message":"Solicitud no permitida","code":"ADMIN_CLIENT_REQUIRED"}')
+OK   business admin con cabecera -> 200
+OK   auth admin sin cabecera -> 403  | (403, '{"message":"Solicitud no permitida","code":"ADMIN_CLIENT_REQUIRED"}')
+OK   auth admin con cabecera -> 200
+OK   cabecera con otro valor -> 403
+OK   sin token pero con cabecera -> 401
+OK   ruta de la app sin cabecera -> 200 (el móvil no cambia)
+OK   login de la app sin cabecera -> 200
+OK   catálogo público sin cabecera -> 200
+OK   soporte público sin cabecera -> 202
+OK   preflight desde el panel local permitido  | (200, 'http://localhost:3000')
+OK   preflight desde otro dominio rechazado  | (403, None)
+OK   preflight auth-svc permite X-Paktay-Client  | (200, 'http://localhost:3000')
+exit=0

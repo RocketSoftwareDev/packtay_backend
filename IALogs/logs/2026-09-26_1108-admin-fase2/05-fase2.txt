@@ -1,0 +1,48 @@
+OK   login del admin
+OK   usuario sin ADMIN -> 403 en catálogos
+== Categorías
+OK   grupos con subcategorías  | 200
+OK   crear subcategoría con solo grupo y nombre  | {'id': '8f78ba85-6eca-447c-9038-01f62ad326d3', 'code': 'codex-prueba-1790439088', 'name': 'Codex prueba 1790439088', 'parentCode': 'hogar', 'parentName': 'Hogar y servicios', 'icon': 'key', 'colorDark': '#2DD4BF', 'colorLight': '#0D9488', 'sortOrder': 23, 'active': True, 'createdAt': '2026-09-26T16:
+OK   hereda el ícono del grupo  | {'id': '8f78ba85-6eca-447c-9038-01f62ad326d3', 'code': 'codex-prueba-1790439088', 'name': 'Codex prueba 1790439088', 'parentCode': 'hogar', 'parentName': 'Hogar y servicios', 'icon': 'key', 'colorDark': '#2DD4BF', 'colorLight': '#0D9488', 'sortOrder': 23, 'active': True, 'createdAt': '2026-09-26T16:
+OK   desactivar subcategoría  | {'id': '8f78ba85-6eca-447c-9038-01f62ad326d3', 'code': 'codex-prueba-1790439088', 'name': 'Codex prueba 1790439088', 'parentCode': 'hogar', 'icon': 'key', 'color': '#0D9488', 'order': 23, 'active': False, 'usersCount': 0}
+OK   grupo inexistente -> 404
+== Bancos
+OK   bancos del sistema con ofertas  | 200
+OK   ofertas de débito sin marca
+OK   conteos  | {'system': 29, 'custom': 0}
+OK   bancos de usuarios agrupados
+OK   crear banco  | {'id': 'b9991cde-d388-4d20-b948-5865bed577c2', 'name': 'Banco Codex 1790439088', 'country': 'EC', 'origin': 'SYSTEM', 'logoUrl': None, 'active': True, 'offerings': [], 'usersCount': 0}
+OK   débito con marca se guarda sin marca  | {'id': 'b9991cde-d388-4d20-b948-5865bed577c2', 'name': 'Banco Codex 1790439088', 'country': 'EC', 'origin': 'SYSTEM', 'logoUrl': None, 'active': True, 'offerings': [{'id': '64c0d7e5-c545-4e68-8d82-950cd131f1dc', 'cardType': 'DEBIT', 'brand': None, 'sourceUrl': None, 'verifiedAt': '2026-09-26', 'acti
+OK   crédito sin marca -> 400
+OK   crédito Visa  | {'id': 'b9991cde-d388-4d20-b948-5865bed577c2', 'name': 'Banco Codex 1790439088', 'country': 'EC', 'origin': 'SYSTEM', 'logoUrl': None, 'active': True, 'offerings': [{'id': '93c0455f-ace0-4dca-90e0-42822c39507e', 'cardType': 'CREDIT', 'brand': 'VISA', 'sourceUrl': 'https://ejemplo.ec', 'verifiedAt': 
+oferta repetida -> 409 (409 si hay índice único; anotar)
+OK   banco duplicado -> 409
+OK   desactivar banco  | {'id': 'b9991cde-d388-4d20-b948-5865bed577c2', 'name': 'Banco Codex 1790439088', 'country': 'EC', 'origin': 'SYSTEM', 'logoUrl': None, 'active': False, 'offerings': [{'id': '93c0455f-ace0-4dca-90e0-42822c39507e', 'cardType': 'CREDIT', 'brand': 'VISA', 'sourceUrl': 'https://ejemplo.ec', 'verifiedAt':
+== Monedas y países
+OK   hay una moneda base  | [{'code': 'USD', 'numericCode': '840', 'name': 'Dólar estadounidense', 'symbol': '$', 'decimals': 2, 'base': True, 'active': True}]
+OK   desactivar la base -> 409
+OK   crear moneda  | {'code': 'ZAA', 'numericCode': '988', 'name': 'Moneda Codex', 'symbol': '¤', 'decimals': 2, 'base': False, 'active': True}
+OK   desactivar moneda nueva
+OK   país con moneda inactiva -> 409
+OK   crear país  | {'code': 'QA', 'name': 'País Codex', 'currencyCode': 'ZAA', 'active': True, 'usersCount': 0}
+OK   moneda usada por país activo -> 409
+OK   desactivar país
+== Resumen, notificaciones y estado
+OK   cifras del resumen  | {'activeUsers': 1, 'newUsersThisMonth': 1, 'walletCaptures': 0, 'activeCards': 0, 'pushDelivered': 0, 'pushSent': 0, 'plans': [{'key': 'PRO_BETA', 'label': 'PRO · Beta', 'count': 1}], 'signupsByWeek': [{'week': 'S32', 'weekStart': '2026-08-03', 'count': 0}, {'week': 'S33', 'weekStart': '2026-08-10',
+OK   sin montos en el resumen
+OK   resumen de avisos  | {'sentThisMonth': 0, 'delivered': 0, 'failed': 0, 'devicesWithPush': 0, 'devicesTotal': 0}
+OK   registro de avisos
+OK   push de prueba responde con mensaje  | {'delivered': False, 'sent': 0, 'message': 'Tu cuenta no tiene dispositivos con avisos activados.'}
+OK   estado con 6 servicios  | {'auth-svc': 'UP', 'business-svc': 'UP', 'keycloak': 'UP', 'postgres': 'UP', 'fcm': 'UP', 'smtp': 'UNMONITORED'}
+OK   auth-svc UP desde business-svc  | {'auth-svc': 'UP', 'business-svc': 'UP', 'keycloak': 'UP', 'postgres': 'UP', 'fcm': 'UP', 'smtp': 'UNMONITORED'}
+OK   Keycloak y la base UP  | {'auth-svc': 'UP', 'business-svc': 'UP', 'keycloak': 'UP', 'postgres': 'UP', 'fcm': 'UP', 'smtp': 'UNMONITORED'}
+OK   versión del esquema V9  | [{'label': 'Esquema', 'value': 'Flyway V9'}, {'label': 'Java', 'value': '17.0.20.1'}]
+== Auditoría
+OK   auditado: Subcategoría creada
+OK   auditado: Categoría desactivada
+OK   auditado: Banco creado
+OK   auditado: Oferta de tarjeta agregada
+OK   auditado: Banco desactivado
+OK   auditado: Moneda creada
+OK   auditado: País creado
+exit=0
