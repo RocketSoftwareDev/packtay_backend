@@ -3,8 +3,13 @@
 Único script para probar el panel; reemplaza a `admin-fase2.md` y `admin-seguridad1.md`.
 **No cambies código.** Todo va a `IALogs/logs/`.
 
-Rama: `BRANCH=feature/password-temporal-bloqueo` (incluye `feature/admin-login-propio`) hasta que
-se integre; después, `develop`. Web: `feature/contrasenia-temporal` (incluye el BFF). Desde esas ramas:
+Ramas: `develop` en los tres repos (backend PR #26 y #27, web PR #4, móvil PR #29). Mientras
+`fix/test-contrasenia-temporal` no esté integrada en `develop`, usa `BRANCH=fix/test-contrasenia-temporal`
+(corrige `TemporaryPasswordServiceTest`, que no compilaba y rompía también el build de la imagen).
+**Obligatorio:** correr `keycloak-init` (paso 1) en cada run: crea el cliente `paktay-admin-panel`,
+sincroniza la contraseña del admin con `PAKTAY_ADMIN_PASSWORD` y aplica la fuerza bruta. Sin él, el
+login del panel responde 401 y todo el escenario falla en cascada (run `1239-develop-3repos`). En
+`develop`:
 - **Contraseñas:** el admin envía una contraseña temporal por correo (`POST
   /api/v1/admin/users/{id}/password/temporary`); el login del móvil con ella responde
   `password_change_required`; se cambia con `PUT /api/v1/auth/password/temporary`; vence a las 24 h.
@@ -36,7 +41,7 @@ Cubre:
 
 ```bash
 cd packtay_backend
-export BRANCH=${BRANCH:-feature/password-temporal-bloqueo}
+export BRANCH=${BRANCH:-develop}
 git fetch origin && git checkout "$BRANCH" && git pull --ff-only
 export RUN=$(date +%Y-%m-%d_%H%M)-admin-panel
 export LOGS=$PWD/IALogs/logs/$RUN; mkdir -p "$LOGS"
@@ -320,7 +325,7 @@ Solo si existe `../packtay_web_admin` (si no, anótalo en el resumen y sigue). N
 
 ```bash
 cd ../packtay_web_admin
-git fetch origin && git checkout feature/contrasenia-temporal && git pull --ff-only
+git fetch origin && git checkout ${WEB_BRANCH:-develop} && git pull --ff-only
 pnpm install --frozen-lockfile > "$LOGS/10-web-install.log" 2>&1
 cat > .env.local <<EOF
 NEXT_PUBLIC_USE_MOCKS=false
@@ -393,7 +398,7 @@ Solo si existe `../packtay_mobile_front` con su `.env` (si no, anótalo y sigue)
 
 ```bash
 cd ../packtay_mobile_front
-git fetch origin && git checkout feature/contrasenia-temporal-bloqueo && git pull --ff-only
+git fetch origin && git checkout ${MOBILE_BRANCH:-develop} && git pull --ff-only
 npm ci > "$LOGS/12-movil-install.log" 2>&1
 npx tsc --noEmit > "$LOGS/12-movil-tsc.txt" 2>&1; echo "exit=$?" >> "$LOGS/12-movil-tsc.txt"
 npm test -- __tests__/authSession.test.ts __tests__/passwordApi.test.ts __tests__/AuthScreens.test.tsx > "$LOGS/12-movil-jest.txt" 2>&1; echo "exit=$?" >> "$LOGS/12-movil-jest.txt"
