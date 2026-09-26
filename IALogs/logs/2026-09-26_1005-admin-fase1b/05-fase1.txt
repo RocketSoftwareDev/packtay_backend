@@ -1,0 +1,63 @@
+OK   login del admin
+== Registro, app_users y auditoría
+OK   registro 201  | {'id': '605d12b3-f0ec-4f51-9a2e-6940070fb044', 'email': 'codexf11790436173572@paktay.local', 'displayName': 'Codex Fase Uno', 'enabled': True}
+OK   app_users tiene el correo desde el registro
+OK   alta en admin_audit
+OK   login del usuario
+== Permisos
+OK   usuario sin ADMIN -> 403 en business
+OK   usuario sin ADMIN -> 403 en auth
+OK   sin token -> 401
+== Usuarios (business)
+OK   lista con búsqueda  | {'items': [{'id': '605d12b3-f0ec-4f51-9a2e-6940070fb044', 'name': 'Codex Fase Uno', 'email': 'codexf11790436173572@paktay.local', 'country': 'EC', 'plan': 'PRO', 'planSource': None, 'status': 'ACTIVE', 'activeCards': 0, 'lastAccess': None, 'createdAt': '2026-09-26T15:22:53.837611Z'}], 'total': 1, 'p
+OK   detalle sin montos  | {'id': '605d12b3-f0ec-4f51-9a2e-6940070fb044', 'name': 'Codex Fase Uno', 'email': 'codexf11790436173572@paktay.local', 'country': 'EC', 'plan': 'PRO', 'planSource': None, 'status': 'ACTIVE', 'activeCards': 0, 'lastAccess': None, 'createdAt': '2026-09-26T15:22:53.837611Z', 'timezone': 'America/Guayaq
+OK   cambiar plan a FREE  | {'id': '605d12b3-f0ec-4f51-9a2e-6940070fb044', 'name': 'Codex Fase Uno', 'email': 'codexf11790436173572@paktay.local', 'country': 'EC', 'plan': 'FREE', 'planSource': 'TESTER', 'status': 'ACTIVE', 'activeCards': 0, 'lastAccess': None, 'createdAt': '2026-09-26T15:22:53.837611Z', 'timezone': 'America/G
+OK   plan cambiado en auditoría
+OK   plan inválido -> 400
+== Roles (auth)
+OK   lista de administradores  | [{'id': '4d0eb5dd-d8c8-4a9f-91e7-34e1b8dbf187', 'email': 'admin@paktay.local', 'name': 'Paktay Admin', 'enabled': True}]
+OK   asignar ADMIN
+OK   con el rol nuevo entra al admin
+OK   quitar ADMIN
+OK   nadie se quita el rol a sí mismo -> 409
+OK   no puede bloquearse a sí mismo -> 409
+OK   roles en auditoría
+== Bloqueo de cuenta
+OK   bloquear
+OK   token viejo -> 403 ACCOUNT_BLOCKED  | (403, {'requestId': '21404436-51cc-4335-8b53-c6225f904dff', 'message': 'Tu cuenta fue bloqueada', 'code': 'ACCOUNT_BLOCKED'})
+OK   ya no puede iniciar sesión
+OK   desbloquear
+OK   vuelve a entrar
+== Bloqueos de correo y dominio
+OK   bloquear dominio  | {'id': '4ec2706a-abdd-4a59-be86-179dbeb97680', 'type': 'DOMAIN', 'value': 'codex-desechable.test', 'scopes': ['TICKETS', 'REGISTRATION'], 'reason': 'FAKE_EMAIL', 'createdAt': '2026-09-26T15:22:54.724151Z', 'createdBy': 'admin@paktay.local', 'automatic': False}
+OK   registro con dominio bloqueado -> 400 genérico  | {'message': 'No fue posible registrar la cuenta', 'timestamp': '2026-09-26T15:22:54.731999251Z', 'requestId': 'a3b1132b-8479-4f39-b847-8be3a6b79dc2', 'status': 400}
+OK   dominio público -> 400
+OK   duplicado -> 409
+OK   correo guardado normalizado  | {'id': '0361aa2f-a20c-4fe7-8439-8876040946a9', 'type': 'EMAIL', 'value': 'codextroll@gmail.com', 'scopes': ['TICKETS'], 'reason': 'OFFENSIVE', 'createdAt': '2026-09-26T15:22:54.747984Z', 'createdBy': 'admin@paktay.local', 'automatic': False}
+== Soporte público
+OK   crear ticket -> 202 con código  | {'ticketId': 'PK-0001', 'status': 'PENDING_VERIFICATION', 'message': 'Te enviamos un correo para confirmar tu solicitud. Revisa tu bandeja y spam.'}
+OK   queda sin confirmar
+OK   sin confirmar no aparece en la bandeja
+OK   llegó el correo con el enlace
+OK   confirmar -> 200  | 200
+OK   el enlace no sirve dos veces -> 410
+OK   confirmado aparece en NEW con la cuenta vinculada  | [{'id': '8ed288b6-9c80-4159-a9d6-6020a1b549c4', 'code': 'PK-0001', 'email': 'codexf11790436173572@paktay.local', 'reason': 'No me llegan las capturas de Wallet', 'status': 'NEW', 'createdAt': '2026-09-26T15:22:54.765968Z', 'verifiedAt': '2026-09-26T15:22:57.903032Z', 'unread': True, 'account': {'use
+OK   detalle con conversación  | {'id': '8ed288b6-9c80-4159-a9d6-6020a1b549c4', 'code': 'PK-0001', 'email': 'codexf11790436173572@paktay.local', 'reason': 'No me llegan las capturas de Wallet', 'status': 'NEW', 'createdAt': '2026-09-26T15:22:54.765968Z', 'verifiedAt': '2026-09-26T15:22:57.903032Z', 'unread': True, 'account': {'user
+OK   nota interna  | {'id': '8ed288b6-9c80-4159-a9d6-6020a1b549c4', 'code': 'PK-0001', 'email': 'codexf11790436173572@paktay.local', 'reason': 'No me llegan las capturas de Wallet', 'status': 'NEW', 'createdAt': '2026-09-26T15:22:54.765968Z', 'verifiedAt': '2026-09-26T15:22:57.903032Z', 'unread': False, 'account': {'use
+OK   responder y resolver  | {'id': '8ed288b6-9c80-4159-a9d6-6020a1b549c4', 'code': 'PK-0001', 'email': 'codexf11790436173572@paktay.local', 'reason': 'No me llegan las capturas de Wallet', 'status': 'RESOLVED', 'createdAt': '2026-09-26T15:22:54.765968Z', 'verifiedAt': '2026-09-26T15:22:57.903032Z', 'unread': False, 'account': 
+OK   la respuesta salió por correo
+OK   contadores  | {'new': 0, 'inProgress': 0, 'resolved': 1, 'pendingVerification': 0, 'blocks': 2}
+OK   bloqueado recibe 202 pero no se guarda  | {'ticketId': 'PK-1622', 'status': 'PENDING_VERIFICATION', 'message': 'Te enviamos un correo para confirmar tu solicitud. Revisa tu bandeja y spam.'}
+OK   campo trampa lleno -> 202 sin guardar  | {'ticketId': 'PK-2138', 'status': 'PENDING_VERIFICATION', 'message': 'Te enviamos un correo para confirmar tu solicitud. Revisa tu bandeja y spam.'}
+OK   límite por IP -> 429  | [202, 202, 202, 429, 429, 429]
+== Auditoría (business)
+OK   lista de auditoría con conteos  | {'ALL': 8, 'ACCOUNT_DELETED': 0, 'USER_CREATED': 1, 'ADMIN_ACTION': 7}
+OK   ya no se auditan gastos ni tarjetas
+== Borrado desde el admin
+OK   eliminar cuenta -> 200
+OK   datos purgados
+OK   tickets del correo borrados
+OK   eventos del usuario borrados
+OK   cierre anónimo en auditoría
+OK   normalize_email en SQL = Java
+exit=0

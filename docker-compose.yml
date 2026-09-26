@@ -34,7 +34,13 @@ services:
         /opt/keycloak/bin/kcadm.sh update realms/paktay -s "accessTokenLifespan=$$KEYCLOAK_ACCESS_TOKEN_LIFESPAN" -s "ssoSessionIdleTimeout=$$KEYCLOAK_SSO_SESSION_IDLE_TIMEOUT" -s "ssoSessionMaxLifespan=$$KEYCLOAK_SSO_SESSION_MAX_LIFESPAN";
         /opt/keycloak/bin/kcadm.sh update "clients/$$CLIENT_UUID" -r paktay -s "secret=$$KEYCLOAK_SERVICE_CLIENT_SECRET";
         /opt/keycloak/bin/kcadm.sh set-password -r paktay --username "$$PAKTAY_ADMIN_EMAIL" --new-password "$$PAKTAY_ADMIN_PASSWORD";
-        /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm
+        /opt/keycloak/bin/kcadm.sh add-roles -r paktay --uusername service-account-paktay-auth-service --cclientid realm-management --rolename manage-users --rolename view-users --rolename query-users --rolename view-realm;
+        /opt/keycloak/bin/kcadm.sh update realms/paktay -s bruteForceProtected=true -s permanentLockout=false -s failureFactor=3 -s waitIncrementSeconds=60 -s maxFailureWaitSeconds=900 -s maxDeltaTimeSeconds=43200;
+        PANEL_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-admin-panel --fields id --format csv --noquotes);
+        if [ -z "$$PANEL_UUID" ]; then /opt/keycloak/bin/kcadm.sh create clients -r paktay -s clientId=paktay-admin-panel -s "name=Paktay Admin Panel" -s enabled=true -s publicClient=false -s standardFlowEnabled=false -s directAccessGrantsEnabled=true -s implicitFlowEnabled=false -s serviceAccountsEnabled=false; PANEL_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-admin-panel --fields id --format csv --noquotes); fi;
+        /opt/keycloak/bin/kcadm.sh update "clients/$$PANEL_UUID" -r paktay -s "secret=$$KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET" -s 'attributes."access.token.lifespan"='"$$PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN" -s 'attributes."client.session.idle.timeout"='"$$PAKTAY_ADMIN_SESSION_IDLE_TIMEOUT" -s 'attributes."client.session.max.lifespan"='"$$PAKTAY_ADMIN_SESSION_MAX_LIFESPAN";
+        OLD_WEB_UUID=$$(/opt/keycloak/bin/kcadm.sh get clients -r paktay -q clientId=paktay-admin-web --fields id --format csv --noquotes);
+        if [ -n "$$OLD_WEB_UUID" ]; then /opt/keycloak/bin/kcadm.sh delete "clients/$$OLD_WEB_UUID" -r paktay; fi
     environment:
       KEYCLOAK_INTERNAL_URL: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN:-admin}
@@ -46,6 +52,10 @@ services:
       KEYCLOAK_SSO_SESSION_MAX_LIFESPAN: ${KEYCLOAK_SSO_SESSION_MAX_LIFESPAN:-2592000}
       PAKTAY_ADMIN_EMAIL: ${PAKTAY_ADMIN_EMAIL:?Define PAKTAY_ADMIN_EMAIL in .env}
       PAKTAY_ADMIN_PASSWORD: ${PAKTAY_ADMIN_PASSWORD:?Define PAKTAY_ADMIN_PASSWORD in .env}
+      KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET: ${KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET:?Define KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET in .env}
+      PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN: ${PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN:-900}
+      PAKTAY_ADMIN_SESSION_IDLE_TIMEOUT: ${PAKTAY_ADMIN_SESSION_IDLE_TIMEOUT:-1800}
+      PAKTAY_ADMIN_SESSION_MAX_LIFESPAN: ${PAKTAY_ADMIN_SESSION_MAX_LIFESPAN:-28800}
 
   auth-svc:
     mem_limit: 640m
@@ -70,7 +80,10 @@ services:
       KEYCLOAK_ISSUER_URI: ${KEYCLOAK_ISSUER_URI:-http://localhost:8180/realms/paktay}
       KEYCLOAK_JWK_SET_URI: ${SHARED_KEYCLOAK_INTERNAL_URL:-http://host.docker.internal:8180}/realms/paktay/protocol/openid-connect/certs
       KEYCLOAK_SERVICE_CLIENT_SECRET: ${KEYCLOAK_SERVICE_CLIENT_SECRET:?Define KEYCLOAK_SERVICE_CLIENT_SECRET in .env}
+      KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET: ${KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET:?Define KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET in .env}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
+      PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN: ${PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN:-true}
     ports:
       - "${API_BIND_ADDRESS:-127.0.0.1}:${AUTH_PORT:-8081}:8081"
     depends_on:
@@ -95,6 +108,20 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_AVATAR_BUCKET: ${SUPABASE_AVATAR_BUCKET:-avatars}
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
+      # Web del formulario público de soporte (vacío = los mismos dominios del panel).
+      PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS: ${PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS:-}
+      PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
+      PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN: ${PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN:-true}
+      # Correo de soporte (confirmación y respuestas): el mismo SMTP que auth-svc.
+      SMTP_HOST: ${SMTP_HOST:?Define SMTP_HOST in .env}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_USER: ${SMTP_USER:?Define SMTP_USER in .env}
+      SMTP_PASS: ${SMTP_PASS:?Define SMTP_PASS in .env}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SUPPORT_VERIFY_LINK: ${SUPPORT_VERIFY_LINK:-http://localhost:8082/api/v1/public/support/verify?token={token}}
+      AUTH_HEALTH_URL: http://auth-svc:8081/actuator/health
       # Avisos push opcionales. Sin credenciales, no se envía nada.
       FIREBASE_CREDENTIALS_FILE: /run/secrets/firebase-admin.json
     volumes:

@@ -30,6 +30,31 @@ public class ApiExceptionHandler {
         return response(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
+    @ExceptionHandler(ConflictException.class)
+    ResponseEntity<Map<String, Object>> conflict(ConflictException exception) {
+        log.warn("request_conflict requestId={} reason={}", MDC.get("requestId"), exception.getMessage());
+        return response(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(CodedException.class)
+    ResponseEntity<Map<String, Object>> coded(CodedException exception) {
+        log.warn("request_rejected_with_code requestId={} code={}", MDC.get("requestId"), exception.code());
+        return ResponseEntity.status(exception.status()).body(Map.of("timestamp", Instant.now().toString(),
+                "status", exception.status().value(), "message", exception.getMessage(), "code", exception.code(),
+                "requestId", String.valueOf(MDC.get("requestId"))));
+    }
+
+    @ExceptionHandler(NotFoundException.class)
+    ResponseEntity<Map<String, Object>> notFound(NotFoundException exception) {
+        log.warn("resource_not_found requestId={} reason={}", MDC.get("requestId"), exception.getMessage());
+        return response(HttpStatus.NOT_FOUND, exception.getMessage());
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    ResponseEntity<Map<String, Object>> denied(org.springframework.security.access.AccessDeniedException exception) {
+        return response(HttpStatus.FORBIDDEN, "Se requiere el rol ADMIN");
+    }
+
     @ExceptionHandler(IllegalStateException.class)
     ResponseEntity<Map<String, Object>> illegalState(IllegalStateException exception) {
         log.error("upstream_operation_failed requestId={}", MDC.get("requestId"));

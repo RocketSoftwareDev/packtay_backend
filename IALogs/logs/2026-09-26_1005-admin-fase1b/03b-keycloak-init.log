@@ -1,0 +1,285 @@
+time="2026-09-26T10:14:38-05:00" level=warning msg="Found orphan containers (paktay-local-keycloak-db-1, paktay-local-mailpit-1) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container paktay-local-keycloak-init-run-564d82bdf36c Creating 
+ Container paktay-local-keycloak-init-run-564d82bdf36c Created 
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:38 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:38 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:38 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:38 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:38 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:38 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:41 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:41 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:41 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:41 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:41 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:41 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:45 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:45 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:45 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:45 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:45 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:45 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:48 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:48 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:48 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:48 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:48 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:48 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:52 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:52 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:52 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:52 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:52 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:52 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:55 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:55 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:55 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:55 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:55 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:55 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:14:58 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:58 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:58 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:58 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:14:58 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:14:58 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:02 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:02 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:02 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:02 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:02 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:02 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:05 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:05 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:05 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:05 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:05 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:05 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:09 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:09 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:09 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:09 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:09 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:09 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:12 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:12 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:12 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:12 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:12 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:12 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:15 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:15 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:15 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:15 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:15 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:15 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:19 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:19 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:19 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:19 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:19 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:19 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:22 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:22 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:22 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:22 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:22 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:22 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:25 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:25 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:25 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:25 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:25 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:25 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:29 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:29 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:29 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:29 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:29 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:29 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:32 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:32 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:32 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:32 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:32 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:32 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:36 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:36 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:36 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:36 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:36 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:36 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:39 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:39 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:39 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:39 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:39 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:39 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+Logging into http://host.docker.internal:8180 as user admin of realm master
+Sep 26, 2026 3:15:42 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:42 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:42 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:42 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Sep 26, 2026 3:15:42 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: I/O exception (java.net.SocketException) caught when processing request to {}->http://host.docker.internal:8180: Network is unreachable
+Sep 26, 2026 3:15:42 PM org.apache.http.impl.execchain.RetryExec execute
+INFO: Retrying request to {}->http://host.docker.internal:8180
+Failed to send request - Network is unreachable
+
+exit=1

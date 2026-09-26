@@ -4,6 +4,7 @@ import java.security.SecureRandom;
 import java.time.Clock;
 import java.util.Locale;
 import java.util.Map;
+import ec.paktay.auth.exception.CodedException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ public class PasswordPinService {
     private final SecureRandom random = new SecureRandom();
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
     private final Clock clock;
+    private final AccountAccess access;
 
     @org.springframework.beans.factory.annotation.Autowired
     public PasswordPinService(JdbcTemplate db, org.springframework.transaction.PlatformTransactionManager manager,
@@ -27,13 +29,24 @@ public class PasswordPinService {
     PasswordPinService(JdbcTemplate db, TransactionTemplate tx, KeycloakIdentityService identities,
             PasswordMailService mail, Clock clock) {
         this.db = db; this.tx = tx; this.identities = identities; this.mail = mail; this.clock = clock;
+        this.access = new AccountAccess(db, identities);
     }
     private String normalize(String email) { return email.trim().toLowerCase(Locale.ROOT); }
 
-    public void requestReset(String email) { request(normalize(email), "RESET", null); }
+    /**
+     * Una cuenta bloqueada por un administrador no recibe PIN: se le dice que contacte con soporte.
+     * Es la única respuesta no genérica; el registro ya revela si un correo tiene cuenta, así que no
+     * abre una puerta nueva. Una cuenta solo pausada por intentos fallidos sí recibe PIN (y el PIN
+     * quita la pausa): ver {@link AccountAccess}.
+     */
+    public void requestReset(String email) {
+        String address = normalize(email);
+        if (access.blockedByAdmin(identities.findByEmail(address))) throw CodedException.accountBlocked();
+        request(address, "RESET", null);
+    }
     public void requestChange(String subject) {
         Map<?, ?> user = identities.findById(subject);
-        if (user == null || !Boolean.TRUE.equals(user.get("enabled")) || !(user.get("email") instanceof String email) || email.isBlank())
+        if (!access.usable(user) || !(user.get("email") instanceof String email) || email.isBlank())
             throw new IllegalArgumentException("La cuenta no tiene un correo disponible");
         request(normalize(email), "CHANGE", subject);
     }
@@ -44,8 +57,7 @@ public class PasswordPinService {
             if (ids.size() == 1) user = identities.findById(ids.get(0));
         }
         // Un correo local antiguo nunca autoriza cambiar la cuenta de otro correo.
-        return user != null && Boolean.TRUE.equals(user.get("enabled"))
-                && email.equalsIgnoreCase(String.valueOf(user.get("email"))) ? user : null;
+        return access.usable(user) && email.equalsIgnoreCase(String.valueOf(user.get("email"))) ? user : null;
     }
     private void request(String email, String purpose, String subject) {
         tx.executeWithoutResult(status -> {
@@ -94,7 +106,10 @@ public class PasswordPinService {
     }
     private boolean currentIdentity(Map<String,Object> row, String email) {
         Map<?, ?> user = identities.findById((String)row.get("user_id"));
-        return user != null && Boolean.TRUE.equals(user.get("enabled")) && email.equalsIgnoreCase(String.valueOf(user.get("email")));
+        boolean current = access.usable(user) && email.equalsIgnoreCase(String.valueOf(user.get("email")));
+        if (!current) org.slf4j.LoggerFactory.getLogger(PasswordPinService.class)
+                .warn("pin_identity_rejected subject={} found={}", row.get("user_id"), user != null);
+        return current;
     }
     private String hash(String value) {
         try {
@@ -105,18 +120,23 @@ public class PasswordPinService {
     public void completeReset(String email, String resetToken, String password) { complete(normalize(email), "RESET", null, resetToken, password); }
     public void completeChange(String subject, String resetToken, String password) { complete(accountEmail(subject), "CHANGE", subject, resetToken, password); }
     private void complete(String email, String purpose, String subject, String resetToken, String password) {
-        Boolean valid = tx.execute(status -> {
+        String userId = tx.execute(status -> {
             var rows = db.queryForList("select * from password_pins where email=? and purpose=? for update", email, purpose);
-            if (rows.isEmpty()) return false;
+            if (rows.isEmpty()) return null;
             var row = rows.get(0);
             if (row.get("token_hash") == null || ((Number)row.get("token_expires_at")).longValue() <= clock.millis()
                     || !java.security.MessageDigest.isEqual(hash(resetToken).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
                             ((String)row.get("token_hash")).getBytes(java.nio.charset.StandardCharsets.US_ASCII))
-                    || (subject != null && !subject.equals(row.get("user_id"))) || !currentIdentity(row, email)) return false;
-            identities.replacePassword((String)row.get("user_id"), password, false);
+                    || (subject != null && !subject.equals(row.get("user_id"))) || !currentIdentity(row, email)) return null;
+            String owner = (String) row.get("user_id");
+            identities.replacePassword(owner, password, false);
             db.update("update password_pins set token_hash=null,token_expires_at=0 where email=? and purpose=?", email, purpose);
-            return true;
+            // Una contraseña elegida por la persona reemplaza la temporal que hubiera enviado el admin.
+            db.update("delete from password_temporary where user_id = cast(? as uuid)", owner);
+            return owner;
         });
-        if (!Boolean.TRUE.equals(valid)) throw new IllegalArgumentException("La validación expiró. Solicita y valida un nuevo PIN.");
+        if (userId == null) throw new IllegalArgumentException("La validación expiró. Solicita y valida un nuevo PIN.");
+        // Demostró ser dueña del correo: fuera el bloqueo temporal por intentos fallidos.
+        identities.clearBruteForce(userId);
     }
 }

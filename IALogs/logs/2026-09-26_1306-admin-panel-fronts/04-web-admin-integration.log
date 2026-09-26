@@ -1,0 +1,10 @@
+session_without_client_header= 403
+session_without_cookie= 401
+login= 200 cookies= pk_at,pk_rt
+session_after_login= 200 has_user= True
+bff_summary= 200 keys= activeCards,activeUsers,newUsersThisMonth,plans,pushDelivered,pushSent,signupsByWeek,walletCaptures
+logout= 204
+session_after_logout= 401
+/ = 200 final_url= http://localhost:3000/resumen
+/login = 200 final_url= http://localhost:3000/login
+exit=0

@@ -1,0 +1,6 @@
+ Container paktay-local-keycloak-init-run-09f55e259947 Creating 
+ Container paktay-local-keycloak-init-run-09f55e259947 Created 
+Logging into http://host.docker.internal:28180 as user admin of realm master
+Invalid password: must contain at least 1 upper case characters. [invalidPasswordMinUpperCaseCharsMessage]
+
+exit=1

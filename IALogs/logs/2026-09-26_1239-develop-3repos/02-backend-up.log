@@ -1,0 +1,238 @@
+ Image paktay-local-auth-svc Building 
+ Image paktay-local-business-svc Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.14kB done
+#1 DONE 0.0s
+
+#2 [auth-svc internal] load build definition from Dockerfile
+#2 transferring dockerfile: 557B done
+#2 DONE 0.0s
+
+#3 [business-svc internal] load build definition from Dockerfile
+#3 transferring dockerfile: 575B done
+#3 DONE 0.0s
+
+#4 [auth-svc internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-17
+#4 ...
+
+#5 [auth] library/eclipse-temurin:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [auth] library/maven:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#7 [auth-svc internal] load metadata for docker.io/library/eclipse-temurin:17-jre
+#7 DONE 1.1s
+
+#4 [business-svc internal] load metadata for docker.io/library/maven:3.9.9-eclipse-temurin-17
+#4 DONE 1.1s
+
+#8 [auth-svc internal] load .dockerignore
+#8 transferring context: 123B done
+#8 DONE 0.0s
+
+#9 [auth-svc build 1/7] FROM docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc
+#9 resolve docker.io/library/maven:3.9.9-eclipse-temurin-17@sha256:f58d59b6273e785ac0a4477f6e9b5ba1d7731c75b906c0f7b34076f1851318cc done
+#9 DONE 0.0s
+
+#10 [auth-svc stage-1 1/3] FROM docker.io/library/eclipse-temurin:17-jre@sha256:34d6aaf0fa4ef553c470234ec23c32c7d5c0f370c2bd4b0bf8a16838052d85f0
+#10 resolve docker.io/library/eclipse-temurin:17-jre@sha256:34d6aaf0fa4ef553c470234ec23c32c7d5c0f370c2bd4b0bf8a16838052d85f0 done
+#10 DONE 0.0s
+
+#11 [auth-svc internal] load build context
+#11 transferring context: 154.84kB done
+#11 DONE 0.0s
+
+#12 [auth-svc build 4/7] COPY auth-svc/pom.xml ./auth-svc/pom.xml
+#12 CACHED
+
+#13 [auth-svc build 3/7] COPY pom.xml ./pom.xml
+#13 CACHED
+
+#14 [business-svc build 5/7] COPY business-svc/pom.xml ./business-svc/pom.xml
+#14 CACHED
+
+#15 [business-svc internal] load build context
+#15 transferring context: 612.15kB 0.0s done
+#15 DONE 0.0s
+
+#16 [business-svc build 3/7] COPY pom.xml ./pom.xml
+#16 CACHED
+
+#17 [business-svc build 2/7] WORKDIR /workspace
+#17 CACHED
+
+#18 [business-svc build 4/7] COPY auth-svc/pom.xml ./auth-svc/pom.xml
+#18 CACHED
+
+#19 [business-svc build 5/7] COPY business-svc/pom.xml ./business-svc/pom.xml
+#19 CACHED
+
+#20 [auth-svc build 6/7] COPY auth-svc/src ./auth-svc/src
+#20 DONE 0.0s
+
+#21 [business-svc build 6/7] COPY business-svc/src ./business-svc/src
+#21 DONE 0.0s
+
+#22 [business-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl business-svc -am package -DskipTests
+#22 0.691 [INFO] Scanning for projects...
+#22 7.362 [INFO] ------------------------------------------------------------------------
+#22 7.362 [INFO] Reactor Build Order:
+#22 7.362 [INFO] 
+#22 7.363 [INFO] Paktay Backend                                                     [pom]
+#22 7.363 [INFO] Paktay Business Service                                            [jar]
+#22 7.367 [INFO] 
+#22 7.367 [INFO] ----------------------< ec.paktay:paktay-backend >----------------------
+#22 7.367 [INFO] Building Paktay Backend 0.1.0-SNAPSHOT                             [1/2]
+#22 7.367 [INFO]   from pom.xml
+#22 7.368 [INFO] --------------------------------[ pom ]---------------------------------
+#22 8.049 [INFO] 
+#22 8.049 [INFO] --- dependency:3.8.1:properties (ruta-de-dependencias) @ paktay-backend ---
+#22 ...
+
+#23 [auth-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests
+#23 0.703 [INFO] Scanning for projects...
+#23 7.385 [INFO] ------------------------------------------------------------------------
+#23 7.385 [INFO] Reactor Build Order:
+#23 7.385 [INFO] 
+#23 7.386 [INFO] Paktay Backend                                                     [pom]
+#23 7.386 [INFO] Paktay Auth Service                                                [jar]
+#23 7.390 [INFO] 
+#23 7.390 [INFO] ----------------------< ec.paktay:paktay-backend >----------------------
+#23 7.390 [INFO] Building Paktay Backend 0.1.0-SNAPSHOT                             [1/2]
+#23 7.390 [INFO]   from pom.xml
+#23 7.390 [INFO] --------------------------------[ pom ]---------------------------------
+#23 8.064 [INFO] 
+#23 8.065 [INFO] --- dependency:3.8.1:properties (ruta-de-dependencias) @ paktay-backend ---
+#23 ...
+
+#22 [business-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl business-svc -am package -DskipTests
+#22 27.67 [INFO] 
+#22 27.67 [INFO] -----------------------< ec.paktay:business-svc >-----------------------
+#22 27.67 [INFO] Building Paktay Business Service 0.1.0-SNAPSHOT                    [2/2]
+#22 27.67 [INFO]   from business-svc/pom.xml
+#22 27.67 [INFO] --------------------------------[ jar ]---------------------------------
+#22 ...
+
+#23 [auth-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests
+#23 27.73 [INFO] 
+#23 27.73 [INFO] -------------------------< ec.paktay:auth-svc >-------------------------
+#23 27.73 [INFO] Building Paktay Auth Service 0.1.0-SNAPSHOT                        [2/2]
+#23 27.73 [INFO]   from auth-svc/pom.xml
+#23 27.73 [INFO] --------------------------------[ jar ]---------------------------------
+#23 51.89 [INFO] 
+#23 51.89 [INFO] --- dependency:3.8.1:properties (ruta-de-dependencias) @ auth-svc ---
+#23 51.89 [INFO] 
+#23 51.89 [INFO] --- resources:3.3.1:resources (default-resources) @ auth-svc ---
+#23 52.91 [INFO] Copying 1 resource from src/main/resources to target/classes
+#23 52.92 [INFO] Copying 3 resources from src/main/resources to target/classes
+#23 52.92 [INFO] 
+#23 52.92 [INFO] --- compiler:3.13.0:compile (default-compile) @ auth-svc ---
+#23 55.17 [INFO] Recompiling the module because of changed source code.
+#23 55.18 [INFO] Compiling 48 source files with javac [debug parameters release 17] to target/classes
+#23 56.17 [INFO] 
+#23 56.17 [INFO] --- resources:3.3.1:testResources (default-testResources) @ auth-svc ---
+#23 56.17 [INFO] skip non existing resourceDirectory /workspace/auth-svc/src/test/resources
+#23 56.17 [INFO] 
+#23 56.17 [INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ auth-svc ---
+#23 56.17 [INFO] Recompiling the module because of changed dependency.
+#23 56.17 [INFO] Compiling 6 source files with javac [debug parameters release 17] to target/test-classes
+#23 56.41 [INFO] -------------------------------------------------------------
+#23 56.41 [ERROR] COMPILATION ERROR : 
+#23 56.41 [INFO] -------------------------------------------------------------
+#23 56.41 [ERROR] /workspace/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[46,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+#23 56.41     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>) is not applicable
+#23 56.41       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41           equality constraints: capture#1 of ?
+#23 56.41           lower bounds: java.lang.String)
+#23 56.41     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>,java.util.Map<capture#1 of ?,capture#2 of ?>...) is not applicable
+#23 56.41       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41           equality constraints: capture#1 of ?
+#23 56.41           lower bounds: java.lang.String)
+#23 56.41 [ERROR] /workspace/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[75,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+#23 56.41     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>) is not applicable
+#23 56.41       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41           equality constraints: capture#3 of ?
+#23 56.41           lower bounds: java.lang.String)
+#23 56.41     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>,java.util.Map<capture#3 of ?,capture#4 of ?>...) is not applicable
+#23 56.41       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41           equality constraints: capture#3 of ?
+#23 56.41           lower bounds: java.lang.String)
+#23 56.41 [INFO] 2 errors 
+#23 56.41 [INFO] -------------------------------------------------------------
+#23 56.41 [INFO] ------------------------------------------------------------------------
+#23 56.41 [INFO] Reactor Summary for Paktay Backend 0.1.0-SNAPSHOT:
+#23 56.41 [INFO] 
+#23 56.41 [INFO] Paktay Backend ..................................... SUCCESS [ 20.344 s]
+#23 56.41 [INFO] Paktay Auth Service ................................ FAILURE [ 28.671 s]
+#23 56.41 [INFO] ------------------------------------------------------------------------
+#23 56.41 [INFO] BUILD FAILURE
+#23 56.41 [INFO] ------------------------------------------------------------------------
+#23 56.41 [INFO] Total time:  55.714 s
+#23 56.41 [INFO] Finished at: 2026-09-26T17:42:10Z
+#23 56.41 [INFO] ------------------------------------------------------------------------
+#23 56.41 [ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:testCompile (default-testCompile) on project auth-svc: Compilation failure: Compilation failure: 
+#23 56.41 [ERROR] /workspace/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[46,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+#23 56.41 [ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>) is not applicable
+#23 56.41 [ERROR]       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41 [ERROR]           equality constraints: capture#1 of ?
+#23 56.41 [ERROR]           lower bounds: java.lang.String)
+#23 56.41 [ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#1 of ?,capture#2 of ?>,java.util.Map<capture#1 of ?,capture#2 of ?>...) is not applicable
+#23 56.41 [ERROR]       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41 [ERROR]           equality constraints: capture#1 of ?
+#23 56.41 [ERROR]           lower bounds: java.lang.String)
+#23 56.41 [ERROR] /workspace/auth-svc/src/test/java/ec/paktay/auth/service/TemporaryPasswordServiceTest.java:[75,40] no suitable method found for thenReturn(java.util.Map<java.lang.String,java.lang.Object&java.io.Serializable&java.lang.Comparable<? extends java.lang.Object&java.io.Serializable&java.lang.Comparable<?>&java.lang.constant.Constable>&java.lang.constant.Constable>)
+#23 56.41 [ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>) is not applicable
+#23 56.41 [ERROR]       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41 [ERROR]           equality constraints: capture#3 of ?
+#23 56.41 [ERROR]           lower bounds: java.lang.String)
+#23 56.41 [ERROR]     method org.mockito.stubbing.OngoingStubbing.thenReturn(java.util.Map<capture#3 of ?,capture#4 of ?>,java.util.Map<capture#3 of ?,capture#4 of ?>...) is not applicable
+#23 56.41 [ERROR]       (argument mismatch; inference variable K has incompatible bounds
+#23 56.41 [ERROR]           equality constraints: capture#3 of ?
+#23 56.41 [ERROR]           lower bounds: java.lang.String)
+#23 56.41 [ERROR] -> [Help 1]
+#23 56.41 [ERROR] 
+#23 56.41 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+#23 56.41 [ERROR] Re-run Maven using the -X switch to enable full debug logging.
+#23 56.41 [ERROR] 
+#23 56.41 [ERROR] For more information about the errors and possible solutions, please read the following articles:
+#23 56.41 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+#23 56.41 [ERROR] 
+#23 56.41 [ERROR] After correcting the problems, you can resume the build with the command
+#23 56.41 [ERROR]   mvn <args> -rf :auth-svc
+#23 ERROR: process "/bin/sh -c mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests" did not complete successfully: exit code: 1
+
+#22 [business-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl business-svc -am package -DskipTests
+#22 CANCELED
+------
+ > [auth-svc build 7/7] RUN mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests:
+56.41 [ERROR] -> [Help 1]
+56.41 [ERROR] 
+56.41 [ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+56.41 [ERROR] Re-run Maven using the -X switch to enable full debug logging.
+56.41 [ERROR] 
+56.41 [ERROR] For more information about the errors and possible solutions, please read the following articles:
+56.41 [ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+56.41 [ERROR] 
+56.41 [ERROR] After correcting the problems, you can resume the build with the command
+56.41 [ERROR]   mvn <args> -rf :auth-svc
+------
+Dockerfile:9
+
+--------------------
+
+   7 |     COPY auth-svc/src ./auth-svc/src
+
+   8 |     
+
+   9 | >>> RUN mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests
+
+  10 |     
+
+  11 |     FROM eclipse-temurin:17-jre
+
+--------------------
+
+target auth-svc: failed to solve: process "/bin/sh -c mvn --batch-mode --no-transfer-progress -pl auth-svc -am package -DskipTests" did not complete successfully: exit code: 1
+
+exit=1

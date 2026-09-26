@@ -11,9 +11,12 @@ import ec.paktay.auth.dto.LoginRequest;
 import ec.paktay.auth.dto.RegisterRequest;
 import ec.paktay.auth.dto.TokenResponse;
 import ec.paktay.auth.dto.UserResponse;
+import ec.paktay.auth.exception.AdminSessionException;
+import ec.paktay.auth.exception.CodedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -73,16 +76,70 @@ public class KeycloakIdentityService {
                     .retrieve().body(TokenResponse.class);
         } catch (RestClientResponseException ex) {
             if (ex.getStatusCode().is4xxClientError()) {
-                log.warn("keycloak_login_rejected status={} errorCode={} reason={}", ex.getStatusCode().value(), keycloakErrorCode(ex), keycloakErrorDescription(ex));
-                throw new IllegalArgumentException("Credenciales inválidas");
+                String reason = keycloakErrorDescription(ex);
+                log.warn("keycloak_login_rejected status={} errorCode={} reason={}", ex.getStatusCode().value(), keycloakErrorCode(ex), reason);
+                // Identidad desactivada = bloqueada por un administrador: la app ofrece soporte.
+                // El bloqueo temporal por intentos fallidos Keycloak lo informa como credenciales inválidas.
+                if ("Account disabled".equals(reason)) throw CodedException.accountBlocked();
+                // Código estable para que la app cuente los intentos fallidos (mismo mensaje de siempre).
+                throw new CodedException(HttpStatus.BAD_REQUEST, "INVALID_CREDENTIALS", "Credenciales inválidas");
             }
             log.error("keycloak_login_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
             throw new IllegalStateException("No fue posible iniciar sesión en Keycloak");
         }
     }
 
+    /** Login del panel con el cliente confidencial paktay-admin-panel (el rol lo revisa AdminSessionService). */
+    public TokenResponse adminPanelLogin(String username, String password) {
+        return adminPanelToken("grant_type=password&username=" + encode(username) + "&password=" + encode(password), false);
+    }
+
+    public TokenResponse adminPanelRefresh(String refreshToken) {
+        return adminPanelToken("grant_type=refresh_token&refresh_token=" + encode(refreshToken), true);
+    }
+
+    /** Cierra la sesión de Keycloak de ese refresh token. Si ya no existe, no hay nada que cerrar. */
+    public void adminPanelLogout(String refreshToken) {
+        try {
+            client.post().uri("/realms/" + properties.realm() + "/protocol/openid-connect/logout")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(adminPanelClient() + "&refresh_token=" + encode(refreshToken))
+                    .retrieve().toBodilessEntity();
+        } catch (RestClientResponseException ex) {
+            log.warn("keycloak_admin_panel_logout_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+        }
+    }
+
+    private TokenResponse adminPanelToken(String grant, boolean refresh) {
+        try {
+            return client.post().uri(tokenPath())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(grant + "&" + adminPanelClient())
+                    .retrieve().body(TokenResponse.class);
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().is4xxClientError()) {
+                String reason = keycloakErrorDescription(ex);
+                log.warn("keycloak_admin_panel_rejected refresh={} status={} errorCode={} reason={}", refresh,
+                        ex.getStatusCode().value(), keycloakErrorCode(ex), reason);
+                // Keycloak solo lo dice con la contraseña correcta: contraseña temporal pendiente de cambio.
+                if (!refresh && "Account is not fully set up".equals(reason)) throw AdminSessionException.passwordChangeRequired();
+                throw refresh ? AdminSessionException.sessionExpired() : AdminSessionException.invalidCredentials();
+            }
+            log.error("keycloak_admin_panel_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+            throw new IllegalStateException("No fue posible iniciar sesión");
+        }
+    }
+
+    private String adminPanelClient() {
+        return "client_id=" + encode(properties.adminPanelClientId()) + "&client_secret=" + encode(properties.adminPanelClientSecret());
+    }
+
     public void verifyCredentials(String username, String password) {
-        login(new LoginRequest(username, password));
+        try {
+            login(new LoginRequest(username, password));
+        } catch (CodedException ex) {
+            throw new IllegalArgumentException(ex.getMessage());
+        }
     }
 
     public void replacePassword(String userId, String password, boolean temporary) {
@@ -121,6 +178,86 @@ public class KeycloakIdentityService {
         client.delete().uri(adminPath("users/" + userId))
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
                 .retrieve().toBodilessEntity();
+    }
+
+    /** Activa o desactiva la identidad. Desactivada no puede iniciar sesión ni renovar tokens. */
+    public void setEnabled(String userId, boolean enabled) {
+        client.put().uri(adminPath("users/" + userId))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                .contentType(MediaType.APPLICATION_JSON).body(Map.of("enabled", enabled))
+                .retrieve().toBodilessEntity();
+    }
+
+    /** Cierra todas las sesiones del usuario (sus refresh tokens dejan de servir). */
+    public void logout(String userId) {
+        client.post().uri(adminPath("users/" + userId + "/logout"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                .retrieve().toBodilessEntity();
+    }
+
+    /**
+     * Quita el bloqueo temporal por intentos fallidos (fuerza bruta del realm). Se llama después de
+     * que la persona demostró ser dueña del correo (PIN) o recibió una contraseña nueva del admin.
+     * Si falla no rompe nada: el bloqueo vence solo en minutos.
+     */
+    public void clearBruteForce(String userId) {
+        try {
+            client.delete().uri(adminPath("attack-detection/brute-force/users/" + userId))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                    .retrieve().toBodilessEntity();
+        } catch (RuntimeException ex) {
+            log.warn("keycloak_brute_force_clear_failed subject={} reason={}", userId, ex.getMessage());
+        }
+    }
+
+    /** Si la cuenta está pausada por intentos fallidos (fuerza bruta del realm). */
+    public boolean isTemporarilyLocked(String userId) {
+        try {
+            Map<?, ?> status = client.get().uri(adminPath("attack-detection/brute-force/users/" + userId))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                    .retrieve().body(Map.class);
+            return status != null && Boolean.TRUE.equals(status.get("disabled"));
+        } catch (RuntimeException ex) {
+            log.warn("keycloak_brute_force_status_failed subject={} reason={}", userId, ex.getMessage());
+            return false;
+        }
+    }
+
+    public void grantRealmRole(String userId, String roleName) {
+        String token = adminToken();
+        client.post().uri(adminPath("users/" + userId + "/role-mappings/realm"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON).body(List.of(realmRole(token, roleName)))
+                .retrieve().toBodilessEntity();
+    }
+
+    public void revokeRealmRole(String userId, String roleName) {
+        String token = adminToken();
+        client.method(org.springframework.http.HttpMethod.DELETE).uri(adminPath("users/" + userId + "/role-mappings/realm"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON).body(List.of(realmRole(token, roleName)))
+                .retrieve().toBodilessEntity();
+    }
+
+    /** Usuarios con el rol de realm (asignación directa), hasta 500. */
+    public List<Map<?, ?>> usersWithRealmRole(String roleName) {
+        List<?> users = client.get().uri(builder -> builder.path(adminPath("roles/" + roleName + "/users"))
+                        .queryParam("first", 0).queryParam("max", 500).build())
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
+        if (users == null) return List.of();
+        List<Map<?, ?>> result = new java.util.ArrayList<>();
+        for (Object user : users) {
+            if (user instanceof Map<?, ?> map) result.add(map);
+        }
+        return result;
+    }
+
+    private Map<?, ?> realmRole(String adminToken, String roleName) {
+        Map<?, ?> role = client.get().uri(adminPath("roles/" + roleName))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+                .retrieve().body(Map.class);
+        if (role == null) throw new IllegalStateException("No existe el rol " + roleName + " en Keycloak");
+        return role;
     }
 
     private String adminToken() {

@@ -1,0 +1,16 @@
+[ERROR] COMPILATION ERROR : 
+[ERROR] /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/main/java/ec/paktay/auth/service/KeycloakIdentityService.java:[163,97] incompatible types: java.util.List<java.util.Map<capture#1 of ?,capture#2 of ?>> cannot be converted to java.util.List<java.util.Map<?,?>>
+[INFO] Paktay Auth Service ................................ FAILURE [  0.992 s]
+[INFO] BUILD FAILURE
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project auth-svc: Compilation failure
+[ERROR] /Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_backend/auth-svc/src/main/java/ec/paktay/auth/service/KeycloakIdentityService.java:[163,97] incompatible types: java.util.List<java.util.Map<capture#1 of ?,capture#2 of ?>> cannot be converted to java.util.List<java.util.Map<?,?>>
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <args> -rf :auth-svc

@@ -36,6 +36,21 @@ public class ApiExceptionHandler {
         return body(message);
     }
 
+    /** @Validated en parámetros de consulta (por ejemplo, status de la bandeja de soporte). */
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    Map<String, String> constraint(jakarta.validation.ConstraintViolationException ex) {
+        log.warn("request_parameter_invalid requestId={} reason={}", MDC.get("requestId"), ex.getMessage());
+        return body("Parámetro inválido");
+    }
+
+    @ExceptionHandler(org.springframework.web.method.annotation.HandlerMethodValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    Map<String, String> methodValidation(org.springframework.web.method.annotation.HandlerMethodValidationException ex) {
+        log.warn("request_parameter_invalid requestId={}", MDC.get("requestId"));
+        return body("Parámetro inválido");
+    }
+
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     Map<String, String> typeMismatch(MethodArgumentTypeMismatchException ex) {
@@ -68,6 +83,27 @@ public class ApiExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     Map<String, String> conflict(ConflictException ex) {
         log.warn("request_conflict requestId={} reason={}", MDC.get("requestId"), ex.getMessage());
+        return body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AccountBlockedException.class)
+    ResponseEntity<Map<String, String>> blocked(AccountBlockedException ex) {
+        log.warn("account_blocked requestId={}", MDC.get("requestId"));
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", ex.getMessage(),
+                "code", AccountBlockedException.CODE, "requestId", String.valueOf(MDC.get("requestId"))));
+    }
+
+    @ExceptionHandler(UpstreamException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    Map<String, String> upstream(UpstreamException ex) {
+        log.error("upstream_failed requestId={} reason={}", MDC.get("requestId"), ex.getMessage(), ex);
+        return body(ex.getMessage());
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    Map<String, String> tooMany(TooManyRequestsException ex) {
+        log.warn("request_rate_limited requestId={}", MDC.get("requestId"));
         return body(ex.getMessage());
     }
 

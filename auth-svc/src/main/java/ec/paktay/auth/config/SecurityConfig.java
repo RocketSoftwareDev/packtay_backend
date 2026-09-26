@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/password-reset/verify", "/api/v1/auth/password-reset/request", "/api/v1/auth/password-reset/complete", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/oauth-config", "/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                        .requestMatchers("/api/v1/auth/password-reset/verify", "/api/v1/auth/password-reset/request", "/api/v1/auth/password-reset/complete", "/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/oauth-config", "/api/v1/admin/session/**", "/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                         .permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(keycloakRoles())))
@@ -45,7 +45,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(Arrays.stream(origins.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", AdminClientHeaderFilter.HEADER));
         config.setExposedHeaders(List.of("Location", "X-Request-Id"));
         config.setAllowCredentials(false);
         config.setMaxAge(3600L);

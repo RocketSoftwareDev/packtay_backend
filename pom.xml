@@ -20,6 +20,37 @@
     </modules>
     <properties>
         <java.version>17</java.version>
+        <!-- Base vacía para @{argLine} de surefire (otros plugins, como JaCoCo, la pueden completar). -->
+        <argLine></argLine>
     </properties>
+    <!--
+      Mockito se carga como agente al arrancar las pruebas. Sin esto intenta engancharse a la
+      JVM en caliente, lo que los JDK nuevos restringen y el entorno de Codex en la Mac bloquea
+      ("JDK does not supply a working agent attachment mechanism", corrida 2026-09-26_1005).
+      Es la configuración que recomienda Mockito 5 para JDK 21 o superior.
+    -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>ruta-de-dependencias</id>
+                        <goals>
+                            <goal>properties</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar} -Xshare:off</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>
 

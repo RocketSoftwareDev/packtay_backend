@@ -1,0 +1,34 @@
+FAIL login del panel (admin)  | 401
+OK   usuario sin ADMIN -> 403 en catálogos
+== Login propio del panel
+OK   contraseña mala -> 401 INVALID_CREDENTIALS  | (401, {'requestId': 'caa4178e-84d5-4d64-9827-35b22e7a1db8', 'timestamp': '2026-09-26T17:45:47.037231886Z', 'message': 'Correo o contraseña incorrectos', 'code': 'INVALID_CREDENTIALS', 'status': 401})
+OK   usuario sin ADMIN -> el mismo 401 que una contraseña mala  | (401, {'requestId': '1b8d492a-3524-442b-b3f8-da071ef422b8', 'timestamp': '2026-09-26T17:45:47.049206011Z', 'message': 'Correo o contraseña incorrectos', 'code': 'INVALID_CREDENTIALS', 'status': 401})
+OK   login del panel sin cabecera -> 403
+FAIL token del móvil (cuenta ADMIN) en business -> 403 ADMIN_TOKEN_REQUIRED  | (401, None)
+FAIL token del móvil (cuenta ADMIN) en auth -> 403 ADMIN_TOKEN_REQUIRED  | (401, None)
+FAIL renovar -> 200 con token nuevo  | 400
+FAIL cerrar sesión -> 204
+FAIL renovar después de cerrar -> 401 SESSION_EXPIRED  | (400, {'requestId': '1b6482ae-979f-40ea-aeae-4d33bd920e61', 'status': 400, 'message': 'refreshToken: must not be blank', 'timestamp': '2026-09-26T17:45:47.109637844Z'})
+FAIL auditado: Inicio de sesión en el panel
+== Cabecera X-Paktay-Client
+FAIL business admin sin cabecera -> 403 ADMIN_CLIENT_REQUIRED  | (401, None)
+FAIL business admin con cabecera -> 200
+FAIL auth admin sin cabecera -> 403  | (401, None)
+FAIL auth admin con cabecera -> 200
+FAIL cabecera con otro valor -> 403
+OK   sin token pero con cabecera -> 401
+OK   ruta de la app sin cabecera -> 200 (el móvil no cambia)
+OK   catálogo de la app sin cabecera -> 200
+OK   soporte público sin cabecera -> 202
+== CORS local (panel en localhost:3000)
+OK   preflight business desde el panel permitido  | (200, 'http://localhost:3000')
+OK   preflight auth desde el panel permitido  | (200, 'http://localhost:3000')
+OK   preflight desde otro dominio rechazado  | (403, None)
+== Categorías
+FAIL grupos con subcategorías  | 401
+Traceback (most recent call last):
+  File "/tmp/panel.py", line 92, in <module>
+    parent = groups[0]["code"]
+             ~~~~~~^^^
+TypeError: 'NoneType' object is not subscriptable
+exit=1

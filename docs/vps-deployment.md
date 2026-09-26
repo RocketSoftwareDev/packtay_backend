@@ -102,6 +102,11 @@ Comprueba que existen:
 - Realm: `paktay`.
 - Cliente público móvil: `paktay-mobile`.
 - Cliente técnico: `paktay-auth-service`.
+- Cliente confidencial del panel: `paktay-admin-panel` (solo direct grant, lo usa auth-svc para
+  el login propio del panel). Lo crea o actualiza el perfil `identity-setup` con
+  `KEYCLOAK_ADMIN_PANEL_CLIENT_SECRET`, y borra el antiguo `paktay-admin-web` si existe. Ver
+  `docs/panel-admin.md`.
+- Protección contra fuerza bruta del realm activada (la aplica `identity-setup`).
 - Roles de realm: `USER` y `ADMIN`.
 
 En `paktay-mobile`, conserva el redirect URI:

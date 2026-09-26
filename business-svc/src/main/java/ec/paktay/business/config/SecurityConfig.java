@@ -30,6 +30,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Formulario público de soporte: sin token, con límites por IP y correo.
+                        .requestMatchers("/api/v1/public/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/user/**").hasAnyRole("USER", "ADMIN")
                         .anyRequest().authenticated())
@@ -37,19 +39,33 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * CORS solo aplica a navegadores (la app móvil no lo usa).
+     * - Rutas públicas de soporte: los dominios de la web del formulario (PAKTAY_CORS_PUBLIC_ORIGIN_PATTERNS;
+     *   vacío = los mismos del panel).
+     * - Todo lo demás: los dominios del panel (PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS). En producción, solo
+     *   el dominio HTTPS del panel.
+     */
     @Bean
     CorsConfigurationSource corsConfigurationSource(
-            @Value("${paktay.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*}") String origins) {
+            @Value("${paktay.cors.allowed-origin-patterns:http://localhost:*,http://127.0.0.1:*}") String origins,
+            @Value("${paktay.cors.public-origin-patterns:}") String publicOrigins) {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        String forPublic = publicOrigins == null || publicOrigins.isBlank() ? origins : publicOrigins;
+        source.registerCorsConfiguration("/api/v1/public/**", cors(forPublic, List.of("POST", "GET", "OPTIONS")));
+        source.registerCorsConfiguration("/**", cors(origins, List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")));
+        return source;
+    }
+
+    private static CorsConfiguration cors(String origins, List<String> methods) {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(Arrays.stream(origins.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin"));
+        config.setAllowedMethods(methods);
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Origin", AdminClientHeaderFilter.HEADER));
         config.setExposedHeaders(List.of("Location", "X-Request-Id"));
         config.setAllowCredentials(false);
         config.setMaxAge(3600L);
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
+        return config;
     }
 
     private Converter<Jwt, ? extends AbstractAuthenticationToken> roles() {
