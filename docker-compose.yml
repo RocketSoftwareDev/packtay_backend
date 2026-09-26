@@ -134,32 +134,6 @@ services:
       business-db:
         condition: service_healthy
 
-  web-admin:
-    mem_limit: 512m
-    mem_reservation: 128m
-    restart: unless-stopped
-    build:
-      context: ../packtay_web_admin
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_USE_MOCKS: ${WEB_NEXT_PUBLIC_USE_MOCKS:-false}
-        NEXT_PUBLIC_MOCK_AUTO_LOGIN: ${WEB_NEXT_PUBLIC_MOCK_AUTO_LOGIN:-false}
-    env_file:
-      - ${WEB_ENV_FILE:-../packtay_web_admin/.env.local}
-    environment:
-      NODE_ENV: ${WEB_NODE_ENV:-production}
-      # Dentro del proyecto Compose se usan los nombres de servicio, no localhost.
-      AUTH_API_URL: ${WEB_AUTH_API_URL:-http://auth-svc:8081}
-      BUSINESS_API_URL: ${WEB_BUSINESS_API_URL:-http://business-svc:8082}
-      ADMIN_CLIENT_HEADER: ${WEB_ADMIN_CLIENT_HEADER:-admin-web}
-    ports:
-      - "${WEB_BIND_ADDRESS:-127.0.0.1}:${WEB_PORT:-3000}:3000"
-    depends_on:
-      auth-svc:
-        condition: service_started
-      business-svc:
-        condition: service_started
-
   cloudflared:
     image: cloudflare/cloudflared:latest
     mem_limit: 128m
@@ -171,8 +145,6 @@ services:
       auth-svc:
         condition: service_started
       business-svc:
-        condition: service_started
-      web-admin:
         condition: service_started
 
 volumes:
