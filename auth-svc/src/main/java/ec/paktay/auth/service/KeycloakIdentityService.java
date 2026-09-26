@@ -160,7 +160,11 @@ public class KeycloakIdentityService {
                         .queryParam("first", 0).queryParam("max", 500).build())
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
         if (users == null) return List.of();
-        return users.stream().filter(Map.class::isInstance).map(user -> (Map<?, ?>) user).toList();
+        List<Map<?, ?>> result = new java.util.ArrayList<>();
+        for (Object user : users) {
+            if (user instanceof Map<?, ?> map) result.add(map);
+        }
+        return result;
     }
 
     private Map<?, ?> realmRole(String adminToken, String roleName) {
