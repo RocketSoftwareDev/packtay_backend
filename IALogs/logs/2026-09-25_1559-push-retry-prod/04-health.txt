@@ -1,0 +1,4 @@
+https://paktayauth.rocketsoftwarecore.com/actuator/health 200
+https://paktayauth.rocketsoftwarecore.com/v3/api-docs 200
+https://paktay.rocketsoftwarecore.com/actuator/health 200
+https://paktay.rocketsoftwarecore.com/v3/api-docs 200

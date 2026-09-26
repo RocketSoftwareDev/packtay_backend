@@ -1,0 +1,13 @@
+1|t
+2|t
+3|t
+4|t
+5|t
+6|t
+7|t
+8|t
+app_users|4
+cards|13
+expenses|25
+user_categories|52
+budget_allocations|0
