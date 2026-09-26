@@ -11,6 +11,7 @@ import ec.paktay.auth.dto.LoginRequest;
 import ec.paktay.auth.dto.RegisterRequest;
 import ec.paktay.auth.dto.TokenResponse;
 import ec.paktay.auth.dto.UserResponse;
+import ec.paktay.auth.exception.AdminSessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -79,6 +80,51 @@ public class KeycloakIdentityService {
             log.error("keycloak_login_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
             throw new IllegalStateException("No fue posible iniciar sesión en Keycloak");
         }
+    }
+
+    /** Login del panel con el cliente confidencial paktay-admin-panel (el rol lo revisa AdminSessionService). */
+    public TokenResponse adminPanelLogin(String username, String password) {
+        return adminPanelToken("grant_type=password&username=" + encode(username) + "&password=" + encode(password), false);
+    }
+
+    public TokenResponse adminPanelRefresh(String refreshToken) {
+        return adminPanelToken("grant_type=refresh_token&refresh_token=" + encode(refreshToken), true);
+    }
+
+    /** Cierra la sesión de Keycloak de ese refresh token. Si ya no existe, no hay nada que cerrar. */
+    public void adminPanelLogout(String refreshToken) {
+        try {
+            client.post().uri("/realms/" + properties.realm() + "/protocol/openid-connect/logout")
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(adminPanelClient() + "&refresh_token=" + encode(refreshToken))
+                    .retrieve().toBodilessEntity();
+        } catch (RestClientResponseException ex) {
+            log.warn("keycloak_admin_panel_logout_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+        }
+    }
+
+    private TokenResponse adminPanelToken(String grant, boolean refresh) {
+        try {
+            return client.post().uri(tokenPath())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body(grant + "&" + adminPanelClient())
+                    .retrieve().body(TokenResponse.class);
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().is4xxClientError()) {
+                String reason = keycloakErrorDescription(ex);
+                log.warn("keycloak_admin_panel_rejected refresh={} status={} errorCode={} reason={}", refresh,
+                        ex.getStatusCode().value(), keycloakErrorCode(ex), reason);
+                // Keycloak solo lo dice con la contraseña correcta: contraseña temporal pendiente de cambio.
+                if (!refresh && "Account is not fully set up".equals(reason)) throw AdminSessionException.passwordChangeRequired();
+                throw refresh ? AdminSessionException.sessionExpired() : AdminSessionException.invalidCredentials();
+            }
+            log.error("keycloak_admin_panel_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+            throw new IllegalStateException("No fue posible iniciar sesión");
+        }
+    }
+
+    private String adminPanelClient() {
+        return "client_id=" + encode(properties.adminPanelClientId()) + "&client_secret=" + encode(properties.adminPanelClientSecret());
     }
 
     public void verifyCredentials(String username, String password) {
