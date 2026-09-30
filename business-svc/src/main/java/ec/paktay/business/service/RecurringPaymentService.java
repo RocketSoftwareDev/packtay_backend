@@ -408,10 +408,21 @@ public class RecurringPaymentService {
     private RecurringPaymentResponse response(Row r, LocalDate today) {
         LocalDate from = r.startsOn().isAfter(today) ? r.startsOn() : today;
         LocalDate next = "ACTIVE".equals(r.status()) ? RecurrenceSchedule.nextDue(r.rule(), from) : null;
+        // Si el cobro de esa fecha ya se confirmó u omitió, el próximo es el siguiente.
+        if (next != null && resolvedOn(r.id(), next)) {
+            next = RecurrenceSchedule.nextDue(r.rule(), next.plusDays(1));
+        }
         return new RecurringPaymentResponse(r.id(), r.name(), r.amount(), r.currency(), r.cardId(), r.cardName(),
                 r.cardStatus(), r.categoryId(), r.categoryName(), r.frequency(), r.dayRule(), r.dayOfMonth(),
                 r.monthOfYear(), r.endMonth() == null ? null : YearMonth.from(r.endMonth()).toString(), r.status(), next,
                 RecurrenceSchedule.monthlyEquivalent(r.rule(), r.amount()));
+    }
+
+    private boolean resolvedOn(UUID recurringId, LocalDate due) {
+        return jdbc.sql("""
+                select exists(select 1 from recurring_occurrences
+                               where recurring_payment_id = :id and due_date = :due and status <> 'PENDING')
+                """).param("id", recurringId).param("due", due).query(Boolean.class).single();
     }
 
     private RecurringOccurrenceResponse occurrence(ResultSet rs, int n) throws SQLException {
