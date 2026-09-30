@@ -39,5 +39,7 @@ public record ExpenseResponse(UUID id, UUID cardId,
                               @Schema(description = "Monto de la compra en su moneda original (pago en otra moneda); null si fue en la moneda del gasto")
                               BigDecimal originalAmount,
                               @Schema(description = "Moneda de originalAmount; null si no aplica")
-                              String originalCurrencyCode) {
+                              String originalCurrencyCode,
+                              @Schema(description = "Pago recurrente que lo originó (confirmado en Por revisar); null en el resto", nullable = true)
+                              UUID recurringPaymentId) {
 }

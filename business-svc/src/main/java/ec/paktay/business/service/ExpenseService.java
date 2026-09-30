@@ -123,6 +123,46 @@ public class ExpenseService {
     }
 
     /**
+     * Gasto de un pago recurrente confirmado en «Por revisar» (día 8a). Es un gasto
+     * MANUAL enlazado con su recurrente; la fecha es la del cobro (al mediodía en la zona
+     * del usuario) aunque se confirme días después, por eso no pasa por la ventana de 7
+     * días del alta manual. La idempotencia es el id del cobro: confirmar dos veces
+     * devuelve el mismo gasto. No enseña reglas de comercio.
+     */
+    @Transactional
+    public ExpenseResponse createFromRecurring(UUID userId, UUID recurringId, UUID occurrenceId, UUID cardId,
+                                               UUID categoryId, BigDecimal amount, String currency, String name,
+                                               OffsetDateTime occurredAt) {
+        users.ensureActiveUser(userId);
+        ExpenseResponse existing = findByIdempotency(userId, occurrenceId);
+        if (existing != null) return existing;
+        boolean activeCard = jdbc.sql("select exists(select 1 from cards where id = :id and user_id = :userId and status = 'ACTIVE')")
+                .param("id", cardId).param("userId", userId).query(Boolean.class).single();
+        if (!activeCard) {
+            throw new IllegalArgumentException("La tarjeta de este pago recurrente ya no está activa. Edítalo y elige otra tarjeta.");
+        }
+        ensureCategory(userId, categoryId);
+        String merchant = name.trim();
+        UUID expenseId = jdbc.sql("""
+                insert into expenses (user_id, idempotency_key, card_id, category_id, origin, amount,
+                    currency_code, exchange_rate_to_usd, merchant_raw, merchant_normalized,
+                    normalization_version, occurred_at, is_recurring, recurrence_day, assigned_by_rule,
+                    recurring_payment_id)
+                values (:userId, :key, :cardId, :categoryId, 'MANUAL', :amount, :currency, 1,
+                    :merchant, :normalized, 1, :occurredAt, false, null, false, :recurringId)
+                on conflict (user_id, idempotency_key) where idempotency_key is not null do nothing
+                returning id
+                """).param("userId", userId).param("key", occurrenceId).param("cardId", cardId)
+                .param("categoryId", categoryId).param("amount", amount).param("currency", currency)
+                .param("merchant", merchant).param("normalized", MerchantKey.normalize(merchant))
+                .param("occurredAt", occurredAt).param("recurringId", recurringId)
+                .query(UUID.class).optional()
+                .orElseGet(() -> findByIdempotency(userId, occurrenceId).id());
+        alerts.afterExpense(userId, categoryId, cardId, occurredAt);
+        return query.findOne(userId, expenseId);
+    }
+
+    /**
      * Una captura de Wallet igual a otra ya guardada: mismo comercio, monto y
      * tarjeta con menos de {@link #DUPLICATE_WINDOW_SECONDS} segundos entre las dos.
      * El bloqueo consultivo serializa dos envíos simultáneos del mismo pago para que

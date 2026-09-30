@@ -22,5 +22,7 @@ public record SummaryCategoryResponse(
         BigDecimal overBy,
         @Schema(description = "NO_BUDGET sin presupuesto; OVER si spent > budget; AT_LIMIT desde 90 % (incluye 100 %); OK en el resto",
                 allowableValues = {"NO_BUDGET", "OK", "AT_LIMIT", "OVER"})
-        String status) {
+        String status,
+        @Schema(description = "Pagos recurrentes de esta categoría que faltan cobrar este mes (pendientes o por venir); 0 en meses pasados")
+        BigDecimal committed) {
 }

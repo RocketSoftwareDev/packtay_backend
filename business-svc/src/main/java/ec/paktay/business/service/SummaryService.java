@@ -42,11 +42,14 @@ public class SummaryService {
     private final JdbcClient jdbc;
     private final UserAccountService users;
     private final BudgetService budgets;
+    private final RecurringPaymentService recurring;
 
-    public SummaryService(JdbcClient jdbc, UserAccountService users, BudgetService budgets) {
+    public SummaryService(JdbcClient jdbc, UserAccountService users, BudgetService budgets,
+                          RecurringPaymentService recurring) {
         this.jdbc = jdbc;
         this.users = users;
         this.budgets = budgets;
+        this.recurring = recurring;
     }
 
     @Transactional
@@ -68,6 +71,10 @@ public class SummaryService {
         BigDecimal global = settings.globalAmount();
 
         List<CategoryRow> categoryRows = categoryRows(userId, budgetPeriod, currency, from, to);
+        // Comprometido (día 8a): sólo el mes en curso tiene cobros por venir.
+        RecurringPaymentService.Committed committed = clock.current()
+                ? recurring.committed(userId, currency)
+                : new RecurringPaymentService.Committed(BigDecimal.ZERO, java.util.Map.of());
         List<SummaryMath.CategoryBudget> budgetInputs = new ArrayList<>();
         List<SummaryCategoryResponse> categories = new ArrayList<>();
         BigDecimal spent = BigDecimal.ZERO;
@@ -82,7 +89,8 @@ public class SummaryService {
             categories.add(new SummaryCategoryResponse(row.id(), row.name(), row.icon(), row.colorDark(), row.colorLight(),
                     categoryBudget, SummaryMath.budgetSource(own, categoryGlobal), row.spent(),
                     SummaryMath.percent(row.spent(), categoryBudget), SummaryMath.overBy(row.spent(), categoryBudget),
-                    SummaryMath.categoryStatus(row.spent(), categoryBudget)));
+                    SummaryMath.categoryStatus(row.spent(), categoryBudget),
+                    committed.byCategory().getOrDefault(row.id(), BigDecimal.ZERO)));
         }
         categories.sort(Comparator.comparing(SummaryCategoryResponse::spent).reversed()
                 .thenComparing(SummaryCategoryResponse::name, String.CASE_INSENSITIVE_ORDER));
@@ -94,7 +102,8 @@ public class SummaryService {
                 budget, spent, SummaryMath.available(spent, budget), SummaryMath.percent(spent, budget),
                 clock.elapsedPercent(), SummaryMath.pace(spent, budget, clock.elapsedPercent()),
                 SummaryMath.overBy(spent, budget), otherCurrencyCount(userId, currency, from, to),
-                categories, cards(userId, currency, firstDay, from, to), recent(userId, from, to), counts(userId));
+                categories, cards(userId, currency, firstDay, from, to), recent(userId, from, to), counts(userId),
+                committed.total(), budget == null ? null : budget.subtract(spent).subtract(committed.total()));
     }
 
     private BudgetSettings settings(UUID userId, UUID periodId) {
