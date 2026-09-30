@@ -88,8 +88,15 @@ public class PlanService {
         boolean free = "FREE".equals(plan);
         return new EntitlementsResponse(plan,
                 new EntitlementsResponse.Limits(free ? FREE_CARDS : null, free ? FREE_CAPTURES_PER_MONTH : null,
-                        free ? FREE_BUDGET_CATEGORIES : null, free ? FREE_HISTORY_MONTHS : null),
+                        free ? FREE_BUDGET_CATEGORIES : null, free ? FREE_HISTORY_MONTHS : null,
+                        free ? RecurringPaymentService.FREE_RECURRING : null),
                 new EntitlementsResponse.Usage(registeredCards(userId), capturesThisMonth(userId),
-                        budgetCategories(userId, currentPeriod.get())));
+                        budgetCategories(userId, currentPeriod.get()), activeRecurring(userId)));
+    }
+
+    /** Pagos recurrentes activos: los pausados no cuentan para el plan Gratis. */
+    public int activeRecurring(UUID userId) {
+        return jdbc.sql("select count(*) from recurring_payments where user_id = :userId and status = 'ACTIVE'")
+                .param("userId", userId).query(Integer.class).single();
     }
 }

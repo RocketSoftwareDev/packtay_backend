@@ -44,5 +44,9 @@ public record MonthSummaryResponse(
         List<SummaryCardResponse> cards,
         @Schema(description = "Los 3 gastos ACTIVE de tipo EXPENSE más recientes del mes")
         List<ExpenseResponse> recent,
-        SummaryCountsResponse counts) {
+        SummaryCountsResponse counts,
+        @Schema(description = "Comprometido: pagos recurrentes que faltan cobrar este mes (pendientes en Por revisar o por venir). 0 en meses pasados. Los avisos de 90 % cuentan sólo spent")
+        BigDecimal committed,
+        @Schema(description = "Libre: budget - spent - committed; puede ser negativo; null sin presupuesto", nullable = true)
+        BigDecimal free) {
 }

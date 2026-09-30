@@ -10,7 +10,9 @@ public record EntitlementsResponse(
         @Schema(description = "Uso actual del mes (zona horaria del usuario)")
         Usage usage) {
 
-    public record Limits(Integer cards, Integer capturesPerMonth, Integer budgetCategories, Integer historyMonths) { }
+    public record Limits(Integer cards, Integer capturesPerMonth, Integer budgetCategories, Integer historyMonths,
+                         @Schema(description = "Pagos recurrentes activos (los pausados no cuentan); null = sin límite")
+                         Integer recurring) { }
 
-    public record Usage(int cards, int capturesThisMonth, int budgetCategories) { }
+    public record Usage(int cards, int capturesThisMonth, int budgetCategories, int recurring) { }
 }
