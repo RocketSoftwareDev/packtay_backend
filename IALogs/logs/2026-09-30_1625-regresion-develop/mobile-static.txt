@@ -1,0 +1,22 @@
+tsc=0
+lint=0
+  783:20  warning  Inline style: { overflow: 'hidden' }         react-native/no-inline-styles
+
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/src/shared/components/AppStatusBar.tsx
+  39:18  warning  Inline style: { position: 'absolute', top: 0, right: 0, left: 0, zIndex: 1000 }  react-native/no-inline-styles
+
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/src/shared/components/StepTransition.tsx
+  45:5  warning  Expected 'undefined' and instead saw 'void'  no-void
+
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/src/shared/hooks/useAppLinks.ts
+  110:5  warning  Expected 'undefined' and instead saw 'void'  no-void
+
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/src/shared/hooks/useProfile.ts
+  26:5  warning  Expected 'undefined' and instead saw 'void'  no-void
+
+/Users/macmalona/Desktop/Proyecto/paktay/Paktay/packtay_mobile_front/src/shared/theme/themed.ts
+  142:3  warning  Expected 'undefined' and instead saw 'void'  no-void
+
+✖ 143 problems (0 errors, 143 warnings)
+  0 errors and 1 warning potentially fixable with the `--fix` option.
+
