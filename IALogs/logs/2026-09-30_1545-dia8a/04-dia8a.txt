@@ -1,0 +1,45 @@
+bank_row_present=yes
+== Crear y pendiente de hoy
+OK   crear mensual con el día de hoy -> 201  | {'id': 'f67539ad-03d9-4b75-85b8-74e5b6cf1360', 'name': 'Netflix', 'amount': 15.99, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'freq
+OK   el cobro de hoy queda pendiente  | [{'id': '9688affc-ed94-4a8a-b882-1dadf5187253', 'recurringPaymentId': 'f67539ad-03d9-4b75-85b8-74e5b6cf1360', 'name': 'Netflix', 'dueDate': '2026-09-30', 'expectedAmount': 15.99, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE',
+OK   resumen: comprometido incluye 15.99  | {'spent': 0, 'committed': 15.99, 'free': 84.01, 'budget': 100.0}
+OK   resumen: libre = budget - spent - committed
+OK   categoría con comprometido  | [{'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'name': 'Suscripciones D8', 'icon': 'tv', 'colorDark': '#8B5CF6', 'colorLight': '#7C3AED', 'budget': 100.0, 'budgetSource': 'GLOBAL', 'spent': 0, 'percent': 0, 'overBy': 0, 'status': 'OK', 'committed': 15.99}]
+== Confirmar con otro monto y usarlo desde ahora
+OK   confirmar crea el gasto enlazado  | {'id': 'd7b5cdc5-abad-421e-8942-a8ecf418dc8a', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'origin': 'MANUAL', 'kind': 'EXPENSE', 'status': 'ACTIVE', 'voidedByExp
+OK   el recurrente ahora espera 17.50
+OK   tras confirmar, el próximo cobro ya no es hoy  | [{'id': 'f67539ad-03d9-4b75-85b8-74e5b6cf1360', 'name': 'Netflix', 'amount': 17.5, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'freq
+OK   confirmar dos veces -> 404 (ya resuelto)  | {'message': 'El cobro no existe, no es del usuario o ya se resolvió', 'requestId': 'c2e781d3-fa13-4501-a849-d13e0b695191'}
+OK   gastado sube 17.50 y comprometido baja  | {'spent': 17.5, 'committed': 0}
+== Anual y «Este mes no se cobró»
+OK   crear anual -> 201  | {'id': '818d5d56-2528-4bd9-a1a0-18fe32d7adf2', 'name': 'Seguro', 'amount': 120.0, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'frequ
+OK   skip -> 204 y ya no está pendiente
+OK   anual: próximo cobro el año que viene
+== Reglas del día
+OK   startsTomorrow: no queda pendiente hoy
+OK   día 31 cae en el último día del mes  | {'id': 'd4c333d0-3c9e-4bd4-bae5-14b282042117', 'name': 'Dia31', 'amount': 1.0, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'frequenc
+OK   fin de mes  | {'id': '73d04b97-9d90-4c02-94d6-56b7fcd48eac', 'name': 'Fin', 'amount': 1.0, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'frequency'
+OK   fin en un mes pasado -> 400  | {'message': 'La fecha de fin no puede ser un mes pasado', 'requestId': 'f3688b16-6780-456b-91b0-bc9a661aaa42'}
+OK   anual sin mes -> 400  | {'message': 'Un pago anual necesita el mes', 'requestId': 'e87393d3-bafc-4fe1-bbdd-ce60e1ce0cb8'}
+OK   lista: activos primero y total mensual  | {'activeCount': 5, 'monthlyTotal': 34.5}
+== Pausar, reanudar y editar
+OK   pausar -> PAUSED sin próximo cobro  | {'id': '96af713a-52ac-4e4a-b954-7ecb35efdb40', 'name': 'Mañana', 'amount': 5.0, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'frequen
+OK   reanudar -> ACTIVE  | {'id': '96af713a-52ac-4e4a-b954-7ecb35efdb40', 'name': 'Mañana', 'amount': 5.0, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'frequen
+OK   editar -> inicio de mes y nuevo monto  | {'id': '96af713a-52ac-4e4a-b954-7ecb35efdb40', 'name': 'Mañana editado', 'amount': 6.0, 'currencyCode': 'USD', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': 'Principal', 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 
+== Cancelar la serie desde un cobro
+OK   cancel-series -> 204 y ya no se lista
+OK   no se creó gasto de ese cobro
+== Anular un gasto de recurrente no cancela la serie
+OK   anular -> 200 y la serie sigue activa  | {'voided': {'id': 'd7b5cdc5-abad-421e-8942-a8ecf418dc8a', 'cardId': '02bff164-ed8c-4e71-804f-fbab3bdda2d3', 'cardName': None, 'cardStatus': 'ACTIVE', 'categoryId': 'ee05f07f-cd54-4e82-bfa5-fbf8f1a6937a', 'categoryName': 'Suscripciones D8', 'origin': 'MANUAL', 'kind': 'EXPENSE', 'status': 'VOIDED', '
+== Plan Gratis: 2 activos, los pausados no cuentan
+OK   tercer recurrente con plan Gratis -> 409  | {'message': 'Tienes 2 recurrentes en el plan Gratis. Pausa o cancela uno, o pasa al plan Pro.', 'requestId': 'd3eba7e1-1883-4e6a-befb-3148fb2b9ea1'}
+OK   con uno pausado sí se puede  | {'id': 'e5102fc7-5a6b-4ac6-b0de-da76a2e42e36', 'name': 'Tres', 'amount': 1.0, 'currencyCode': 'USD', 'cardId': '0617deb3-a9bd-429b-8fa9-5b498bfe46e8', 'cardName': 'Free', 'cardStatus': 'ACTIVE', 'categoryId': '07e1c432-518e-4be4-809e-7906649db250', 'categoryName': 'Casa D8', 'frequency': 'MONTHLY', 
+OK   reanudar el tercero activo -> 409  | {'message': 'Tienes 2 recurrentes en el plan Gratis. Pausa o cancela uno, o pasa al plan Pro.', 'requestId': '0400386f-9e14-480f-ad8b-e8121a1e8651'}
+OK   entitlements: limits.recurring 2 y usage.recurring 2  | {'plan': 'FREE', 'limits': {'cards': 2, 'capturesPerMonth': 20, 'budgetCategories': 3, 'historyMonths': 3, 'recurring': 2}, 'usage': {'cards': 1, 'capturesThisMonth': 0, 'budgetCategories': 0, 'recurring': 2}}
+== Eliminar cuenta borra los recurrentes
+OK   eliminar cuenta -> 200  | {'message': 'Cuenta eliminada'}
+OK   sin filas en recurring_payments
+OK   sin filas en recurring_occurrences
+== Aviso de la víspera (preparación; se verifica en el paso 2)
+vispera preparada: 201 tz Etc/GMT+1 manana 2026-10-01
+exit=0

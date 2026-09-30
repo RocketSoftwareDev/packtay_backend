@@ -1,0 +1,5 @@
+time="2026-09-30T15:48:06-05:00" level=warning msg="Found orphan containers (paktay-local-web-admin-1) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container paktay-local-keycloak-init-run-edfac3497a88 Creating 
+ Container paktay-local-keycloak-init-run-edfac3497a88 Created 
+Logging into http://host.docker.internal:28180 as user admin of realm master
+exit=0

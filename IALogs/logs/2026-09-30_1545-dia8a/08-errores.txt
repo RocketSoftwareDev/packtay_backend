@@ -1,0 +1,2 @@
+business-svc-1  | 2026-09-30T20:48:38.813Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-6] e.p.b.exception.ApiExceptionHandler      : request_conflict requestId=d3eba7e1-1883-4e6a-befb-3148fb2b9ea1 reason=Tienes 2 recurrentes en el plan Gratis. Pausa o cancela uno, o pasa al plan Pro.
+business-svc-1  | 2026-09-30T20:48:38.826Z  WARN 1 --- [paktay-business-svc] [nio-8082-exec-9] e.p.b.exception.ApiExceptionHandler      : request_conflict requestId=0400386f-9e14-480f-ad8b-e8121a1e8651 reason=Tienes 2 recurrentes en el plan Gratis. Pausa o cancela uno, o pasa al plan Pro.

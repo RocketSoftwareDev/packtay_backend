@@ -1,0 +1,1 @@
+{'/api/v1/user/recurring-payments': True, '/api/v1/user/recurring-payments/{id}': True, '/api/v1/user/recurring-payments/occurrences/pending': True, '/api/v1/user/recurring-payments/occurrences/{occurrenceId}/confirm': True}
