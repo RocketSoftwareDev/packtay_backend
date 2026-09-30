@@ -56,6 +56,9 @@ services:
       PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN: ${PAKTAY_ADMIN_ACCESS_TOKEN_LIFESPAN:-900}
       PAKTAY_ADMIN_SESSION_IDLE_TIMEOUT: ${PAKTAY_ADMIN_SESSION_IDLE_TIMEOUT:-1800}
       PAKTAY_ADMIN_SESSION_MAX_LIFESPAN: ${PAKTAY_ADMIN_SESSION_MAX_LIFESPAN:-28800}
+    # En Linux (VPS) host.docker.internal no existe por defecto; en la Mac ya resuelve.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   auth-svc:
     mem_limit: 640m
@@ -86,6 +89,8 @@ services:
       PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN: ${PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN:-true}
     ports:
       - "${API_BIND_ADDRESS:-127.0.0.1}:${AUTH_PORT:-8081}:8081"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       business-db:
         condition: service_healthy
@@ -130,6 +135,8 @@ services:
       - ${FIREBASE_CREDENTIALS_HOST_FILE:-/dev/null}:/run/secrets/firebase-admin.json:ro
     ports:
       - "${API_BIND_ADDRESS:-127.0.0.1}:${BUSINESS_PORT:-8082}:8082"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       business-db:
         condition: service_healthy
@@ -141,6 +148,8 @@ services:
     profiles: ["tunnel"]
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:-}
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       auth-svc:
         condition: service_started
