@@ -32,6 +32,14 @@ class RecurringJobTest {
     }
 
     @Test
+    void elAvisoSaleDesdeLas19HastaMedianoche() {
+        assertEquals(false, RecurringJob.inReminderWindow(18));
+        assertEquals(true, RecurringJob.inReminderWindow(19));
+        assertEquals(true, RecurringJob.inReminderWindow(20));
+        assertEquals(true, RecurringJob.inReminderWindow(23));
+    }
+
+    @Test
     void masDeTresSeResumen() {
         PushSender.Message m = RecurringJob.message(List.of(row("A", "1"), row("B", "1"), row("C", "1"), row("D", "1"), row("E", "1")),
                 LocalDate.of(2026, 10, 1));

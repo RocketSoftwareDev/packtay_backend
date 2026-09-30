@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  *
  * 1. Deja PENDING los cobros que ya tocan, en la zona horaria de cada usuario, aunque no
  *    abra la app.
- * 2. Aviso de la víspera a las 19:00 de su zona: uno por fecha. Con un solo cobro dice
+ * 2. Aviso de la víspera desde las 19:00 de su zona: uno por fecha. Con un solo cobro dice
  *    cuál («Mañana se cobra Netflix»); con varios, los agrupa («Mañana se cobran 3 pagos
  *    recurrentes»). recurring_reminders evita repetirlo. El día del cobro no hay aviso: ya
  *    está en «Por revisar».
@@ -66,7 +66,7 @@ public class RecurringJob {
     /** true si mandó (o intentó mandar) el aviso de mañana. */
     boolean remind(UUID userId) {
         ZonedDateTime now = ZonedDateTime.now(users.zoneOf(userId));
-        if (now.getHour() != REMINDER_HOUR) return false;
+        if (!inReminderWindow(now.getHour())) return false;
         LocalDate tomorrow = now.toLocalDate().plusDays(1);
         List<RecurringPaymentService.Row> due = recurring.dueOn(userId, tomorrow);
         if (due.isEmpty()) return false;
@@ -82,6 +82,15 @@ public class RecurringJob {
             if (outcome == PushSender.Outcome.INVALID_TOKEN) devices.forgetPushToken(target.token());
         }
         return true;
+    }
+
+    /**
+     * Desde las 19:00 hasta la medianoche, no sólo a las 19: si el servidor estuvo caído
+     * o reiniciándose a esa hora, el aviso sale en la siguiente vuelta. recurring_reminders
+     * garantiza que sea uno solo.
+     */
+    static boolean inReminderWindow(int hour) {
+        return hour >= REMINDER_HOUR;
     }
 
     static PushSender.Message message(List<RecurringPaymentService.Row> due, LocalDate date) {
