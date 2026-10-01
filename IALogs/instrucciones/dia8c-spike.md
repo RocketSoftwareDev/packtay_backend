@@ -75,6 +75,29 @@ audience=paktay-mobile
 8. **Borrar:** eliminar el usuario nuevo por la API de admin con la cuenta de servicio de
    `paktay-auth-service` responde 204.
 
+## 3b. Segunda ronda (la corrida `1922` respondió 403 «Client not allowed to exchange»)
+
+Mismo Keycloak desechable, mismas reglas. Antes de repetir las pruebas del paso 3:
+
+1. Arranca `kc-spike` con, además de las funciones, `--log-level=INFO,org.keycloak.events:DEBUG`
+   y activa en `paktay` el registro de eventos de usuario con detalles. Cada 403 debe dejar en los
+   logs del contenedor el evento `TOKEN_EXCHANGE_ERROR` con su motivo; guárdalos en
+   `03-eventos.txt` (sin tokens).
+2. **Permiso sobre el cliente de destino.** Al pedir `audience=paktay-mobile`, Keycloak también
+   exige que `paktay-mobile` permita el cambio: activa los permisos finos en el cliente
+   `paktay-mobile` y asocia la misma política de cliente (la que incluye a
+   `paktay-auth-service`) a su permiso `token-exchange`.
+3. Guarda en `03-permisos.txt` la configuración de autorización del cliente `realm-management`:
+   los permisos `token-exchange` del proveedor `google` y de `paktay-mobile`, con su política
+   asociada, la estrategia de decisión y el `clientId` que incluye cada política.
+4. Prueba en este orden y anota el código y el motivo del evento en cada caso:
+   - **a)** el cambio **sin** `audience` (el token sale para `paktay-auth-service`). Si da 200, el
+     permiso del proveedor está bien y el problema era el del destino;
+   - **b)** el cambio **con** `audience=paktay-mobile`.
+5. Si (b) da 200, repite **todas** las pruebas del paso 3. Si solo da 200 (a), repite el paso 3
+   sin `audience` y en la prueba 2 renueva con `paktay-auth-service`. Eso significa que la app
+   renovará a través de auth-svc.
+
 ## 4. Resumen
 
 `RESUMEN.md`: sintaxis de funciones que sirvió, cada prueba con su resultado, qué cliente
