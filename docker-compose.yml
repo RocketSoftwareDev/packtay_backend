@@ -87,6 +87,15 @@ services:
       PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS: ${PAKTAY_CORS_ALLOWED_ORIGIN_PATTERNS:-http://localhost:*,http://127.0.0.1:*}
       PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER: ${PAKTAY_ADMIN_REQUIRE_CLIENT_HEADER:-true}
       PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN: ${PAKTAY_ADMIN_REQUIRE_PANEL_TOKEN:-true}
+      # Día 8c · Apple y Google. Vacío = proveedor apagado. La key .p8 de Apple se monta
+      # abajo; SOCIAL_APPLE_PRIVATE_KEY_PATH=/run/secrets/apple-signin.p8 cuando exista.
+      SOCIAL_GOOGLE_CLIENT_IDS: ${SOCIAL_GOOGLE_CLIENT_IDS:-}
+      SOCIAL_APPLE_CLIENT_IDS: ${SOCIAL_APPLE_CLIENT_IDS:-}
+      SOCIAL_APPLE_TEAM_ID: ${SOCIAL_APPLE_TEAM_ID:-}
+      SOCIAL_APPLE_KEY_ID: ${SOCIAL_APPLE_KEY_ID:-}
+      SOCIAL_APPLE_PRIVATE_KEY_PATH: ${SOCIAL_APPLE_PRIVATE_KEY_PATH:-}
+    volumes:
+      - ${SOCIAL_APPLE_PRIVATE_KEY_HOST_FILE:-/dev/null}:/run/secrets/apple-signin.p8:ro
     ports:
       - "${API_BIND_ADDRESS:-127.0.0.1}:${AUTH_PORT:-8081}:8081"
     extra_hosts:
