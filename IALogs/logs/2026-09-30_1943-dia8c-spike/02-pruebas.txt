@@ -1,0 +1,26 @@
+1 usuario nuevo: FAIL {
+  "http_code": 403,
+  "error": "access_denied",
+  "error_description": "Client not allowed to exchange",
+  "access_token_present": false,
+  "refresh_token_present": false
+}
+2 renovar desde el móvil: BLOCKED; no se obtuvo refresh_token
+3 vincular por correo: BLOCKED; no se creó el usuario nuevo
+4 segunda vez: {
+  "http_code": 403,
+  "error": "access_denied",
+  "error_description": "Client not allowed to exchange",
+  "access_token_present": false,
+  "refresh_token_present": false
+}
+5 token falso: {
+  "http_code": 403,
+  "error": "access_denied",
+  "error_description": "Client not allowed to exchange",
+  "access_token_present": false,
+  "refresh_token_present": false
+}
+6 proveedor sin permiso: FAIL; el cliente autorizado recibió la misma denegación del proveedor
+7 rol USER: BLOCKED; no se creó el usuario nuevo
+8 borrar: BLOCKED; no se creó el usuario nuevo
