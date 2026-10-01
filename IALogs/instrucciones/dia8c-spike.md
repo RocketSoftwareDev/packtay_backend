@@ -98,6 +98,60 @@ Mismo Keycloak desechable, mismas reglas. Antes de repetir las pruebas del paso 
    sin `audience` y en la prueba 2 renueva con `paktay-auth-service`. Eso significa que la app
    renovará a través de auth-svc.
 
+## 3c. Tercera ronda: comandos exactos (la corrida `1943` repitió el 403 también sin `audience`)
+
+Sin `audience` también falló, así que el permiso que falla es el del **proveedor**. En la
+corrida `1943` faltaron `03-eventos.txt` y `03-permisos.txt`: **son obligatorios**. Sin ellos la
+corrida no sirve.
+
+Dos errores típicos que estos comandos evitan:
+- la política de cliente necesita el **UUID** del cliente, no `paktay-auth-service`;
+- actualizar el permiso sin `resources` y `scopes` lo deja sin recurso y lo deniega todo.
+
+Con `kc-spike` ya montado (pasos 1 y 2), y `KC_ADMIN_PW` con la contraseña del admin:
+
+```bash
+KC="docker exec -i kc-spike /opt/keycloak/bin/kcadm.sh"
+$KC config credentials --server http://localhost:8080 --realm master --user admin --password "$KC_ADMIN_PW"
+id_of() { $KC get clients -r paktay -q clientId="$1" --fields id --format csv --noquotes; }
+RM=$(id_of realm-management); AS=$(id_of paktay-auth-service); MOB=$(id_of paktay-mobile)
+J() { python3 -c "import sys,json;d=json.load(sys.stdin);print($1)"; }
+
+$KC update events/config -r paktay -s eventsEnabled=true -s 'enabledEventTypes=[]'
+$KC update identity-provider/instances/google/management/permissions -r paktay -s enabled=true
+$KC update clients/$MOB/management/permissions -r paktay -s enabled=true
+P_IDP=$($KC get identity-provider/instances/google/management/permissions -r paktay | J 'd["scopePermissions"]["token-exchange"]')
+P_MOB=$($KC get clients/$MOB/management/permissions -r paktay | J 'd["scopePermissions"]["token-exchange"]')
+
+POL=$($KC create clients/$RM/authz/resource-server/policy/client -r paktay \
+  -s name=auth-svc-puede-cambiar -s "clients=[\"$AS\"]" -i)
+
+for P in $P_IDP $P_MOB; do
+  BASE=clients/$RM/authz/resource-server
+  RES=$($KC get $BASE/policy/$P/resources -r paktay | J 'json.dumps([r["_id"] for r in d])')
+  SCO=$($KC get $BASE/policy/$P/scopes -r paktay | J 'json.dumps([s["id"] for s in d])')
+  $KC get $BASE/permission/scope/$P -r paktay \
+    | python3 -c "import sys,json;d=json.load(sys.stdin);d.update(resources=$RES,scopes=$SCO,policies=['$POL'],decisionStrategy='UNANIMOUS');print(json.dumps(d))" \
+    | $KC update $BASE/permission/scope/$P -r paktay -f -
+  { echo "== permiso $P"; $KC get $BASE/permission/scope/$P -r paktay
+    echo "-- recursos"; $KC get $BASE/policy/$P/resources -r paktay
+    echo "-- políticas"; $KC get $BASE/policy/$P/associatedPolicies -r paktay; } >> "$LOGS/03-permisos.txt"
+done
+{ echo "== política"; $KC get clients/$RM/authz/resource-server/policy/client/$POL -r paktay; echo "AS=$AS"; } >> "$LOGS/03-permisos.txt"
+```
+
+En `03-permisos.txt` cada permiso tiene que mostrar **un recurso**, el scope `token-exchange` y
+la política `auth-svc-puede-cambiar`, cuyo `clients` contiene el valor de `AS`.
+
+Repite el cambio sin `audience` y con `audience=paktay-mobile`. Después de cada uno:
+
+```bash
+$KC get events -r paktay -q type=TOKEN_EXCHANGE_ERROR >> "$LOGS/03-eventos.txt"
+```
+
+Si sigue el 403, el campo `details` del evento dice qué comprobación falló: cópialo tal cual en el
+resumen. Si da 200, sigue con el paso 5 de la ronda 3b.
+
 ## 4. Resumen
 
 `RESUMEN.md`: sintaxis de funciones que sirvió, cada prueba con su resultado, qué cliente
