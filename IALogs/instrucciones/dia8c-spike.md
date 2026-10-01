@@ -152,6 +152,36 @@ $KC get events -r paktay -q type=TOKEN_EXCHANGE_ERROR >> "$LOGS/03-eventos.txt"
 Si sigue el 403, el campo `details` del evento dice qué comprobación falló: cópialo tal cual en el
 resumen. Si da 200, sigue con el paso 5 de la ronda 3b.
 
+## 3d. Cuarta ronda: el usuario se prepara antes del cambio (la corrida `1954` ya da 200)
+
+El cambio funciona. Faltan tres cosas, y el diseño final las resuelve así: **auth-svc deja
+listo al usuario antes de cambiar el token** (lo busca por su vínculo; si no, por correo y lo
+vincula; si no existe, lo crea con el rol `USER`) y **la app renueva a través de auth-svc**.
+Esta ronda lo confirma en `kc-spike`, con la misma configuración de permisos de la 3c (sin
+`audience`). Todo por la API de admin usando la cuenta de servicio de `paktay-auth-service`
+(como hará auth-svc), no con el admin de `master`. Si le falta algún rol, anótalo.
+
+Resultados en `04-pruebas.txt`, una línea `OK`/`FAIL` por prueba:
+
+1. **Buscar por vínculo:** `GET /admin/realms/paktay/users?idpAlias=google&idpUserId=<sub de fakeidp>`
+   devuelve el usuario ya vinculado en la corrida (o vacío si no hay ninguno). Anota si el filtro funciona.
+2. **Vincular una cuenta existente:** con `existente@fake.local` (que tiene contraseña),
+   `POST /admin/realms/paktay/users/{id}/federated-identity/google` con
+   `{"identityProvider":"google","userId":"<sub de fakeidp>","userName":"existente@fake.local"}`,
+   y **después** el cambio de token: 200 y el `sub` es el id de la cuenta que ya existía. Su
+   contraseña sigue sirviendo.
+3. **Crear antes de cambiar:** crea `tercero@fake.local` en `fakeidp`. En `paktay`, crea el
+   usuario (correo verificado, sin contraseña), vincúlalo como en 2 y asígnale el rol de realm
+   `USER`. Después cambia el token: 200, el `sub` es ese id, y `realm_access.roles` del access
+   token **incluye `USER`**.
+4. **Renovar con auth-service, inmediatamente:** con el refresh token de la prueba 3, sin borrar
+   nada antes, `grant_type=refresh_token` con `client_id=paktay-auth-service` y su secreto: 200,
+   nuevo access token con `USER`. Repite la renovación con el refresh token **nuevo** (rotación): 200.
+5. **Cerrar sesión:** `POST /realms/paktay/protocol/openid-connect/logout` con el refresh token y
+   las credenciales de `paktay-auth-service`: 204. Renovar después: 400.
+6. **Duración:** anota `expires_in` y `refresh_expires_in` del cambio y de la renovación, para
+   compararlos con los del login normal del realm.
+
 ## 4. Resumen
 
 `RESUMEN.md`: sintaxis de funciones que sirvió, cada prueba con su resultado, qué cliente
