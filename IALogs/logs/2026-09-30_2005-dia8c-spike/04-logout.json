@@ -1,0 +1,4 @@
+{
+  "logout_http": 204,
+  "renew_after_logout_http": 400
+}

@@ -1,0 +1,2 @@
+type="TOKEN_EXCHANGE" clientId="paktay-auth-service" audience="paktay-auth-service" type="urn:ietf:params:oauth:grant-type:token-exchange" type="Refresh" subject_issuer="google" type="urn:ietf:params:oauth:token-type:refresh_token"
+type="LOGOUT" clientId="paktay-auth-service"

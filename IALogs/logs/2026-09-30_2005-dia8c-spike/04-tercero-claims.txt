@@ -1,0 +1,6 @@
+iss="http://127.0.0.1:28190/realms/paktay"
+azp="paktay-auth-service"
+aud="account"
+sub="10e9056c-0c00-4d73-939e-68df0b8b84fa"
+email="tercero@fake.local"
+realm_access={"roles": ["default-roles-paktay", "offline_access", "uma_authorization", "USER"]}

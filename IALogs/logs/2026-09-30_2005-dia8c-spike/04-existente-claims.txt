@@ -1,0 +1,3 @@
+sub="bb4ebda8-9828-449c-b730-75db447d0af5"
+email="existente@fake.local"
+realm_access={"roles": ["default-roles-paktay", "offline_access", "uma_authorization"]}

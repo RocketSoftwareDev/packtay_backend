@@ -1,0 +1,6 @@
+{
+  "token_exchange": 28800,
+  "refresh_exchange_1": 28800,
+  "refresh_exchange_2": 28800,
+  "normal_login": 28800
+}

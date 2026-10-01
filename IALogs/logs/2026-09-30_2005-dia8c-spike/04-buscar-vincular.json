@@ -1,0 +1,12 @@
+{
+  "search_http": 200,
+  "fakeidp_sub": "a7e3c12f-af0b-4123-983f-6044de25dec9",
+  "link_http": 204,
+  "password_http": 200,
+  "link_exchange_http": 200,
+  "link_exchange_sub": "bb4ebda8-9828-449c-b730-75db447d0af5",
+  "search_before_count": 0,
+  "search_after_count": 1,
+  "existing_user_id": "bb4ebda8-9828-449c-b730-75db447d0af5",
+  "sub_matches_existing_user": true
+}

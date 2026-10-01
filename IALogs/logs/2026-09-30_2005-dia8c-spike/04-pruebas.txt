@@ -1,0 +1,6 @@
+OK - 1 buscar por vínculo - HTTP 200; vacío antes y 1 usuario después de vincular
+OK - 2 vincular cuenta existente - vínculo HTTP 204; cambio HTTP 200; sub coincide; password HTTP 200
+OK - 3 crear antes de cambiar - cambio HTTP 200; access incluye USER
+OK - 4 renovar con auth-service - primera HTTP 200; rotación HTTP 200
+OK - 5 cerrar sesión - logout HTTP 204; renovar después HTTP 400
+OK - 6 duración - access token exchange y refresh: 28800; login normal: 28800
