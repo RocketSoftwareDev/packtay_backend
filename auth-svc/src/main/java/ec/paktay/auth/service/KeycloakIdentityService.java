@@ -223,6 +223,136 @@ public class KeycloakIdentityService {
         }
     }
 
+    // ---------------------------------------------------------------- día 8c · Apple y Google
+
+    /** Id del usuario vinculado a esa cuenta de Apple o Google, o null. */
+    public String findByFederatedIdentity(String alias, String providerUserId) {
+        List<?> users = client.get().uri(builder -> builder.path(adminPath("users"))
+                        .queryParam("idpAlias", "{alias}").queryParam("idpUserId", "{sub}").build(alias, providerUserId))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
+        if (users == null || users.size() != 1) return null;
+        Object id = ((Map<?, ?>) users.get(0)).get("id");
+        return id == null ? null : String.valueOf(id);
+    }
+
+    /**
+     * Crea la identidad de quien entra con Apple o Google: correo verificado por el proveedor,
+     * sin contraseña, con el rol USER. Devuelve null si el correo ya existe (otra petición la
+     * creó a la vez): quien llama la busca por correo y la vincula.
+     */
+    public String createSocialUser(String email, String displayName) {
+        String adminToken = adminToken();
+        // Keycloak exige nombre y apellido; sin nombre del proveedor se usa uno genérico que la
+        // app no muestra (el nombre visible es app_users.display_name).
+        String[] names = splitDisplayName(displayName == null || displayName.isBlank() ? "PAKTAY" : displayName);
+        Map<String, Object> payload = Map.of(
+                "username", email,
+                "email", email,
+                "firstName", names[0],
+                "lastName", names[1],
+                "enabled", true,
+                "emailVerified", true);
+        try {
+            URI location = client.post().uri(adminPath("users"))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+                    .contentType(MediaType.APPLICATION_JSON).body(payload).retrieve()
+                    .toBodilessEntity().getHeaders().getLocation();
+            if (location == null) throw new IllegalStateException("Keycloak no devolvió el identificador del usuario");
+            String id = location.getPath().substring(location.getPath().lastIndexOf('/') + 1);
+            assignUserRole(adminToken, id);
+            return id;
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().value() == 409) return null;
+            log.error("keycloak_social_create_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+            throw new IllegalStateException("No fue posible crear la cuenta");
+        }
+    }
+
+    /** Vincula la cuenta de Keycloak con la de Apple o Google (el token exchange no lo hace solo). */
+    public void linkFederatedIdentity(String userId, String alias, String providerUserId, String userName) {
+        try {
+            client.post().uri(adminPath("users/" + userId + "/federated-identity/" + alias))
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of("identityProvider", alias, "userId", providerUserId, "userName", userName))
+                    .retrieve().toBodilessEntity();
+        } catch (RestClientResponseException ex) {
+            // 409 = ya estaba vinculada (dos entradas a la vez): no es un error.
+            if (ex.getStatusCode().value() == 409) return;
+            log.error("keycloak_social_link_failed subject={} status={} errorCode={}", userId, ex.getStatusCode().value(), keycloakErrorCode(ex));
+            throw new IllegalStateException("No fue posible vincular la cuenta");
+        }
+    }
+
+    /**
+     * Cambia el ID token de Apple o Google por una sesión de PAKTAY (token exchange de externo a
+     * interno, función en vista previa de Keycloak 26.2: token-exchange:v1 y
+     * admin-fine-grained-authz:v1). Sin audience: el token sale para paktay-auth-service, y por eso
+     * la app renueva con {@link #serviceRefresh}.
+     */
+    public TokenResponse exchangeExternalToken(String alias, String subjectToken) {
+        try {
+            return client.post().uri(tokenPath())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body("grant_type=" + encode("urn:ietf:params:oauth:grant-type:token-exchange")
+                            + "&" + serviceClient()
+                            + "&subject_token=" + encode(subjectToken)
+                            + "&subject_issuer=" + encode(alias)
+                            + "&subject_token_type=" + encode("urn:ietf:params:oauth:token-type:jwt")
+                            + "&requested_token_type=" + encode("urn:ietf:params:oauth:token-type:refresh_token"))
+                    .retrieve().body(TokenResponse.class);
+        } catch (RestClientResponseException ex) {
+            String reason = keycloakErrorDescription(ex);
+            log.warn("keycloak_token_exchange_rejected alias={} status={} errorCode={} reason={}", alias,
+                    ex.getStatusCode().value(), keycloakErrorCode(ex), reason);
+            if (reason.toLowerCase().contains("disabled")) throw CodedException.accountBlocked();
+            if (ex.getStatusCode().is4xxClientError()) {
+                throw new CodedException(HttpStatus.BAD_REQUEST, "SOCIAL_TOKEN_INVALID", "No pudimos verificar tu cuenta. Inténtalo otra vez.");
+            }
+            throw new IllegalStateException("No fue posible iniciar sesión");
+        }
+    }
+
+    /** Renueva una sesión emitida por el token exchange (cliente paktay-auth-service). */
+    public TokenResponse serviceRefresh(String refreshToken) {
+        try {
+            return client.post().uri(tokenPath())
+                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                    .body("grant_type=refresh_token&" + serviceClient() + "&refresh_token=" + encode(refreshToken))
+                    .retrieve().body(TokenResponse.class);
+        } catch (RestClientResponseException ex) {
+            if (ex.getStatusCode().is4xxClientError()) {
+                String reason = keycloakErrorDescription(ex);
+                log.warn("keycloak_service_refresh_rejected status={} errorCode={} reason={}", ex.getStatusCode().value(), keycloakErrorCode(ex), reason);
+                if ("Account disabled".equals(reason)) throw CodedException.accountBlocked();
+                throw new CodedException(HttpStatus.UNAUTHORIZED, "SESSION_EXPIRED", "Tu sesión venció. Vuelve a entrar.");
+            }
+            log.error("keycloak_service_refresh_failed status={} errorCode={}", ex.getStatusCode().value(), keycloakErrorCode(ex));
+            throw new IllegalStateException("No fue posible renovar la sesión");
+        }
+    }
+
+    /** Si la cuenta tiene contraseña en Keycloak (quien solo entra con Apple o Google no la tiene). */
+    public boolean hasPassword(String userId) {
+        List<?> credentials = client.get().uri(adminPath("users/" + userId + "/credentials"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
+        if (credentials == null) return false;
+        return credentials.stream().anyMatch(c -> c instanceof Map<?, ?> map && "password".equals(map.get("type")));
+    }
+
+    /** Alias de los proveedores vinculados a la cuenta (p. ej. ["apple"]). */
+    public List<String> federatedProviders(String userId) {
+        List<?> links = client.get().uri(adminPath("users/" + userId + "/federated-identity"))
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken()).retrieve().body(List.class);
+        if (links == null) return List.of();
+        return links.stream().filter(l -> l instanceof Map<?, ?>)
+                .map(l -> String.valueOf(((Map<?, ?>) l).get("identityProvider"))).toList();
+    }
+
+    private String serviceClient() {
+        return "client_id=" + encode(properties.serviceClientId()) + "&client_secret=" + encode(properties.serviceClientSecret());
+    }
+
     public void grantRealmRole(String userId, String roleName) {
         String token = adminToken();
         client.post().uri(adminPath("users/" + userId + "/role-mappings/realm"))

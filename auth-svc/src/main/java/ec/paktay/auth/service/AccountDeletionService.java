@@ -32,19 +32,25 @@ public class AccountDeletionService {
     private final JdbcTemplate db;
     private final TransactionTemplate tx;
     private final AdminAuditWriter audit;
+    private final AppleTokenService apple;
 
     public AccountDeletionService(KeycloakIdentityService identities, JdbcTemplate db, PlatformTransactionManager manager,
-                                  AdminAuditWriter audit) {
+                                  AdminAuditWriter audit, AppleTokenService apple) {
         this.identities = identities;
         this.db = db;
         this.tx = new TransactionTemplate(manager);
         this.audit = audit;
+        this.apple = apple;
     }
 
-    /** El propio usuario, confirmando su contraseña. */
+    /**
+     * El propio usuario. Con contraseña, la confirma. Sin contraseña (solo entra con Apple o
+     * Google, día 8c) no hay nada que escribir: la app ya lo confirmó con Face ID.
+     */
     public void delete(String subject, String password) {
         Map<?, ?> user = identities.findById(subject);
-        if (user != null) {
+        if (user != null && identities.hasPassword(subject)) {
+            if (password == null || password.isBlank()) throw new IllegalArgumentException("Escribe tu contraseña para confirmar");
             try {
                 identities.verifyCredentials(String.valueOf(user.get("username")), password);
             } catch (IllegalArgumentException ex) {
@@ -61,6 +67,8 @@ public class AccountDeletionService {
     }
 
     private void purgeAndDelete(String subject, boolean identityExists, AdminActor actor) {
+        // Antes de borrar: purge_user se lleva el refresh token de Apple que hay que revocar.
+        apple.revokeFor(subject);
         tx.executeWithoutResult(status -> db.queryForList("select public.purge_user(cast(? as uuid))", subject));
         log.info("account_data_purged subject={}", subject);
         if (identityExists) {

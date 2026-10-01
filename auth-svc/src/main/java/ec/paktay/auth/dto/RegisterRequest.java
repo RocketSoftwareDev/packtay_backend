@@ -9,6 +9,9 @@ public record RegisterRequest(
         @NotBlank @Email String email,
         @NotBlank @Size(min = 2, max = 120) String displayName,
         @NotBlank @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{10,128}$",
-                message = "Debe tener 10 caracteres, mayúscula, minúscula, número y símbolo") String password) {
+                message = "Debe tener 10 caracteres, mayúscula, minúscula, número y símbolo") String password,
+        // Día 8c · la casilla de Términos y Privacidad. Opcional para no romper builds
+        // anteriores; si viene en true se guarda fecha y versión.
+        Boolean acceptedLegal) {
 }
 

@@ -14,6 +14,12 @@ import ec.paktay.auth.service.KeycloakIdentityService;
 import ec.paktay.auth.service.RegistrationService;
 import ec.paktay.auth.service.TemporaryPasswordService;
 import ec.paktay.auth.dto.TemporaryPasswordChangeRequest;
+import ec.paktay.auth.dto.AccountMethodsResponse;
+import ec.paktay.auth.dto.SocialLoginRequest;
+import ec.paktay.auth.dto.SocialRefreshRequest;
+import ec.paktay.auth.service.SocialLoginService;
+import ec.paktay.auth.service.SocialProvider;
+import org.springframework.web.bind.annotation.PathVariable;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -40,9 +46,12 @@ public class AuthController {
     private final AccountDeletionService accounts;
     private final RegistrationService registrations;
     private final TemporaryPasswordService temporaryPasswords;
+    private final SocialLoginService socials;
 
     public AuthController(KeycloakIdentityService identities, KeycloakProperties properties, ec.paktay.auth.service.PasswordPinService pins,
-                          AccountDeletionService accounts, RegistrationService registrations, TemporaryPasswordService temporaryPasswords) {
+                          AccountDeletionService accounts, RegistrationService registrations, TemporaryPasswordService temporaryPasswords,
+                          SocialLoginService socials) {
+        this.socials = socials;
         this.temporaryPasswords = temporaryPasswords;
         this.pins = pins;
         this.accounts = accounts;
@@ -76,6 +85,43 @@ public class AuthController {
     @ApiResponse(responseCode = "403", description = "ACCOUNT_BLOCKED: cuenta bloqueada por un administrador")
     public TokenResponse login(@Valid @RequestBody LoginRequest request) {
         return temporaryPasswords.afterMobileLogin(identities.login(request));
+    }
+
+    @PostMapping("/social/{provider}")
+    @Operation(summary = "Entrar con Apple o Google", description = "Ruta pública; no requiere token. provider = apple | google. "
+            + "Valida el ID token del proveedor (firma, emisor, audiencia, vencimiento; Apple además el nonce) y abre la sesión: "
+            + "si esa cuenta de Apple/Google ya está vinculada la usa; si el correo ya tiene cuenta la vincula (conserva su "
+            + "contraseña); si no, crea una cuenta sin contraseña. Sirve igual para entrar y para registrarse. La sesión se "
+            + "renueva con POST /api/v1/auth/social/refresh, no directamente en Keycloak.")
+    @ApiResponse(responseCode = "200", description = "Tokens emitidos")
+    @ApiResponse(responseCode = "400", description = "SOCIAL_TOKEN_INVALID, SOCIAL_EMAIL_MISSING, SOCIAL_EMAIL_UNVERIFIED, "
+            + "LEGAL_ACCEPTANCE_REQUIRED (crear cuenta sin acceptedLegal = true) o registro rechazado")
+    @ApiResponse(responseCode = "403", description = "ACCOUNT_BLOCKED: cuenta bloqueada por un administrador")
+    @ApiResponse(responseCode = "404", description = "Proveedor desconocido o apagado en este servidor")
+    public TokenResponse socialLogin(@PathVariable String provider, @Valid @RequestBody SocialLoginRequest request) {
+        return socials.login(SocialProvider.fromPath(provider), request);
+    }
+
+    @PostMapping("/social/refresh")
+    @Operation(summary = "Renovar una sesión de Apple o Google", description = "Ruta pública; no requiere token (el refresh token "
+            + "es la credencial). Solo para sesiones abiertas con POST /api/v1/auth/social/{provider}: esos tokens se emiten para "
+            + "el cliente del servidor y la app no puede renovarlos directamente en Keycloak.")
+    @ApiResponse(responseCode = "200", description = "Tokens renovados (el refresh token rota)")
+    @ApiResponse(responseCode = "401", description = "SESSION_EXPIRED: hay que volver a entrar")
+    @ApiResponse(responseCode = "403", description = "ACCOUNT_BLOCKED")
+    public TokenResponse socialRefresh(@Valid @RequestBody SocialRefreshRequest request) {
+        return identities.serviceRefresh(request.refreshToken());
+    }
+
+    @GetMapping("/account/methods")
+    @Operation(summary = "Cómo entra mi cuenta", description = "Ruta autenticada. hasPassword dice si la cuenta tiene contraseña "
+            + "(la app ofrece «Cambiar contraseña» y la pide al eliminar la cuenta); providers, los proveedores vinculados "
+            + "(\"apple\", \"google\").")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponse(responseCode = "200", description = "Métodos de acceso")
+    @ApiResponse(responseCode = "401", description = "Token inválido")
+    public AccountMethodsResponse accountMethods(@AuthenticationPrincipal Jwt jwt) {
+        return new AccountMethodsResponse(identities.hasPassword(jwt.getSubject()), identities.federatedProviders(jwt.getSubject()));
     }
 
     @PutMapping("/password/temporary")
@@ -147,16 +193,19 @@ public class AuthController {
     }
 
     @PostMapping("/account/delete")
-    @Operation(summary = "Eliminar mi cuenta", description = "Ruta autenticada. Confirma la contraseña, borra de inmediato todos los datos del usuario "
-            + "(tarjetas, gastos, categorías, reglas, presupuestos, dispositivos y bitácora) y elimina la identidad en Keycloak, lo que cierra todas sus sesiones. "
-            + "Sólo se conserva el registro de compras de planes. Idempotente: si los datos ya se borraron y falló Keycloak, se puede repetir.")
+    @Operation(summary = "Eliminar mi cuenta", description = "Ruta autenticada. Si la cuenta tiene contraseña la confirma; si solo entra con "
+            + "Apple o Google no tiene contraseña y el cuerpo va sin ella (la app lo confirma con Face ID). Revoca el acceso en Apple si lo hay, "
+            + "borra de inmediato todos los datos del usuario (tarjetas, gastos, categorías, reglas, presupuestos, dispositivos y bitácora) y "
+            + "elimina la identidad en Keycloak, lo que cierra todas sus sesiones. Sólo se conserva el registro de compras de planes. "
+            + "Idempotente: si los datos ya se borraron y falló Keycloak, se puede repetir.")
     @SecurityRequirement(name = "bearerAuth")
     @ApiResponse(responseCode = "200", description = "Cuenta eliminada")
-    @ApiResponse(responseCode = "400", description = "Contraseña vacía o incorrecta")
+    @ApiResponse(responseCode = "400", description = "Contraseña vacía o incorrecta (solo si la cuenta tiene contraseña)")
     @ApiResponse(responseCode = "401", description = "Token inválido")
     @ApiResponse(responseCode = "502", description = "Los datos se borraron pero Keycloak no respondió; repetir la llamada")
-    public MessageResponse deleteAccount(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody AccountDeletionRequest request) {
-        accounts.delete(jwt.getSubject(), request.password());
+    public MessageResponse deleteAccount(@AuthenticationPrincipal Jwt jwt,
+                                         @Valid @RequestBody(required = false) AccountDeletionRequest request) {
+        accounts.delete(jwt.getSubject(), request == null ? null : request.password());
         return new MessageResponse("Cuenta eliminada");
     }
 
