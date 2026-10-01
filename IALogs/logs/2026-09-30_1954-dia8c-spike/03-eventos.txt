@@ -1,0 +1,7 @@
+type="TOKEN_EXCHANGE" clientId="paktay-auth-service" audience="paktay-auth-service" type="urn:ietf:params:oauth:grant-type:token-exchange" type="Refresh" subject_issuer="google" type="urn:ietf:params:oauth:token-type:refresh_token"
+type="TOKEN_EXCHANGE" clientId="paktay-auth-service" audience="paktay-mobile" type="urn:ietf:params:oauth:grant-type:token-exchange" type="Refresh" subject_issuer="google" type="urn:ietf:params:oauth:token-type:refresh_token"
+type="TOKEN_EXCHANGE" clientId="paktay-auth-service" audience="paktay-mobile" type="urn:ietf:params:oauth:grant-type:token-exchange" type="Refresh" subject_issuer="google" type="urn:ietf:params:oauth:token-type:refresh_token"
+type="TOKEN_EXCHANGE_ERROR" clientId="paktay-auth-service" error="federated_identity_account_exists" type="urn:ietf:params:oauth:grant-type:token-exchange" subject_issuer="google"
+type="TOKEN_EXCHANGE" clientId="paktay-auth-service" audience="paktay-mobile" type="urn:ietf:params:oauth:grant-type:token-exchange" type="Refresh" subject_issuer="google" type="urn:ietf:params:oauth:token-type:refresh_token"
+type="TOKEN_EXCHANGE_ERROR" clientId="paktay-auth-service" error="invalid_token" reason="token validation failure" type="urn:ietf:params:oauth:grant-type:token-exchange" subject_issuer="google"
+type="TOKEN_EXCHANGE_ERROR" clientId="paktay-admin-panel" error="not_allowed" reason="client not allowed to exchange subject_issuer" type="urn:ietf:params:oauth:grant-type:token-exchange" subject_issuer="google"

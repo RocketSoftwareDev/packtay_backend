@@ -1,0 +1,55 @@
+== IDP permission
+{
+  "id" : "a905e4e4-fe78-4af2-9497-80180878b391",
+  "name" : "token-exchange.permission.idp.9d68a594-2099-4cec-853f-ccaf93e1d28e",
+  "type" : "scope",
+  "logic" : "POSITIVE",
+  "decisionStrategy" : "UNANIMOUS"
+}-- resources
+[ {
+  "name" : "idp.resource.9d68a594-2099-4cec-853f-ccaf93e1d28e",
+  "_id" : "af35964f-16d5-4c74-95e7-ed2af7666c1c"
+} ]-- scopes
+[ {
+  "id" : "a4505d3a-c75f-405d-8b72-e22d8b9554f1",
+  "name" : "token-exchange"
+} ]-- associated policies
+[ {
+  "id" : "aee407c8-ff6c-43de-8c43-b8f6e92b8af3",
+  "name" : "auth-svc-puede-cambiar",
+  "type" : "client",
+  "logic" : "POSITIVE",
+  "decisionStrategy" : "UNANIMOUS",
+  "config" : { }
+} ]== MOBILE permission
+{
+  "id" : "faaf9597-053a-4602-927b-ec943e8ab546",
+  "name" : "token-exchange.permission.client.9c83da3d-fcd9-4ce1-8900-4f7e2fe80f9e",
+  "type" : "scope",
+  "logic" : "POSITIVE",
+  "decisionStrategy" : "UNANIMOUS"
+}-- resources
+[ {
+  "name" : "client.resource.9c83da3d-fcd9-4ce1-8900-4f7e2fe80f9e",
+  "_id" : "6008fea8-898c-41f5-8e9c-929fa9055a9d"
+} ]-- scopes
+[ {
+  "id" : "a4505d3a-c75f-405d-8b72-e22d8b9554f1",
+  "name" : "token-exchange"
+} ]-- associated policies
+[ {
+  "id" : "aee407c8-ff6c-43de-8c43-b8f6e92b8af3",
+  "name" : "auth-svc-puede-cambiar",
+  "type" : "client",
+  "logic" : "POSITIVE",
+  "decisionStrategy" : "UNANIMOUS",
+  "config" : { }
+} ]== policy auth-svc-puede-cambiar
+{
+  "id" : "aee407c8-ff6c-43de-8c43-b8f6e92b8af3",
+  "name" : "auth-svc-puede-cambiar",
+  "type" : "client",
+  "logic" : "POSITIVE",
+  "decisionStrategy" : "UNANIMOUS",
+  "clients" : [ "5051c885-2e17-48a0-b1f4-47447a13b6c6" ]
+}auth_service_client_uuid=5051c885-2e17-48a0-b1f4-47447a13b6c6

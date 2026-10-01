@@ -1,0 +1,7 @@
+{
+  "http_code": 400,
+  "error": "invalid_grant",
+  "error_description": "Invalid refresh token. Token client and authorized client don't match",
+  "access_token_present": false,
+  "refresh_token_present": false
+}

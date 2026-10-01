@@ -1,0 +1,7 @@
+aud="fake-app"
+azp="fake-app"
+email="nuevo@fake.local"
+iss="http://host.docker.internal:28190/realms/fakeidp"
+preferred_username="nuevo@fake.local"
+sub="f41f5a9c-014b-4868-a5ad-c29d0ac2ff93"
+typ="ID"

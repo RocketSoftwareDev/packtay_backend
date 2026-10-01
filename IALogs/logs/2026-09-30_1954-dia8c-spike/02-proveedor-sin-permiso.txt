@@ -1,0 +1,5 @@
+{
+  "http_code": 403,
+  "error": "access_denied",
+  "error_description": "Client not allowed to exchange"
+}

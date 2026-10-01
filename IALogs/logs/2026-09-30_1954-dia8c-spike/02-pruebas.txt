@@ -1,0 +1,13 @@
+OK - 1 usuario nuevo - HTTP 200; access y refresh presentes
+FAIL - 2 renovar desde móvil - HTTP 400; Invalid refresh token. Token client and authorized client don't match
+FAIL - 2 alternativa auth-service - HTTP 400; Session not active
+FAIL - 3 vincular por correo - HTTP 400; password grant HTTP 200; User already exists
+OK - 4 segunda vez - HTTP 200; sub igual=True
+OK - 5 token falso - HTTP 400; invalid token
+OK - 6 proveedor sin permiso - HTTP 403; Client not allowed to exchange
+FAIL - 7 rol USER - claims realm_access: {"roles": ["default-roles-paktay", "offline_access", "uma_authorization"]}
+OK - 8 borrar usuario nuevo - HTTP 204
+
+sub_nuevo=54081c50-b4f5-4175-8ac2-7b08203a9d48
+sub_segunda_vez=54081c50-b4f5-4175-8ac2-7b08203a9d48
+sub_existente=None
