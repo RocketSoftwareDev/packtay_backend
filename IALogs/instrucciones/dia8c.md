@@ -12,6 +12,10 @@ Qué hay nuevo:
 - `infra/keycloak/social-setup.sh`: proveedores y permisos del token exchange.
 - Móvil: botones de Apple y Google, renovación de esas sesiones a través de auth-svc, perfil y
   eliminar cuenta sin contraseña con Face ID, y el bloqueo con Face ID reescrito.
+- Aceptación de Términos y Privacidad con fecha y versión (`app_users`, V13). La línea «Al
+  continuar con Apple o Google aceptas…» va bajo los botones en Login y Crear cuenta. Las URL
+  salen de `PAKTAY_URL_TERMS` y `PAKTAY_URL_PRIVACY` en la app, y las versiones de
+  `LEGAL_TERMS_VERSION` y `LEGAL_PRIVACY_VERSION` en auth-svc.
 
 Sin cuentas reales de Apple y Google, el backend se prueba con el **proveedor falso** de la
 prueba previa (`dia8c-spike.md`): un realm `fakeidp` que emite tokens como Google. Apple solo se
@@ -113,7 +117,16 @@ con password grant (`client_id=fake-app`, `scope=openid email profile`) y se man
    con `{}` → 200; el usuario ya no existe en Keycloak ni en `app_users`.
 9. **Eliminar con contraseña:** con un token de `existente@fake.local`, `{}` → 400 y
    `{"password":"<la suya>"}` → 200.
-10. **OpenAPI:** `/api/v1/auth/social/{provider}`, `/api/v1/auth/social/refresh` y
+10. **Términos y Privacidad:** `app_users` tiene `terms_accepted_at`, `terms_version`,
+    `privacy_accepted_at` y `privacy_version` (V13).
+    - El usuario de la prueba 1 (entró con `acceptedLegal: true`) tiene las dos fechas y las dos
+      versiones en `1`.
+    - Una cuenta **nueva** con Google **sin** `acceptedLegal` (crea `sinacepto@fake.local` en
+      `fakeidp`) → 400 `LEGAL_ACCEPTANCE_REQUIRED` y no se crea en Keycloak.
+    - `POST $A/api/v1/auth/register` con `acceptedLegal: true` guarda fechas y versiones; sin el
+      campo, quedan en null (las builds viejas siguen registrando).
+    - Volver a entrar con la misma versión no cambia `terms_accepted_at`.
+11. **OpenAPI:** `/api/v1/auth/social/{provider}`, `/api/v1/auth/social/refresh` y
     `/api/v1/auth/account/methods` aparecen en `$A/v3/api-docs` (`06-openapi.txt`), y salud,
     OpenAPI y Swagger de los dos servicios en 200 (`07-health.txt`).
 
