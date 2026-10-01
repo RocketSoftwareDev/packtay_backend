@@ -91,6 +91,15 @@ class SocialTokenVerifierTest {
     }
 
     @Test
+    void elEmisorDePruebaSoloValeConLaVariable() {
+        String fake = "http://host.docker.internal:28190/realms/fakeidp";
+        Jwt jwt = token(fake, GOOGLE_AUD.get(0), b -> { });
+        assertEquals("ana@ejemplo.com", SocialTokenVerifier.validate(SocialProvider.GOOGLE, jwt, GOOGLE_AUD, null, NOW, fake).email());
+        assertEquals("SOCIAL_TOKEN_INVALID", code(() -> SocialTokenVerifier.validate(SocialProvider.GOOGLE, jwt, GOOGLE_AUD, null, NOW)));
+        assertEquals("SOCIAL_TOKEN_INVALID", code(() -> SocialTokenVerifier.validate(SocialProvider.GOOGLE, google(b -> { }), GOOGLE_AUD, null, NOW, fake)));
+    }
+
+    @Test
     void proveedorDesconocidoEs404() {
         assertThrows(NotFoundException.class, () -> SocialProvider.fromPath("facebook"));
         assertEquals(SocialProvider.APPLE, SocialProvider.fromPath("apple"));

@@ -88,8 +88,9 @@ grant_exchange() {
   echo "exchange_granted alias=$alias"
 }
 
+# GOOGLE_ISSUER / GOOGLE_JWKS: solo pruebas locales con un proveedor falso.
 if [ -n "$GOOGLE_CLIENT_ID" ]; then
-  upsert_idp google https://accounts.google.com https://www.googleapis.com/oauth2/v3/certs \
+  upsert_idp google "${GOOGLE_ISSUER:-https://accounts.google.com}" "${GOOGLE_JWKS:-https://www.googleapis.com/oauth2/v3/certs}" \
     https://accounts.google.com/o/oauth2/v2/auth https://oauth2.googleapis.com/token "$GOOGLE_CLIENT_ID"
   grant_exchange google
 fi

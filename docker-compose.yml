@@ -94,6 +94,9 @@ services:
       SOCIAL_APPLE_TEAM_ID: ${SOCIAL_APPLE_TEAM_ID:-}
       SOCIAL_APPLE_KEY_ID: ${SOCIAL_APPLE_KEY_ID:-}
       SOCIAL_APPLE_PRIVATE_KEY_PATH: ${SOCIAL_APPLE_PRIVATE_KEY_PATH:-}
+      # Solo pruebas locales con un proveedor falso; en producción vacías.
+      SOCIAL_GOOGLE_ISSUER_OVERRIDE: ${SOCIAL_GOOGLE_ISSUER_OVERRIDE:-}
+      SOCIAL_GOOGLE_JWKS_URL_OVERRIDE: ${SOCIAL_GOOGLE_JWKS_URL_OVERRIDE:-}
     volumes:
       - ${SOCIAL_APPLE_PRIVATE_KEY_HOST_FILE:-/dev/null}:/run/secrets/apple-signin.p8:ro
     ports:

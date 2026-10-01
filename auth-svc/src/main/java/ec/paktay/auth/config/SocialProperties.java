@@ -24,7 +24,15 @@ public record SocialProperties(
         String appleAlias,
         String appleTeamId,
         String appleKeyId,
-        String applePrivateKeyPath) {
+        String applePrivateKeyPath,
+        String googleIssuerOverride,
+        String googleJwksUrlOverride) {
+
+    /*
+     * googleIssuerOverride / googleJwksUrlOverride: SOLO para pruebas locales. Permiten que
+     * Codex pruebe el flujo completo con un proveedor falso (un realm de Keycloak que emite
+     * tokens como Google). En producción van vacías y mandan los de Google.
+     */
 
     public List<String> googleAudiences() {
         return split(googleClientIds);

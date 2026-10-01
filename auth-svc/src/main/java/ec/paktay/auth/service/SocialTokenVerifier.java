@@ -58,13 +58,22 @@ public class SocialTokenVerifier {
             log.warn("social_token_rejected provider={} reason={}", provider, ex.getClass().getSimpleName());
             throw invalid(provider);
         }
-        return validate(provider, jwt, audiences, rawNonce, Instant.now());
+        String issuerOverride = provider == SocialProvider.GOOGLE ? properties.googleIssuerOverride() : null;
+        return validate(provider, jwt, audiences, rawNonce, Instant.now(), issuerOverride);
+    }
+
+    static SocialIdentity validate(SocialProvider provider, Jwt jwt, List<String> audiences, String rawNonce, Instant now) {
+        return validate(provider, jwt, audiences, rawNonce, now, null);
     }
 
     /** Las comprobaciones de los claims, sin red: separadas para poder probarlas. */
-    static SocialIdentity validate(SocialProvider provider, Jwt jwt, List<String> audiences, String rawNonce, Instant now) {
+    static SocialIdentity validate(SocialProvider provider, Jwt jwt, List<String> audiences, String rawNonce, Instant now,
+                                   String issuerOverride) {
         String issuer = jwt.getClaimAsString("iss");
-        if (issuer == null || !provider.issuers().contains(issuer)) throw invalid(provider);
+        boolean issuerOk = issuerOverride != null && !issuerOverride.isBlank()
+                ? issuerOverride.equals(issuer)
+                : issuer != null && provider.issuers().contains(issuer);
+        if (!issuerOk) throw invalid(provider);
         List<String> aud = jwt.getAudience();
         if (aud == null || aud.stream().noneMatch(audiences::contains)) throw invalid(provider);
         if (jwt.getExpiresAt() == null || !jwt.getExpiresAt().isAfter(now)) throw invalid(provider);
@@ -106,7 +115,9 @@ public class SocialTokenVerifier {
 
     private synchronized JwtDecoder decoder(SocialProvider provider) {
         return decoders.computeIfAbsent(provider, p -> {
-            NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(p.jwksUrl()).build();
+            String override = p == SocialProvider.GOOGLE ? properties.googleJwksUrlOverride() : null;
+            String jwks = override != null && !override.isBlank() ? override : p.jwksUrl();
+            NimbusJwtDecoder decoder = NimbusJwtDecoder.withJwkSetUri(jwks).build();
             decoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(new JwtTimestampValidator()));
             return decoder;
         });
