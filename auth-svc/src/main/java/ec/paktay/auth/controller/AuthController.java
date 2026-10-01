@@ -94,7 +94,8 @@ public class AuthController {
             + "contraseña); si no, crea una cuenta sin contraseña. Sirve igual para entrar y para registrarse. La sesión se "
             + "renueva con POST /api/v1/auth/social/refresh, no directamente en Keycloak.")
     @ApiResponse(responseCode = "200", description = "Tokens emitidos")
-    @ApiResponse(responseCode = "400", description = "SOCIAL_TOKEN_INVALID, SOCIAL_EMAIL_MISSING, SOCIAL_EMAIL_UNVERIFIED o registro rechazado")
+    @ApiResponse(responseCode = "400", description = "SOCIAL_TOKEN_INVALID, SOCIAL_EMAIL_MISSING, SOCIAL_EMAIL_UNVERIFIED, "
+            + "LEGAL_ACCEPTANCE_REQUIRED (crear cuenta sin acceptedLegal = true) o registro rechazado")
     @ApiResponse(responseCode = "403", description = "ACCOUNT_BLOCKED: cuenta bloqueada por un administrador")
     @ApiResponse(responseCode = "404", description = "Proveedor desconocido o apagado en este servidor")
     public TokenResponse socialLogin(@PathVariable String provider, @Valid @RequestBody SocialLoginRequest request) {

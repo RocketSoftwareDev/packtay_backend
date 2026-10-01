@@ -27,13 +27,15 @@ public class RegistrationService {
     private final IdentityBlockService blocks;
     private final JdbcTemplate db;
     private final AdminAuditWriter audit;
+    private final LegalAcceptanceService legal;
 
     public RegistrationService(KeycloakIdentityService identities, IdentityBlockService blocks, JdbcTemplate db,
-                               AdminAuditWriter audit) {
+                               AdminAuditWriter audit, LegalAcceptanceService legal) {
         this.identities = identities;
         this.blocks = blocks;
         this.db = db;
         this.audit = audit;
+        this.legal = legal;
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -52,6 +54,7 @@ public class RegistrationService {
             // business-svc crea la fila en la primera petición del usuario; no se pierde la cuenta.
             log.error("register_profile_insert_failed userId={} reason={}", created.id(), ex.getMessage());
         }
+        if (Boolean.TRUE.equals(request.acceptedLegal())) legal.record(created.id());
         audit.userCreated(created.id(), email, Map.of("source", "app"));
         return created;
     }

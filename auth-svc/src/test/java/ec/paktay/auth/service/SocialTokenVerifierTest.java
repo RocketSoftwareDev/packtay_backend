@@ -108,10 +108,10 @@ class SocialTokenVerifierTest {
     @Test
     void nombreVisibleSinInventar() {
         SocialIdentity sinNombre = new SocialIdentity(SocialProvider.APPLE, "s", "x@privaterelay.appleid.com", null, null);
-        assertNull(SocialLoginService.displayName(sinNombre, new SocialLoginRequest("t", "n", null, null, null)));
-        assertEquals("Ana Pérez", SocialLoginService.displayName(sinNombre, new SocialLoginRequest("t", "n", null, " Ana ", "Pérez")));
+        assertNull(SocialLoginService.displayName(sinNombre, new SocialLoginRequest("t", "n", null, null, null, true)));
+        assertEquals("Ana Pérez", SocialLoginService.displayName(sinNombre, new SocialLoginRequest("t", "n", null, " Ana ", "Pérez", true)));
         SocialIdentity google = new SocialIdentity(SocialProvider.GOOGLE, "s", "a@b.com", "Luis", null);
-        assertEquals("Luis", SocialLoginService.displayName(google, new SocialLoginRequest("t", null, null, null, null)));
+        assertEquals("Luis", SocialLoginService.displayName(google, new SocialLoginRequest("t", null, null, null, null, true)));
     }
 
     @Test

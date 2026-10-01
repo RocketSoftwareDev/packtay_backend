@@ -94,6 +94,9 @@ services:
       SOCIAL_APPLE_TEAM_ID: ${SOCIAL_APPLE_TEAM_ID:-}
       SOCIAL_APPLE_KEY_ID: ${SOCIAL_APPLE_KEY_ID:-}
       SOCIAL_APPLE_PRIVATE_KEY_PATH: ${SOCIAL_APPLE_PRIVATE_KEY_PATH:-}
+      # Versión vigente de Términos y Privacidad; subirla al publicar una nueva.
+      LEGAL_TERMS_VERSION: ${LEGAL_TERMS_VERSION:-1}
+      LEGAL_PRIVACY_VERSION: ${LEGAL_PRIVACY_VERSION:-1}
       # Solo pruebas locales con un proveedor falso; en producción vacías.
       SOCIAL_GOOGLE_ISSUER_OVERRIDE: ${SOCIAL_GOOGLE_ISSUER_OVERRIDE:-}
       SOCIAL_GOOGLE_JWKS_URL_OVERRIDE: ${SOCIAL_GOOGLE_JWKS_URL_OVERRIDE:-}

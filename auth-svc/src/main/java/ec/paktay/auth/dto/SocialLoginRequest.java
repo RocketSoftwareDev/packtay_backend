@@ -16,5 +16,7 @@ public record SocialLoginRequest(
         @Size(max = 256) String nonce,
         @Size(max = 2048) String authorizationCode,
         @Size(max = 80) String givenName,
-        @Size(max = 80) String familyName) {
+        @Size(max = 80) String familyName,
+        // Aceptó Términos y Privacidad (la línea bajo los botones). Obligatorio para crear cuenta.
+        Boolean acceptedLegal) {
 }

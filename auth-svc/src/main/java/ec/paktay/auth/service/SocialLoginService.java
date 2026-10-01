@@ -38,9 +38,12 @@ public class SocialLoginService {
     private final SocialProperties properties;
     private final JdbcTemplate db;
     private final AdminAuditWriter audit;
+    private final LegalAcceptanceService legal;
 
     public SocialLoginService(SocialTokenVerifier verifier, KeycloakIdentityService identities, IdentityBlockService blocks,
-                              AppleTokenService apple, SocialProperties properties, JdbcTemplate db, AdminAuditWriter audit) {
+                              AppleTokenService apple, SocialProperties properties, JdbcTemplate db, AdminAuditWriter audit,
+                              LegalAcceptanceService legal) {
+        this.legal = legal;
         this.verifier = verifier;
         this.identities = identities;
         this.blocks = blocks;
@@ -53,7 +56,9 @@ public class SocialLoginService {
     public TokenResponse login(SocialProvider provider, SocialLoginRequest request) {
         SocialIdentity identity = verifier.verify(provider, request.idToken(), request.nonce());
         String alias = alias(provider);
-        String userId = prepareUser(identity, alias, displayName(identity, request));
+        boolean acceptedLegal = Boolean.TRUE.equals(request.acceptedLegal());
+        String userId = prepareUser(identity, alias, displayName(identity, request), acceptedLegal);
+        if (acceptedLegal) legal.record(userId);
         Map<?, ?> user = identities.findById(userId);
         if (user != null && Boolean.FALSE.equals(user.get("enabled"))) throw CodedException.accountBlocked();
         TokenResponse tokens = identities.exchangeExternalToken(alias, request.idToken());
@@ -62,13 +67,18 @@ public class SocialLoginService {
         return tokens;
     }
 
-    private String prepareUser(SocialIdentity identity, String alias, String displayName) {
+    private String prepareUser(SocialIdentity identity, String alias, String displayName, boolean acceptedLegal) {
         String linked = identities.findByFederatedIdentity(alias, identity.subject());
         if (linked != null) return linked;
 
         Map<?, ?> existing = identities.findByEmail(identity.email());
         if (existing != null) return link(existing, identity, alias);
 
+        // Crear cuenta exige aceptar Términos y Privacidad (la línea bajo los botones).
+        if (!acceptedLegal) {
+            throw new CodedException(org.springframework.http.HttpStatus.BAD_REQUEST, "LEGAL_ACCEPTANCE_REQUIRED",
+                    "Para crear la cuenta hay que aceptar los Términos de uso y la Política de privacidad.");
+        }
         if (blocks.isRegistrationBlocked(identity.email())) {
             log.warn("social_register_blocked provider={}", identity.provider());
             throw new IllegalArgumentException(RegistrationService.GENERIC_REJECTION);

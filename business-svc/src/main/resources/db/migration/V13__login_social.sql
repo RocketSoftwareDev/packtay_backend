@@ -19,3 +19,17 @@ create table if not exists public.social_provider_tokens (
 );
 
 comment on table public.social_provider_tokens is 'Refresh token de Sign in with Apple por usuario, solo para revocarlo al eliminar la cuenta.';
+
+-- Aceptación de Términos de uso y Política de privacidad. Fecha y versión de cada
+-- documento, no un sí/no: si un documento cambia (LEGAL_TERMS_VERSION /
+-- LEGAL_PRIVACY_VERSION en auth-svc), se sabe quién aceptó cuál y cuándo. Las URL de
+-- las páginas viven en la app (PAKTAY_URL_TERMS / PAKTAY_URL_PRIVACY). Null = nunca
+-- aceptó en la app (cuentas creadas antes del día 8c).
+alter table public.app_users
+    add column if not exists terms_accepted_at timestamp with time zone,
+    add column if not exists terms_version character varying(32),
+    add column if not exists privacy_accepted_at timestamp with time zone,
+    add column if not exists privacy_version character varying(32);
+
+comment on column public.app_users.terms_version is 'Versión de los Términos de uso que aceptó (LEGAL_TERMS_VERSION al aceptar).';
+comment on column public.app_users.privacy_version is 'Versión de la Política de privacidad que aceptó (LEGAL_PRIVACY_VERSION al aceptar).';
