@@ -1,0 +1,6 @@
+iss="http://host.docker.internal:28190/realms/fakeidp"
+azp="fake-app"
+aud="fake-app"
+sub="f2dc384a-fb14-4c4c-921e-0d92000e33ee"
+email="nuevo@fake.local"
+realm_access=null

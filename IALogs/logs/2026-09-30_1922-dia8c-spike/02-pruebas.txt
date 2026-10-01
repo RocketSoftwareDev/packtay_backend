@@ -1,0 +1,14 @@
+1 usuario nuevo: FAIL {
+  "http_code": 403,
+  "error": "access_denied",
+  "error_description": "Client not allowed to exchange",
+  "access_token_present": false,
+  "refresh_token_present": false
+}
+2 renovar desde el móvil: BLOCKED; la prueba 1 no devolvió refresh_token
+3 vincular por correo: BLOCKED; la prueba 1 no creó usuario
+4 segunda vez: BLOCKED; la prueba 1 no creó usuario
+5 token falso: BLOCKED antes de validar firma; el permiso del cliente fue rechazado
+6 proveedor sin permiso: BLOCKED; el cliente autorizado tampoco pasó el permiso del proveedor
+7 rol USER: BLOCKED; la prueba 1 no creó usuario
+8 borrar: BLOCKED; la prueba 1 no creó usuario
