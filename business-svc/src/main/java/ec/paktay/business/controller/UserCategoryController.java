@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import ec.paktay.business.dto.CategoryResponse;
 import ec.paktay.business.dto.CreateUserCategoryRequest;
+import ec.paktay.business.dto.InactiveCategoryResponse;
 import ec.paktay.business.dto.UpdateCategoryRequest;
 import ec.paktay.business.dto.UpdateCategoryAppearanceRequest;
 import ec.paktay.business.service.CategoryService;
@@ -37,9 +38,41 @@ public class UserCategoryController {
     public UserCategoryController(CategoryService categories) { this.categories = categories; }
 
     @GetMapping
-    @Operation(summary = "Listar mis categorías activas", description = "Incluye las predeterminadas clonadas y las categorías propias activas, con icono Lucide, colores y orden personalizados.")
+    @Operation(summary = "Listar mis categorías activas", description = "Incluye las predeterminadas clonadas y las categorías propias activas, con icono Lucide, colores y orden personalizados. "
+            + "Al final va la reservada «Sin categoría» (reserved = true) solo si tiene gastos: no se edita, elimina, presupuesta ni asigna a gastos nuevos.")
     public List<CategoryResponse> list(@AuthenticationPrincipal Jwt jwt) {
         return categories.listUserCategories(UUID.fromString(jwt.getSubject()));
+    }
+
+    @GetMapping("/inactive")
+    @Operation(summary = "Listar mis categorías desactivadas",
+            description = "Ruta autenticada. Cada una dice si se puede eliminar (sin gastos activos en los últimos 3 meses y sin pagos "
+                    + "recurrentes activos o pausados que la usen), desde qué día si todavía no, qué recurrentes la usan y cuántos gastos "
+                    + "pasarían a «Sin categoría».")
+    @ApiResponse(responseCode = "200", description = "Categorías desactivadas")
+    public List<InactiveCategoryResponse> inactive(@AuthenticationPrincipal Jwt jwt) {
+        return categories.listInactiveCategories(UUID.fromString(jwt.getSubject()));
+    }
+
+    @PostMapping("/{categoryId}/reactivate")
+    @Operation(summary = "Reactivar una categoría desactivada",
+            description = "Ruta autenticada. Vuelve con sus gastos, nombre y colores. No vuelve sola al presupuesto: se marca de nuevo en él.")
+    @ApiResponse(responseCode = "200", description = "Categoría reactivada")
+    @ApiResponse(responseCode = "404", description = "Categoría inexistente, ajena o reservada")
+    public CategoryResponse reactivate(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID categoryId) {
+        return categories.reactivateUserCategory(UUID.fromString(jwt.getSubject()), categoryId);
+    }
+
+    @DeleteMapping("/{categoryId}/permanent")
+    @Operation(summary = "Eliminar para siempre una categoría desactivada",
+            description = "Ruta autenticada. Solo si está desactivada, sin gastos activos en los últimos 3 meses y sin pagos recurrentes "
+                    + "activos o pausados que la usen. Sus gastos (de cualquier fecha) pasan a «Sin categoría», también los de meses "
+                    + "cerrados; se borran sus reglas de comercios y presupuestos. No se puede deshacer.")
+    @ApiResponse(responseCode = "200", description = "Eliminada; movedExpenses = gastos que pasaron a «Sin categoría»")
+    @ApiResponse(responseCode = "404", description = "Categoría inexistente, ajena o reservada")
+    @ApiResponse(responseCode = "409", description = "Está activa, tiene gastos en los últimos 3 meses o la usa un pago recurrente")
+    public java.util.Map<String, Integer> deletePermanently(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID categoryId) {
+        return java.util.Map.of("movedExpenses", categories.deleteUserCategory(UUID.fromString(jwt.getSubject()), categoryId));
     }
 
     @PostMapping
@@ -82,10 +115,11 @@ public class UserCategoryController {
 
     @DeleteMapping("/{categoryId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Operation(summary = "Eliminar una categoría de mi catálogo",
-            description = "La elimina físicamente cuando no tiene gastos; si tiene historial, sólo la desactiva para conservar sus relaciones.")
-    @ApiResponse(responseCode = "204", description = "Categoría eliminada o desactivada según su historial")
-    @ApiResponse(responseCode = "400", description = "Categoría inexistente, ajena o ya inactiva")
+    @Operation(summary = "Desactivar una categoría de mi catálogo",
+            description = "Ruta autenticada. Desde el día 9 siempre la desactiva (antes borraba las que no tenían gastos): conserva sus gastos, "
+                    + "la saca del presupuesto y se puede reactivar. Para borrarla: DELETE /{categoryId}/permanent.")
+    @ApiResponse(responseCode = "204", description = "Categoría desactivada")
+    @ApiResponse(responseCode = "400", description = "Categoría inexistente, ajena, reservada o ya inactiva")
     public void delete(@AuthenticationPrincipal Jwt jwt, @PathVariable UUID categoryId) {
         categories.deactivateUserCategory(UUID.fromString(jwt.getSubject()), categoryId);
     }

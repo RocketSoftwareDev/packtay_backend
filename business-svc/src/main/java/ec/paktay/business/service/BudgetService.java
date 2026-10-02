@@ -218,6 +218,8 @@ public class BudgetService {
                 insert into user_category_budgets (user_id, period_id, category_id, individual_amount, active)
                 select :userId, :periodId, b.category_id, b.individual_amount, b.active
                   from previous p join user_category_budgets b on b.period_id = p.period_id and b.user_id = :userId
+                  -- Día 9 · solo las categorías activas: una desactivada no vuelve sola al mes nuevo.
+                  join user_categories uc on uc.id = b.category_id and uc.active and not uc.reserved
                  where exists(select 1 from copied)
                 on conflict (user_id, period_id, category_id) do nothing
                 """).param("userId", userId).param("periodId", periodId).update();
@@ -226,7 +228,7 @@ public class BudgetService {
     }
 
     private void ensureCategory(UUID userId, UUID categoryId) {
-        boolean exists = jdbc.sql("select exists(select 1 from user_categories where id=:id and user_id=:userId and active)")
+        boolean exists = jdbc.sql("select exists(select 1 from user_categories where id=:id and user_id=:userId and active and not reserved)")
                 .param("id", categoryId).param("userId", userId).query(Boolean.class).single();
         if (!exists) throw new IllegalArgumentException("La categoría no existe, está inactiva o no pertenece al usuario");
     }

@@ -128,7 +128,7 @@ public class UserProfileService {
         return jdbc.sql("""
                 select u.id, u.email, u.display_name, u.avatar_url, u.avatar_updated_at, u.timezone, u.country_code,
                        exists(select 1 from cards c where c.user_id = u.id and c.status = 'ACTIVE') as is_have_cards,
-                       exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active) as is_have_category
+                       exists(select 1 from user_categories uc where uc.user_id = u.id and uc.active and not uc.reserved) as is_have_category
                   from app_users u
                  where u.id = :id
                 """)
