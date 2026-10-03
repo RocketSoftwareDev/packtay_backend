@@ -76,7 +76,7 @@ public class MerchantRuleService {
     @Transactional
     public MerchantRuleResponse move(UUID userId, UUID ruleId, UUID categoryId) {
         users.ensureActiveUser(userId);
-        boolean category = jdbc.sql("select exists(select 1 from user_categories where id = :id and user_id = :userId and active)")
+        boolean category = jdbc.sql("select exists(select 1 from user_categories where id = :id and user_id = :userId and active and not reserved)")
                 .param("id", categoryId).param("userId", userId).query(Boolean.class).single();
         if (!category) throw new IllegalArgumentException("La categoría no existe, no pertenece al usuario o está inactiva");
         int updated = jdbc.sql("""
